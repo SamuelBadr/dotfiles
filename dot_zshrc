@@ -1,0 +1,27 @@
+eval "$(starship init zsh)"
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+alias up='brew update && brew upgrade --greedy --overwrite && brew cleanup'
+alias pluto='julia -e "using Pluto; Pluto.run()"'
+export EDITOR="code --wait --new-window"
+
+# for zotero-mcp
+export PATH="$HOME/.local/bin:$PATH"
+
+# History configuration
+setopt SHARE_HISTORY              # Share history between all sessions
+setopt HIST_IGNORE_ALL_DUPS       # Remove older duplicate entries from history
+setopt HIST_REDUCE_BLANKS         # Remove superfluous blanks from history items
+setopt INC_APPEND_HISTORY         # Write to history file immediately, not when shell exits
+
+# Enable zsh completion system
+autoload -Uz compinit && compinit
+
+# Completion styling
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'  # Case insensitive matching
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"     # Colored completion
+
+# fzf integration for history search and more
+source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+source /opt/homebrew/opt/fzf/shell/completion.zsh
