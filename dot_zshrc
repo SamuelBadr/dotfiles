@@ -94,11 +94,6 @@ alias l='eza -F --icons'
 alias lt='eza --tree --level=2 --icons'
 alias llt='eza -lah --tree --level=2 --icons --git'
 
-# Safety nets
-alias rm='rm -i'
-alias cp='cp -i'
-alias mv='mv -i'
-
 # Shortcuts
 alias h='history'
 alias c='clear'
