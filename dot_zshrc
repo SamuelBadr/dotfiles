@@ -1,28 +1,199 @@
-eval "$(starship init zsh)"
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-alias up='brew update && brew upgrade --greedy --overwrite && brew cleanup'
-alias pluto='julia -e "using Pluto; Pluto.run()"'
+# ============================================================================
+# Environment Variables
+# ============================================================================
 export EDITOR="code --wait --new-window"
+export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
 
-# for zotero-mcp
+# Path configuration
 export PATH="$HOME/.local/bin:$PATH"
 
-# History configuration
+# ============================================================================
+# History Configuration
+# ============================================================================
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+
 setopt SHARE_HISTORY              # Share history between all sessions
 setopt HIST_IGNORE_ALL_DUPS       # Remove older duplicate entries from history
 setopt HIST_REDUCE_BLANKS         # Remove superfluous blanks from history items
 setopt INC_APPEND_HISTORY         # Write to history file immediately, not when shell exits
+setopt HIST_IGNORE_SPACE          # Don't record commands starting with space
+setopt HIST_VERIFY                # Show command with history expansion before running it
 
-# Enable zsh completion system
+# ============================================================================
+# Zsh Options
+# ============================================================================
+setopt AUTO_CD                    # cd by typing directory name if it's not a command
+setopt AUTO_PUSHD                 # Make cd push old directory onto directory stack
+setopt PUSHD_IGNORE_DUPS          # Don't push multiple copies of same directory
+setopt PUSHD_SILENT               # Don't print directory stack after pushd/popd
+setopt CORRECT                    # Spelling correction for commands
+setopt INTERACTIVE_COMMENTS       # Allow comments in interactive shells
+
+# ============================================================================
+# Completion System
+# ============================================================================
 autoload -Uz compinit && compinit
 
 # Completion styling
 zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'  # Case insensitive matching
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"     # Colored completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'       # Case insensitive matching
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"         # Colored completion
+zstyle ':completion:*' group-name ''                             # Group results by category
+zstyle ':completion:*:descriptions' format '%B%d%b'              # Bold descriptions
+zstyle ':completion:*:warnings' format 'No matches for: %d'      # Warning format
+zstyle ':completion:*' verbose yes                               # Verbose completion
+zstyle ':completion:*:*:kill:*' menu yes select                  # Process completion
+zstyle ':completion:*:kill:*' force-list always
 
-# fzf integration for history search and more
-source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
-source /opt/homebrew/opt/fzf/shell/completion.zsh
+# ============================================================================
+# Key Bindings
+# ============================================================================
+# Use emacs key bindings (or use 'bindkey -v' for vi mode)
+bindkey -e
+
+# Better history navigation
+bindkey '^[[A' history-beginning-search-backward
+bindkey '^[[B' history-beginning-search-forward
+bindkey '^P' history-beginning-search-backward
+bindkey '^N' history-beginning-search-forward
+
+# ============================================================================
+# Aliases - General
+# ============================================================================
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias ~='cd ~'
+alias -- -='cd -'
+
+# List directory contents (using eza - modern ls replacement)
+alias ls='eza --icons'
+alias ll='eza -lah --icons --git'
+alias la='eza -A --icons'
+alias l='eza -F --icons'
+alias lt='eza --tree --level=2 --icons'
+alias llt='eza -lah --tree --level=2 --icons --git'
+
+# Safety nets
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Shortcuts
+alias h='history'
+alias c='clear'
+alias e='$EDITOR'
+alias cat='bat'
+alias zshrc='$EDITOR ~/.zshrc'
+alias reload='source ~/.zshrc'
+
+# System
+alias up='brew update && brew upgrade --greedy --overwrite && brew cleanup'
+
+# ============================================================================
+# Aliases - Julia
+# ============================================================================
+alias pluto='julia -e "using Pluto; Pluto.run()"'
+alias julia-update='juliaup update'
+
+# ============================================================================
+# Aliases - Git
+# ============================================================================
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gl='git log --oneline --graph --decorate'
+alias gla='git log --oneline --graph --decorate --all'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gb='git branch'
+alias gba='git branch -a'
+
+# ============================================================================
+# Functions
+# ============================================================================
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Quick find
+ff() {
+    find . -type f -iname "*$1*"
+}
+
+# Quick grep
+gg() {
+    grep -r "$1" .
+}
+
+# Extract various archive types
+extract() {
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2)   tar xjf "$1"     ;;
+            *.tar.gz)    tar xzf "$1"     ;;
+            *.bz2)       bunzip2 "$1"     ;;
+            *.rar)       unrar x "$1"     ;;
+            *.gz)        gunzip "$1"      ;;
+            *.tar)       tar xf "$1"      ;;
+            *.tbz2)      tar xjf "$1"     ;;
+            *.tgz)       tar xzf "$1"     ;;
+            *.zip)       unzip "$1"       ;;
+            *.Z)         uncompress "$1"  ;;
+            *.7z)        7z x "$1"        ;;
+            *)           echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# ============================================================================
+# Plugin Loading (order matters!)
+# ============================================================================
+# Load zsh-autosuggestions
+if [ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+fi
+
+# Load syntax highlighting (must be loaded after all other plugins)
+if [ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+# Load fzf integration
+if [ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]; then
+    source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+    source /opt/homebrew/opt/fzf/shell/completion.zsh
+
+    # fzf configuration
+    export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
+    export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window=right:60%"
+    export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
+fi
+
+# ============================================================================
+# Tool Integrations
+# ============================================================================
+# zoxide - smarter cd command (use 'z' to jump to frequently used directories)
+if command -v zoxide &> /dev/null; then
+    eval "$(zoxide init zsh)"
+fi
+
+# ============================================================================
+# Prompt (load last)
+# ============================================================================
+eval "$(starship init zsh)"

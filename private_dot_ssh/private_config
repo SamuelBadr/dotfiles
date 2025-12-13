@@ -1,0 +1,34 @@
+IdentityFile ~/.ssh/id_rsa
+
+Host VSC4
+	User samuel
+	HostName vsc4.vsc.ac.at
+	Port 27
+	IdentityFile id_rsa
+	IdentitiesOnly yes
+
+Host VSC5
+	User samuel
+	HostName vsc5.vsc.ac.at
+	Port 27
+	IdentityFile id_rsa
+	IdentitiesOnly yes
+
+Host kauch
+	User samuel
+	HostName 128.131.127.236
+
+Host hclm                                                                      
+    User samuel                                                                  
+    Hostname hclm.ifp.tuwien.ac.at
+
+Host frank
+	User samuel
+	Hostname 128.131.126.112
+	Port 10492
+	IdentitiesOnly yes
+
+Host CMSuebung
+	User cms2025_10
+	Hostname server4.physprak.tuwien.ac.at
+	IdentitiesOnly yes

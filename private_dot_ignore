@@ -1,0 +1,62 @@
+# Global ignore file for ripgrep, fd, and other tools
+# This file is respected by ripgrep, fd, and many modern search tools
+
+# Version control
+.git/
+.svn/
+.hg/
+
+# Dependencies
+node_modules/
+vendor/
+.bundle/
+
+# Build outputs
+dist/
+build/
+target/
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Package managers
+.npm/
+.yarn/
+.pnpm/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Julia
+.julia/packages/
+.julia/artifacts/
+.julia/compiled/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
