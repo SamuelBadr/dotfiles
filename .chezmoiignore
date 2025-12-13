@@ -1,0 +1,13 @@
+# Chezmoi ignore patterns
+# Files matching these patterns won't be managed by chezmoi
+
+# Julia Manifest files (auto-generated, should not be tracked)
+.julia/environments/**/Manifest.toml
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+*.swp
+*~
