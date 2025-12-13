@@ -1,0 +1,38 @@
+# Brewfile - Homebrew package manager configuration
+# Install all packages with: brew bundle --global
+# Update this file with current packages: brew bundle dump --global --force
+
+# Taps
+tap "artginzburg/tap"
+tap "homebrew/cask"
+
+# CLI Tools - Modern Replacements
+brew "bat"           # Better cat
+brew "eza"           # Better ls
+brew "ripgrep"       # Better grep
+brew "zoxide"        # Smart cd
+brew "git-delta"     # Better git diff
+
+# CLI Tools - System Monitoring
+brew "bottom"        # Better top
+brew "btop"          # System monitor
+
+# CLI Tools - Utilities
+brew "fzf"           # Fuzzy finder
+brew "tealdeer"      # tldr - simplified man pages
+brew "chezmoi"       # Dotfiles manager
+
+# Development Tools
+brew "git"
+brew "juliaup"       # Julia version manager
+brew "uv"            # Python package manager
+brew "typst"         # Markup-based typesetting
+
+# Shell
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+brew "starship"      # Shell prompt
+
+# Other
+brew "ccusage"       # Compiler cache usage
+brew "ghostscript"   # PostScript interpreter
