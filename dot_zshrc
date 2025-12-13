@@ -4,6 +4,7 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 alias up='brew update && brew upgrade --greedy --overwrite && brew cleanup'
 alias pluto='julia -e "using Pluto; Pluto.run()"'
 export EDITOR="code --wait --new-window"
+export GITHUB_USERNAME="SamuelBadr"
 
 # for zotero-mcp
 export PATH="$HOME/.local/bin:$PATH"
