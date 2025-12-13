@@ -1,0 +1,8 @@
+[user]
+	name = Samuel Badr
+	email = samuel.badr@gmail.com
+	signingkey = /Users/samuel/.ssh/id_rsa.pub
+[gpg]
+	format = ssh
+[commit]
+	gpgsign = true
