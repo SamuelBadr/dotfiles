@@ -1,7 +1,14 @@
 # ============================================================================
 # Environment Variables
 # ============================================================================
-export EDITOR="code --wait --new-window"
+# Editor: VS Code on macOS, VS Code in VS Code terminal on Linux, otherwise nvim
+if [[ "$OSTYPE" == darwin* ]]; then
+    export EDITOR="code --wait --new-window"
+elif [[ "$TERM_PROGRAM" == "vscode" ]]; then
+    export EDITOR="code --wait --new-window"
+else
+    export EDITOR="nvim"
+fi
 export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
 

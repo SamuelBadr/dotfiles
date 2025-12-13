@@ -1,7 +1,7 @@
 [user]
 	name = Samuel Badr
 	email = samuel.badr@gmail.com
-	signingkey = /Users/samuel/.ssh/id_rsa.pub
+	signingkey = {{ .chezmoi.homeDir }}/.ssh/id_rsa.pub
 
 [gpg]
 	format = ssh
@@ -10,7 +10,11 @@
 	gpgsign = true
 
 [core]
+{{- if eq .chezmoi.os "darwin" }}
 	editor = code --wait --new-window
+{{- else }}
+	editor = nvim
+{{- end }}
 	pager = delta
 
 [interactive]
