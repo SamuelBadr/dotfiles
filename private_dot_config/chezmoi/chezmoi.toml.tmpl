@@ -1,0 +1,11 @@
+[git]
+    autoCommit = true
+    autoPush = true
+
+[edit]
+{{- if eq .chezmoi.os "darwin" }}
+    command = "code"
+    args = ["--wait", "--new-window"]
+{{- else }}
+    command = "nvim"
+{{- end }}
