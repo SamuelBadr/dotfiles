@@ -95,6 +95,17 @@ alias reload='source ~/.zshrc'
 alias up='brew update && brew upgrade --greedy --overwrite && brew cleanup'
 
 # ============================================================================
+# Aliases - Chezmoi
+# ============================================================================
+alias cm='chezmoi'
+alias cma='chezmoi add'
+alias cme='chezmoi edit'
+alias cmcd='chezmoi cd'
+alias cmap='chezmoi apply'
+alias cmup='chezmoi update'
+alias cmdiff='chezmoi diff'
+
+# ============================================================================
 # Aliases - Julia
 # ============================================================================
 alias pluto='julia -e "using Pluto; Pluto.run()"'
