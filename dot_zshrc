@@ -42,6 +42,11 @@ setopt INTERACTIVE_COMMENTS       # Allow comments in interactive shells
 # ============================================================================
 # Completion System
 # ============================================================================
+# Add zsh-completions to fpath
+if type brew &>/dev/null; then
+    FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+fi
+
 autoload -Uz compinit && compinit
 
 # Completion styling
