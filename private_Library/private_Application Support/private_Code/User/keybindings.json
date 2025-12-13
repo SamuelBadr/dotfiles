@@ -1,0 +1,11 @@
+// Place your key bindings in this file to override the defaultsauto[]
+[
+    {
+        "key": "ctrl+shift+alt+[BracketLeft]",
+        "command": "coverage-gutters.displayCoverage"
+    },
+    {
+        "key": "shift+cmd+7",
+        "command": "-coverage-gutters.displayCoverage"
+    }
+]
