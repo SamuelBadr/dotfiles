@@ -1,0 +1,26 @@
+[deps]
+ACFlow = "4591c03f-a9fd-4dd5-9295-2205d2683a10"
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Cthulhu = "f68482b8-f384-11e8-15f7-abe071a5a75f"
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+ITensorMPS = "0d1a4710-d33b-49a5-8f18-73bdf49b47e2"
+ITensors = "9136182c-28ba-11e9-034c-db9fb085ebd5"
+JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
+PartitionedMPSs = "17ce1de9-5131-45e3-8a48-9723b6e2dc23"
+Pluto = "c3e4b0f8-55cb-11ea-2926-15256bba5781"
+QuanticsGrids = "634c7f73-3e90-4749-a1bd-001b8efc642d"
+ReTestItems = "817f1d60-ba6b-4fd5-9520-3cf149f6a823"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
+TCIAlgorithms = "baf62351-2e82-41dd-9129-4f5768a618e1"
+TensorCrossInterpolation = "b261b2ec-6378-4871-b32e-9173bb050604"
+UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
+
+[sources]
+ACFlow = {rev = "main", url = "https://github.com/huangli712/ACFlow"}
+ITensorMPS = {path = "/Users/samuel/.julia/dev/ITensorMPS"}
+PartitionedMPSs = {path = "/Users/samuel/.julia/dev/PartitionedMPSs"}
+QuanticsGrids = {path = "/Users/samuel/.julia/dev/QuanticsGrids"}
+TCIAlgorithms = {path = "/Users/samuel/.julia/dev/TCIAlgorithms"}
+TensorCrossInterpolation = {path = "/Users/samuel/.julia/dev/TensorCrossInterpolation"}
