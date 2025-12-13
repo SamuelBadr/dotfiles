@@ -2,7 +2,44 @@
 	name = Samuel Badr
 	email = samuel.badr@gmail.com
 	signingkey = /Users/samuel/.ssh/id_rsa.pub
+
 [gpg]
 	format = ssh
+
 [commit]
 	gpgsign = true
+
+[core]
+	editor = code --wait --new-window
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	light = false
+	line-numbers = true
+	side-by-side = true
+	syntax-theme = Monokai Extended
+
+[merge]
+	conflictstyle = diff3
+
+[diff]
+	colorMoved = default
+
+[pull]
+	rebase = false
+
+[init]
+	defaultBranch = main
+
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	visual = log --graph --oneline --all --decorate
