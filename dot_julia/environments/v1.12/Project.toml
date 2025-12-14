@@ -6,6 +6,7 @@ FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 ITensorMPS = "0d1a4710-d33b-49a5-8f18-73bdf49b47e2"
 ITensors = "9136182c-28ba-11e9-034c-db9fb085ebd5"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
+MCPRepl = "b62cb57a-788d-40b5-9d64-84a1dfc37ce3"
 PartitionedMPSs = "17ce1de9-5131-45e3-8a48-9723b6e2dc23"
 Pluto = "c3e4b0f8-55cb-11ea-2926-15256bba5781"
 QuanticsGrids = "634c7f73-3e90-4749-a1bd-001b8efc642d"
@@ -17,4 +18,5 @@ TensorCrossInterpolation = "b261b2ec-6378-4871-b32e-9173bb050604"
 UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [sources]
+MCPRepl = {rev = "main", url = "https://github.com/kahliburke/MCPRepl.jl"}
 TCIAlgorithms = {rev = "update-compat", url = "https://github.com/tensor4all/TCIAlgorithms.jl"}
