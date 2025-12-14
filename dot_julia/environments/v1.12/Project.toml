@@ -1,5 +1,4 @@
 [deps]
-ACFlow = "4591c03f-a9fd-4dd5-9295-2205d2683a10"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Cthulhu = "f68482b8-f384-11e8-15f7-abe071a5a75f"
@@ -18,5 +17,4 @@ TensorCrossInterpolation = "b261b2ec-6378-4871-b32e-9173bb050604"
 UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [sources]
-ACFlow = {rev = "main", url = "https://github.com/huangli712/ACFlow"}
 TCIAlgorithms = {rev = "update-compat", url = "https://github.com/tensor4all/TCIAlgorithms.jl"}
