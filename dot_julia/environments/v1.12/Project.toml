@@ -19,8 +19,4 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [sources]
 ACFlow = {rev = "main", url = "https://github.com/huangli712/ACFlow"}
-ITensorMPS = {path = "/Users/samuel/.julia/dev/ITensorMPS"}
-PartitionedMPSs = {path = "/Users/samuel/.julia/dev/PartitionedMPSs"}
-QuanticsGrids = {path = "/Users/samuel/.julia/dev/QuanticsGrids"}
-TCIAlgorithms = {path = "/Users/samuel/.julia/dev/TCIAlgorithms"}
-TensorCrossInterpolation = {path = "/Users/samuel/.julia/dev/TensorCrossInterpolation"}
+TCIAlgorithms = {rev = "main", url = "https://github.com/tensor4all/TCIAlgorithms.jl"}
