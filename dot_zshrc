@@ -70,11 +70,16 @@ zstyle ':completion:*:kill:*' force-list always
 # Use emacs key bindings (or use 'bindkey -v' for vi mode)
 bindkey -e
 
-# Better history navigation
-bindkey '^[[A' history-beginning-search-backward
-bindkey '^[[B' history-beginning-search-forward
-bindkey '^P' history-beginning-search-backward
-bindkey '^N' history-beginning-search-forward
+# Better history navigation with cursor at end of line
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+bindkey '^P' up-line-or-beginning-search
+bindkey '^N' down-line-or-beginning-search
 
 # ============================================================================
 # Aliases - General
@@ -189,6 +194,7 @@ if [ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
     source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
     ZSH_AUTOSUGGEST_STRATEGY=(history completion)
     ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'  # Gray color for light mode visibility
 fi
 
 # Load syntax highlighting (must be loaded after all other plugins)
