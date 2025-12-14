@@ -19,4 +19,4 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [sources]
 ACFlow = {rev = "main", url = "https://github.com/huangli712/ACFlow"}
-TCIAlgorithms = {rev = "main", url = "https://github.com/tensor4all/TCIAlgorithms.jl"}
+TCIAlgorithms = {rev = "update-compat", url = "https://github.com/tensor4all/TCIAlgorithms.jl"}
