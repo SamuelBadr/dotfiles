@@ -13,7 +13,7 @@ export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
 
 # Path configuration
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
 
 # ============================================================================
 # History Configuration
