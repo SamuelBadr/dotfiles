@@ -22,8 +22,8 @@ require("nvim-treesitter").install({
 
 vim.api.nvim_create_autocmd("FileType", {
     pattern = require("nvim-treesitter").get_installed(),
-    callback = function()
-        vim.treesitter.start()
+    callback = function(ev)
+        pcall(vim.treesitter.start, ev.buf)
     end,
 })
 
