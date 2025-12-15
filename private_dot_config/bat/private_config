@@ -2,17 +2,17 @@
 # https://github.com/sharkdp/bat
 
 # Set the theme (run 'bat --list-themes' to see all available themes)
---theme="Monokai Extended"
+# --theme="Monokai Extended"
 
 # Show line numbers, Git modifications and file header (but no grid)
---style="numbers,changes,header"
+# --style="numbers,changes,header"
 
 # Use italic text on the terminal
 --italic-text=always
 
 # Add mouse scrolling support in less
---paging=auto
+# --paging=auto
 
 # Map extensions to languages
---map-syntax "*.zshrc:Bourne Again Shell (bash)"
---map-syntax ".ignore:Git Ignore"
+# --map-syntax "*.zshrc:Bourne Again Shell (bash)"
+# --map-syntax ".ignore:Git Ignore"
