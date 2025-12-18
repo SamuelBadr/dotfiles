@@ -268,18 +268,16 @@ rgs() {
 
 # Combined picker - toggle between filename and content search
 # Usage: fif (then use CTRL-T to toggle modes)
+# Starts in Content mode - type to search inside files
+# Press CTRL-T to switch to Files mode - type to filter filenames
 fif() {
-    local RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
-    local FD_PREFIX="fd --type f --hidden --follow --exclude .git"
-
     local selection
     selection=$(: | fzf --ansi --disabled \
-        --bind "start:reload:$FD_PREFIX" \
-        --bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
+        --prompt 'Content> ' \
+        --bind 'change:reload:rg --column --line-number --no-heading --color=always --smart-case {q} || true' \
         --bind 'ctrl-t:transform:[[ $FZF_PROMPT == "Content> " ]] &&
-            echo "rebind(change)+change-prompt(Files> )+reload:fd --type f --hidden --follow --exclude .git" ||
-            echo "unbind(change)+change-prompt(Content> )+reload:rg --column --line-number --no-heading --color=always --smart-case {q} || true"' \
-        --prompt 'Files> ' \
+            echo "unbind(change)+enable-search+clear-query+change-prompt(Files> )+reload:fd --type f --hidden --follow --exclude .git" ||
+            echo "disable-search+rebind(change)+clear-query+change-prompt(Content> )+reload:true"' \
         --delimiter : \
         --preview 'f={1}; [[ -f "$f" ]] && bat --style=numbers,changes --color=always --highlight-line {2} "$f" 2>/dev/null || bat --style=numbers,changes --color=always {} 2>/dev/null' \
         --preview-window 'right:60%:wrap' \
