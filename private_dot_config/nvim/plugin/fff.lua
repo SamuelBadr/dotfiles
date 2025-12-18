@@ -1,46 +1,32 @@
--- vim.pack.add({ 'https://github.com/dmtrKovalenko/fff.nvim' })
---
--- -- https://github.com/dmtrKovalenko/fff.nvim/issues/64#issuecomment-3229729261
--- vim.api.nvim_create_autocmd("PackChanged", {
--- 	callback = function(ev)
--- 		local spec = ev.data.spec
--- 		if spec and spec.name == "fff.nvim" and ev.data.kind == "install" or ev.data.kind == "update" then
--- 			local fff_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/fff.nvim"
--- 			vim.fn.jobstart({ "cargo", "build", "--release" }, {
--- 				cwd = fff_path,
--- 				on_exit = function(_, code)
--- 					if code == 0 then
--- 						vim.notify("Cargo build finished successfully in " .. fff_path, vim.log.levels.INFO)
--- 					else
--- 						vim.notify("Cargo build failed with exit code " .. code, vim.log.levels.ERROR)
--- 					end
--- 				end,
--- 			})
--- 		end
--- 	end,
--- })
---
--- vim.api.nvim_create_autocmd('PackChanged', {
---   callback = function(event)
---     if event.data.updated then
---       require('fff.download').download_or_build_binary()
---     end
---   end,
--- })
---
--- -- the plugin will automatically lazy load
--- vim.g.fff = {
---   lazy_sync = true, -- start syncing only when the picker is open
---   debug = {
---     enabled = true,
---     show_scores = true,
---   },
--- }
---
--- vim.keymap.set(
---   'n',
---   'ff',
---   function() require('fff').find_files() end,
---   { desc = 'FFFind files' }
--- )
---
+vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
+
+-- Automatically download or build binary when plugin is installed/updated
+vim.api.nvim_create_autocmd("PackChanged", {
+    group = vim.api.nvim_create_augroup("myconfig.fff", { clear = true }),
+    pattern = { "fff.nvim" },
+    callback = function(ev)
+        if ev.data.kind == "install" or ev.data.kind == "update" then
+            vim.schedule(function()
+                require("fff.download").download_or_build_binary()
+            end)
+        end
+    end,
+})
+
+-- Plugin configuration
+vim.g.fff = {
+    lazy_sync = true,
+}
+
+-- Keymaps
+vim.keymap.set("n", "<leader>ff", function()
+    require("fff").find_files()
+end, { desc = "Find files" })
+
+vim.keymap.set("n", "<leader>fg", function()
+    require("fff").find_in_git_root()
+end, { desc = "Find files in git root" })
+
+vim.keymap.set("n", "gf", function()
+    require("fff").open_file_under_cursor()
+end, { desc = "Open file under cursor" })

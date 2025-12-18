@@ -9,15 +9,24 @@
       "src": "https://github.com/Saghen/blink.cmp",
       "version": ">=0.0.0"
     },
+    "fff.nvim": {
+      "rev": "003c05cf6d3e25e7022fbf6a5f2e285c92d13220",
+      "src": "https://github.com/dmtrKovalenko/fff.nvim"
+    },
+    "gitsigns.nvim": {
+      "rev": "7010000889bfb6c26065e0b0f7f1e6aa9163edd9",
+      "src": "https://github.com/lewis6991/gitsigns.nvim",
+      "version": ">=0.0.0"
+    },
+    "lualine.nvim": {
+      "rev": "c55af3b39cc50109aa75d445e38f2089b023e5df",
+      "src": "https://github.com/nvim-lualine/lualine.nvim",
+      "version": ">=0.0.0"
+    },
     "nvim-treesitter": {
       "rev": "d3218d988f72ed34414959c9ccd802d393432d6e",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
-    },
-    "snacks.nvim": {
-      "rev": "a4e46becca45eb65c73a388634b1ce8aad629ae0",
-      "src": "https://github.com/folke/snacks.nvim",
-      "version": ">=0.0.0"
     },
     "vim-slime": {
       "rev": "3fb77a9d1d3dd3abfbdbd4840eb20947f39f688b",
