@@ -18,6 +18,15 @@ require("nvim-treesitter").install({
     "julia",
     "zsh",
     "lua",
+    "markdown",
+    "markdown_inline",
+    "toml",
+    "json",
+    "bash",
+    "rust",
+    "python",
+    "vim",
+    "vimdoc",
 })
 
 vim.api.nvim_create_autocmd("FileType", {
