@@ -230,6 +230,76 @@ if source_plugin fzf key-bindings 2>/dev/null || [[ -f /usr/share/fzf/key-bindin
 fi
 
 # ============================================================================
+# Interactive File Picker (fzf + fd + rg + bat)
+# ============================================================================
+# File picker by name - search filenames, preview with bat, open in nvim
+# Usage: fp [query]
+fp() {
+    local file
+    file=$(fd --type f --hidden --follow --exclude .git \
+        | fzf --query="$1" \
+              --preview 'bat --style=numbers,changes --color=always {}' \
+              --preview-window 'right:60%:wrap' \
+              --bind 'ctrl-/:toggle-preview' \
+              --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+              --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open in nvim')
+    [[ -n "$file" ]] && nvim "$file"
+}
+
+# Content search - search inside files with rg, preview context, open in nvim at line
+# Usage: rgs [query]
+rgs() {
+    local selection
+    selection=$(rg --color=always --line-number --no-heading --smart-case "${*:-}" \
+        | fzf --ansi \
+              --delimiter : \
+              --preview 'bat --style=numbers,changes --color=always --highlight-line {2} {1} 2>/dev/null' \
+              --preview-window 'right:60%:wrap:+{2}-5' \
+              --bind 'ctrl-/:toggle-preview' \
+              --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+              --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open at line')
+    if [[ -n "$selection" ]]; then
+        local file line
+        file=$(echo "$selection" | cut -d: -f1)
+        line=$(echo "$selection" | cut -d: -f2)
+        nvim "+$line" "$file"
+    fi
+}
+
+# Combined picker - toggle between filename and content search
+# Usage: fif (then use CTRL-T to toggle modes)
+fif() {
+    local RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
+    local FD_PREFIX="fd --type f --hidden --follow --exclude .git"
+
+    local selection
+    selection=$(: | fzf --ansi --disabled \
+        --bind "start:reload:$FD_PREFIX" \
+        --bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
+        --bind 'ctrl-t:transform:[[ $FZF_PROMPT == "Content> " ]] &&
+            echo "rebind(change)+change-prompt(Files> )+reload:fd --type f --hidden --follow --exclude .git" ||
+            echo "unbind(change)+change-prompt(Content> )+reload:rg --column --line-number --no-heading --color=always --smart-case {q} || true"' \
+        --prompt 'Files> ' \
+        --delimiter : \
+        --preview 'f={1}; [[ -f "$f" ]] && bat --style=numbers,changes --color=always --highlight-line {2} "$f" 2>/dev/null || bat --style=numbers,changes --color=always {} 2>/dev/null' \
+        --preview-window 'right:60%:wrap' \
+        --bind 'ctrl-/:toggle-preview' \
+        --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+        --header 'CTRL-T toggle Files/Content | CTRL-/ preview | ENTER open')
+
+    if [[ -n "$selection" ]]; then
+        local file line
+        if [[ "$selection" == *:* ]]; then
+            file=$(echo "$selection" | cut -d: -f1)
+            line=$(echo "$selection" | cut -d: -f2)
+            nvim "+$line" "$file"
+        else
+            nvim "$selection"
+        fi
+    fi
+}
+
+# ============================================================================
 # Tool Integrations
 # ============================================================================
 # zoxide - smarter cd command (use 'z' to jump to frequently used directories)
