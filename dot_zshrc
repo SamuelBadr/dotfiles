@@ -19,7 +19,7 @@ if [[ $OSTYPE == darwin* ]]; then
   # 15 is lowest setting on UI
   # 8 was too fast causing duplicate keystrokes
   # 10 i think this causes issues in bash cli when editing commands, not sure
-  defaults write -g InitialKeyRepeat -int 12
+  defaults write -g InitialKeyRepeat -int 15
 
   # 2 is lowest setting on UI
   defaults write -g KeyRepeat -int 2
