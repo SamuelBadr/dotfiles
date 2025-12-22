@@ -734,4 +734,5 @@
     "accessibility.signals.terminalBell": {
         "sound": "on"
     },
+    "editor.cursorSurroundingLines": 14,
 }
