@@ -322,3 +322,12 @@ fi
 # Prompt (load last)
 # ============================================================================
 eval "$(starship init zsh)"
+
+# >>> juliaup initialize >>>
+
+# !! Contents within this block are managed by juliaup !!
+
+path=('/home/samuel/.juliaup/bin' $path)
+export PATH
+
+# <<< juliaup initialize <<<
