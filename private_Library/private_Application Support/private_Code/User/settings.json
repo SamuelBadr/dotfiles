@@ -10,7 +10,6 @@
     "git.enableSmartCommit": true,
     "git.confirmSync": false,
     "git.autofetch": true,
-    "editor.fontFamily": "'Maple Mono', 'Liga SFMono Nerd Font', Menlo, Monaco, 'Courier New', monospace",
     "editor.fontWeight": 500,
     "julia.enableCrashReporter": true,
     "julia.NumThreads": "auto",
@@ -735,4 +734,5 @@
         "sound": "on"
     },
     "editor.cursorSurroundingLines": 14,
+    "editor.fontFamily": "'Google Sans Code NF', 'Liga SFMono Nerd Font', Menlo, Monaco, 'Courier New', monospace",
 }
