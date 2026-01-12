@@ -734,5 +734,5 @@
         "sound": "on"
     },
     "editor.cursorSurroundingLines": 14,
-    "editor.fontFamily": "'Google Sans Code NF', 'Liga SFMono Nerd Font', Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontFamily": "'JetBrainsMono Nerd Font', 'Liga SFMono Nerd Font', Menlo, Monaco, 'Courier New', monospace",
 }
