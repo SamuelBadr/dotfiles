@@ -734,5 +734,6 @@
         "sound": "on"
     },
     "editor.cursorSurroundingLines": 14,
-    "editor.fontFamily": "'JetBrainsMono Nerd Font', 'Liga SFMono Nerd Font', Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontFamily": "'Maple Mono', Menlo, Monaco, 'Courier New', monospace",
+    "claudeCode.selectedModel": "opus",
 }
