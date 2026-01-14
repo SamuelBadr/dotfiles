@@ -1,7 +1,7 @@
 # Minimal starship prompt
 
 format = '\[$hostname$directory$git_branch$git_status\] $character'
-add_newline = false
+add_newline = true
 scan_timeout = 10
 command_timeout = 200
 
