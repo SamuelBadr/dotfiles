@@ -14,6 +14,7 @@ ReTestItems = "817f1d60-ba6b-4fd5-9520-3cf149f6a823"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 TCIAlgorithms = "baf62351-2e82-41dd-9129-4f5768a618e1"
 TensorCrossInterpolation = "b261b2ec-6378-4871-b32e-9173bb050604"
+TestEnv = "1e6cf692-eddd-4d53-88a5-2d735e33781b"
 UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [sources]
