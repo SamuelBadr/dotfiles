@@ -724,11 +724,9 @@
     "vscode-pets.petSize": "small",
     "editor.matchBrackets": "never",
     "jetls-client.jetlsDirectory": "~/JETLS.jl",
-    "chat.disableAIFeatures": true,
     "githubPullRequests.createOnPublishBranch": "never",
     "tinymist.preview.invertColors": "auto",
     "workbench.preferredDarkColorTheme": "One Dark Pro Flat",
-    "claudeCode.preferredLocation": "panel",
     "terminal.integrated.enableVisualBell": true,
     "accessibility.signals.terminalBell": {
         "sound": "on"
@@ -736,4 +734,6 @@
     "editor.cursorSurroundingLines": 14,
     "editor.fontFamily": "'Maple Mono', Menlo, Monaco, 'Courier New', monospace",
     "claudeCode.selectedModel": "opus",
+    "markdown.extension.preview.autoShowPreviewToSide": true,
+    "claudeCode.preferredLocation": "panel",
 }
