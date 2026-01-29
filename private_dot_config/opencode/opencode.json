@@ -1,6 +1,10 @@
 {
-  "plugin": [
-    "oh-my-opencode"
-  ],
-  "$schema": "https://opencode.ai/config.json"
+  "$schema": "https://opencode.ai/config.json",
+  "theme": "system",
+  "formatter": {
+    "julia": {
+      "command": ["jlfmt", "--inplace", "$FILE"],
+      "extensions": [".jl"]
+    }
+  }
 }
