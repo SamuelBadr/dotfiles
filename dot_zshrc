@@ -121,7 +121,7 @@ alias zshrc='$EDITOR ~/.zshrc'
 alias reload='source ~/.zshrc'
 
 # System
-alias up='brew update && brew upgrade --greedy-auto-updates --overwrite && brew cleanup'
+alias up='brew update && brew upgrade --greedy-auto-updates --overwrite && brew cleanup && if command -v npm >/dev/null; then latest=$(npm view npm version 2>/dev/null); current=$(npm -v); if [ -n "$latest" ] && [ "$current" != "$latest" ]; then npm install -g npm@latest; fi; npm update -g; fi'
 
 # ============================================================================
 # Aliases - Chezmoi
@@ -335,4 +335,3 @@ export PATH
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/samuel/.lmstudio/bin"
 # End of LM Studio CLI section
-
