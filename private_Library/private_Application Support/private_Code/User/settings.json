@@ -734,6 +734,5 @@
     "editor.cursorSurroundingLines": 14,
     "editor.fontFamily": "'Maple Mono', Menlo, Monaco, 'Courier New', monospace",
     "claudeCode.selectedModel": "opus",
-    "markdown.extension.preview.autoShowPreviewToSide": true,
     "claudeCode.preferredLocation": "panel",
 }
