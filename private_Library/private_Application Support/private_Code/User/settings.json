@@ -9,7 +9,7 @@
     "julia.enableTelemetry": true,
     "git.enableSmartCommit": true,
     "git.confirmSync": false,
-    "git.autofetch": true,
+    "git.autofetch": "all",
     "editor.fontWeight": 500,
     "julia.enableCrashReporter": true,
     "julia.NumThreads": "auto",
@@ -735,4 +735,5 @@
     "editor.fontFamily": "'Maple Mono', Menlo, Monaco, 'Courier New', monospace",
     "claudeCode.selectedModel": "opus",
     "claudeCode.preferredLocation": "panel",
+    "terminal.integrated.scrollback": 10000,
 }
