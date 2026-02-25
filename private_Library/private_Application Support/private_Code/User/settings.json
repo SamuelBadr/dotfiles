@@ -736,4 +736,8 @@
     "claudeCode.selectedModel": "opus",
     "claudeCode.preferredLocation": "panel",
     "terminal.integrated.scrollback": 10000,
+    "[tsv]": {
+        "editor.inlayHints.maximumLength": 0
+    },
+    "diffEditor.ignoreTrimWhitespace": false,
 }
