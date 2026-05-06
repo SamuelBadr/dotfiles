@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Install pi packages after chezmoi apply
+# This script runs when settings.json changes
+
+set -e
+
+echo "==> Installing pi packages..."
+
+# Check if pi is installed
+if ! command -v pi &> /dev/null; then
+    echo "pi not found, skipping package installation"
+    exit 0
+fi
+
+# Read packages from settings.json and install them
+SETTINGS_FILE="$HOME/.pi/agent/settings.json"
+
+if [[ -f "$SETTINGS_FILE" ]]; then
+    # Extract packages array and install each one
+    packages=$(jq -r '.packages[]?' "$SETTINGS_FILE" 2>/dev/null || true)
+    
+    if [[ -n "$packages" ]]; then
+        echo "Found packages to install:"
+        echo "$packages"
+        
+        while IFS= read -r package; do
+            if [[ -n "$package" ]]; then
+                echo "Installing: $package"
+                # pi install handles both npm: and git: prefixes
+                pi install "$package" || echo "Warning: Failed to install $package"
+            fi
+        done <<< "$packages"
+        
+        echo "==> Package installation complete"
+    else
+        echo "No packages found in settings.json"
+    fi
+else
+    echo "Settings file not found at $SETTINGS_FILE"
+fi
