@@ -3,7 +3,7 @@
   "defaultProvider": "aqueduct",
   "defaultModel": "coding",
   "defaultThinkingLevel": "high",
-  "theme": "dark",
+  "theme": "light",
   "packages": [
     "npm:pi-markdown-preview",
     "git:https://github.com/badlogic/pi-diff-review",
