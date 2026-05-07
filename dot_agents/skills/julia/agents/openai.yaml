@@ -1,4 +1,0 @@
-interface:
-  display_name: "Julia"
-  short_description: "Modern Julia 1.12 coding and package workflows"
-  default_prompt: "Use $julia to implement or review this Julia codebase with modern Julia 1.12 practices."
