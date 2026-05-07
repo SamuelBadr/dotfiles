@@ -11,3 +11,21 @@
 *.tmp
 *.swp
 *~
+
+# Pi coding agent: private/volatile state
+.pi/agent/sessions/
+.pi/agent/sessions/**
+
+# Usually generated/temporary
+.pi/agent/logs/
+.pi/agent/logs/**
+.pi/agent/cache/
+.pi/agent/cache/**
+.pi/agent/tmp/
+.pi/agent/tmp/**
+.pi/agent/node_modules/
+.pi/agent/node_modules/**
+.pi/agent/npm/
+.pi/agent/npm/**
+.pi/agent/git/
+.pi/agent/git/**
