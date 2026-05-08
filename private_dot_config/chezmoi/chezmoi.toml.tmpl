@@ -1,11 +1,35 @@
+# Chezmoi Configuration for Hermes Agent Secrets
+#
+# This file documents the secrets needed for Hermes Agent.
+# On a new machine, set these secrets before running `chezmoi apply`:
+#
+# Required secrets:
+#   hermes_api_key      - Custom LLM API key (***REMOVED***...jWRU)
+#   firecrawl_api_key   - Firecrawl API key (***REMOVED***...4f81)
+#   telegram_bot_token  - Telegram bot token (***REMOVED***:******REMOVED***)
+#   sudo_password       - SUDO password (***REMOVED***)
+#
+# Optional secrets (uncomment in .env.tmpl as needed):
+#   exa_api_key         - Exa search API
+#   parallel_api_key    - Parallel API key
+#   fal_key             - FAL.ai for image generation
+#   openrouter_api_key  - OpenRouter API key
+#   google_api_key      - Google Gemini API
+#   groq_api_key        - Groq (for Whisper STT)
+#   github_token        - GitHub PAT for skill hub
+#
+# To set a secret (using keyring):
+#   chezmoi secret keyring set --service=chezmoi --user=<secret_name>
+#
+# Or create a .chezmoidata.toml with the values (DO NOT COMMIT THIS FILE):
+#   firecrawl_api_key = "fc-xxx"
+#   telegram_bot_token = "***REMOVED***:xxx"
+#   sudo_password = "xxx"
+#   hermes_api_key = "sk-xxx"
+
 [git]
     autoCommit = true
     autoPush = true
 
 [edit]
-{{- if eq .chezmoi.os "darwin" }}
-    command = "code"
-    args = ["--wait", "--new-window"]
-{{- else }}
     command = "nvim"
-{{- end }}
