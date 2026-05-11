@@ -14,6 +14,10 @@ Host VSC5
 	IdentityFile id_rsa
 	IdentitiesOnly yes
 
+Host MUSICA
+	User sb69466
+	HostName musica.vie.asc.ac.at
+
 Host kauch
 	User samuel
 	HostName 128.131.127.236
