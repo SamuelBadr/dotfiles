@@ -1,3 +1,4 @@
+{{- if .modules.gui_desktop -}}
 -- Completion engine.
 
 vim.pack.add({
@@ -67,3 +68,4 @@ require("blink-cmp").setup({
     },
   },
 })
+{{- end -}}

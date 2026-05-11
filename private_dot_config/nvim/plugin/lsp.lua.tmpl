@@ -1,3 +1,4 @@
+{{- if .modules.gui_desktop -}}
 -- `:help lsp`
 
 vim.lsp.enable({
@@ -62,3 +63,4 @@ vim.api.nvim_create_autocmd("LspAttach", {
         map("n", "<leader>q", vim.diagnostic.setloclist, "Diagnostics to loclist")
     end,
 })
+{{- end -}}

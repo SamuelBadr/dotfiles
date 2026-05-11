@@ -1,3 +1,4 @@
+{{- if .modules.gui_desktop -}}
 -- https://aviatesk.github.io/JETLS.jl/release/#Neovim
 
 return {
@@ -12,4 +13,4 @@ return {
         ".git",
     },
 }
-
+{{- end -}}

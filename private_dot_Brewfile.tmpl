@@ -1,3 +1,4 @@
+{{- if .modules.packages -}}
 # Brewfile - Homebrew package manager configuration
 # Install all packages with: brew bundle --global
 # Update this file with current packages: brew bundle dump --global --force
@@ -36,3 +37,4 @@ brew "starship"      # Shell prompt
 # Other
 brew "ccusage"       # Compiler cache usage
 brew "ghostscript"   # PostScript interpreter
+{{- end -}}

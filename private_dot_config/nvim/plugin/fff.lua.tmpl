@@ -1,3 +1,4 @@
+{{- if .modules.gui_desktop -}}
 vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
 
 -- Automatically download or build binary when plugin is installed/updated
@@ -30,3 +31,4 @@ end, { desc = "Find files in git root" })
 vim.keymap.set("n", "gf", function()
     require("fff").open_file_under_cursor()
 end, { desc = "Open file under cursor" })
+{{- end -}}

@@ -1,3 +1,4 @@
+{{- if .modules.gui_desktop -}}
 vim.pack.add({
     {
         src = "https://github.com/jpalardy/vim-slime",
@@ -5,4 +6,4 @@ vim.pack.add({
 })
 
 vim.g.slime_target = "tmux"
-
+{{- end -}}

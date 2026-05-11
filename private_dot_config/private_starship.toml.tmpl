@@ -1,3 +1,4 @@
+{{- if .modules.gui_desktop -}}
 # Minimal starship prompt
 
 format = '\[$hostname$directory$git_branch$git_status\] $character'
@@ -38,3 +39,4 @@ deleted = '*'
 [character]
 success_symbol = ''
 error_symbol = '[!](red)'
+{{- end -}}

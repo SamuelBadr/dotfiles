@@ -1,3 +1,4 @@
+{{- if .modules.hermes -}}
 # Hermes Agent Environment Configuration
 # Managed by chezmoi - DO NOT edit directly
 # Run `chezmoi edit --prompt .env` to make changes
@@ -17,14 +18,14 @@
 
 # Firecrawl API Key - Web search, extract, and crawl
 # Get at: https://firecrawl.dev/
-FIRECRAWL_API_KEY={{ .firecrawl_api_key }}
+FIRECRAWL_API_KEY={{ .firecrawl_api_key | default "" }}
 
 # =============================================================================
 # MESSENGING PLATFORMS
 # =============================================================================
 
 # Telegram Bot Token - From @BotFather (https://t.me/BotFather)
-TELEGRAM_BOT_TOKEN={{ .telegram_bot_token }}
+TELEGRAM_BOT_TOKEN={{ .telegram_bot_token | default "" }}
 
 # =============================================================================
 # TERMINAL TOOL CONFIGURATION
@@ -35,7 +36,7 @@ TERMINAL_ENV=local
 
 # SUDO password (only if needed for local commands)
 # WARNING: Stored encrypted by chezmoi
-SUDO_PASSWORD={{ .sudo_password }}
+SUDO_PASSWORD={{ .sudo_password | default "" }}
 
 # Container image for modal backend
 TERMINAL_MODAL_IMAGE=nikolaik/python-nodejs:python3.11-nodejs20
@@ -85,4 +86,5 @@ IMAGE_TOOLS_DEBUG=false
 # GROQ_API_KEY={{ .groq_api_key }}
 
 # GitHub Token (for higher rate limits on skill hub)
-# GITHUB_TOKEN={{ .github_token }}
+# GITHUB_TOKEN={{ .github_token | default "" }}
+{{- end -}}

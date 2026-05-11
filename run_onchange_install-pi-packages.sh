@@ -1,3 +1,8 @@
+{{- if not .modules.pi_agent -}}
+#!/usr/bin/env bash
+# Pi agent module is disabled. Exiting.
+exit 0
+{{- else -}}
 #!/usr/bin/env bash
 # Install pi packages after chezmoi apply
 # This script runs when settings.json changes
@@ -38,3 +43,4 @@ if [[ -f "$SETTINGS_FILE" ]]; then
 else
     echo "Settings file not found at $SETTINGS_FILE"
 fi
+{{- end -}}

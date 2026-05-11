@@ -1,3 +1,4 @@
+{{- if .modules.gui_desktop -}}
 vim.pack.add({
     {
         src = "https://github.com/nvim-treesitter/nvim-treesitter",
@@ -58,4 +59,4 @@ local links = {
 for capture, group in pairs(links) do
   vim.api.nvim_set_hl(0, capture, { link = group })
 end
-
+{{- end -}}
