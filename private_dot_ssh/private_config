@@ -14,6 +14,20 @@ Host VSC5
 	IdentityFile id_rsa
 	IdentitiesOnly yes
 
+Host VSC4B
+	User samuelb
+	HostName vsc4.vsc.ac.at
+	Port 27
+	IdentityFile id_rsa
+	IdentitiesOnly yes
+
+Host VSC5B
+	User samuelb
+	HostName vsc5.vsc.ac.at
+	Port 27
+	IdentityFile id_rsa
+	IdentitiesOnly yes
+
 Host MUSICA
 	User sb69466
 	HostName musica.vie.asc.ac.at
