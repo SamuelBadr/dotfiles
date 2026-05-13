@@ -1,0 +1,41 @@
+{{- if not .modules.pi_agent -}}
+#!/usr/bin/env bash
+# Pi agent module is disabled. Exiting.
+exit 0
+{{- else -}}
+#!/usr/bin/env bash
+# Create symlinks for pi skills from ~/.agents/skills/ to ~/.pi/agent/skills/
+# This script runs on every chezmoi apply to ensure symlinks are correct
+
+set -e
+
+echo "==> Setting up pi skill symlinks..."
+
+# Ensure source directory exists
+if [[ ! -d "$HOME/.agents/skills" ]]; then
+    echo "Warning: ~/.agents/skills/ does not exist, skipping symlink creation"
+    exit 0
+fi
+
+# Ensure target directory exists
+mkdir -p "$HOME/.pi/agent/skills"
+
+# Create symlinks for each skill in ~/.agents/skills/
+for skill_dir in "$HOME/.agents/skills"/*/; do
+    if [[ -d "$skill_dir" ]]; then
+        skill_name=$(basename "$skill_dir")
+        target_link="$HOME/.pi/agent/skills/$skill_name"
+        
+        # Remove existing file/link if it exists
+        if [[ -e "$target_link" || -L "$target_link" ]]; then
+            rm -f "$target_link"
+        fi
+        
+        # Create relative symlink
+        ln -s "../../../.agents/skills/$skill_name" "$target_link"
+        echo "  Created symlink: ~/.pi/agent/skills/$skill_name -> ~/.agents/skills/$skill_name"
+    fi
+done
+
+echo "==> Skill symlinks setup complete"
+{{- end -}}
