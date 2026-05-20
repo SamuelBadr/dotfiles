@@ -29,3 +29,4 @@
 .pi/agent/npm/**
 .pi/agent/git/
 .pi/agent/git/**
+.pi/agent/skills/*/.git/**
