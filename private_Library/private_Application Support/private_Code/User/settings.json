@@ -740,4 +740,5 @@
         "editor.inlayHints.maximumLength": 0
     },
     "diffEditor.ignoreTrimWhitespace": false,
+    "chat.disableAIFeatures": true,
 }
