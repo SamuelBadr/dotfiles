@@ -1,0 +1,55 @@
+{{- if not .modules.hermes -}}
+#!/usr/bin/env bash
+# Hermes module is disabled. Exiting.
+exit 0
+{{- else -}}
+#!/usr/bin/env bash
+# Install Hermes CLI if not already installed
+# Uses pip --user (no sudo required)
+
+set -e
+
+echo "==> Checking for Hermes CLI..."
+
+if command -v hermes &> /dev/null; then
+    echo "  ✓ Hermes already installed: $(hermes --version 2>&1 | head -1)"
+    exit 0
+fi
+
+echo "  Hermes CLI not found, installing..."
+
+# Try different pip variants
+if command -v pip3 &> /dev/null; then
+    PIP="pip3"
+elif command -v pip &> /dev/null; then
+    PIP="pip"
+elif command -v python3 &> /dev/null; then
+    PIP="python3 -m pip"
+elif command -v python &> /dev/null; then
+    PIP="python -m pip"
+else
+    echo "  ✗ Error: No pip or python found"
+    echo "  Please install Python/pip first"
+    exit 1
+fi
+
+echo "  Using: $PIP"
+$PIP install --user --quiet hermes-agent
+
+# Verify installation
+if command -v hermes &> /dev/null; then
+    echo "  ✓ Hermes installed successfully: $(hermes --version 2>&1 | head -1)"
+    
+    # Ensure ~/.local/bin is in PATH
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+        echo ""
+        echo "  Note: Adding ~/.local/bin to PATH in ~/.zshrc"
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+else
+    echo "  ✗ Installation failed. Try manually:"
+    echo "    $PIP install --user hermes-agent"
+    exit 1
+fi
+{{- end -}}
