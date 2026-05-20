@@ -36,9 +36,9 @@ Host kauch
 	User samuel
 	HostName 128.131.127.236
 
-Host hclm                                                                      
-    User samuel                                                                  
-    Hostname hclm.ifp.tuwien.ac.at
+Host hclm
+	User samuel
+	Hostname hclm.ifp.tuwien.ac.at
 
 Host frank
 	User samuel

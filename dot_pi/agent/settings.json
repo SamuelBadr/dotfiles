@@ -16,6 +16,7 @@
     "github-copilot/gpt-5.3-codex",
     "aqueduct/coding",
     "openai-codex/gpt-5.5",
-    "fireworks/accounts/fireworks/models/kimi-k2p6"
+    "fireworks/accounts/fireworks/models/kimi-k2p6",
+    "omlx/MLX-Qwopus3.5-9B-Coder-oQ4-fp16-mtp"
   ]
 }
