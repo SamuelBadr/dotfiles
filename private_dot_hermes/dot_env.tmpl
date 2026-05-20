@@ -18,14 +18,14 @@
 
 # Firecrawl API Key - Web search, extract, and crawl
 # Get at: https://firecrawl.dev/
-FIRECRAWL_API_KEY={{ .firecrawl_api_key | default "" }}
+FIRECRAWL_API_KEY={{ .modules.firecrawl_api_key | default "" }}
 
 # =============================================================================
 # MESSAGING PLATFORMS
 # =============================================================================
 
 # Telegram Bot Token - From @BotFather (https://t.me/BotFather)
-TELEGRAM_BOT_TOKEN={{ .telegram_bot_token | default "" }}
+TELEGRAM_BOT_TOKEN={{ .modules.telegram_bot_token | default "" }}
 
 # =============================================================================
 # TERMINAL TOOL CONFIGURATION
@@ -36,7 +36,7 @@ TERMINAL_ENV=local
 
 # SUDO password (only if needed for local commands)
 # WARNING: Stored encrypted by chezmoi
-SUDO_PASSWORD={{ .sudo_password | default "" }}
+SUDO_PASSWORD={{ .modules.sudo_password | default "" }}
 
 # Container image for modal backend
 TERMINAL_MODAL_IMAGE=nikolaik/python-nodejs:python3.11-nodejs20
@@ -68,23 +68,23 @@ IMAGE_TOOLS_DEBUG=false
 # =============================================================================
 
 # Exa API Key - AI-native web search
-# EXA_API_KEY={{ .exa_api_key }}
+# EXA_API_KEY={{/* .modules.exa_api_key | default "" */}}
 
 # Parallel API Key - AI-native web search and extract
-# PARALLEL_API_KEY={{ .parallel_api_key }}
+# PARALLEL_API_KEY={{/* .modules.parallel_api_key | default "" */}}
 
 # FAL.ai API Key - Image generation
-# FAL_KEY={{ .fal_key }}
+# FAL_KEY={{/* .modules.fal_key | default "" */}}
 
 # OpenRouter API Key (if using instead of custom endpoint)
-# OPENROUTER_API_KEY={{ .openrouter_api_key }}
+# OPENROUTER_API_KEY={{/* .modules.openrouter_api_key | default "" */}}
 
 # Google Gemini API Key
-# GOOGLE_API_KEY={{ .google_api_key }}
+# GOOGLE_API_KEY={{/* .modules.google_api_key | default "" */}}
 
 # Groq API Key (for Whisper STT)
-# GROQ_API_KEY={{ .groq_api_key }}
+# GROQ_API_KEY={{/* .modules.groq_api_key | default "" */}}
 
 # GitHub Token (for higher rate limits on skill hub)
-# GITHUB_TOKEN={{ .github_token | default "" }}
+# GITHUB_TOKEN={{/* .modules.github_token | default "" */}}
 {{- end -}}
