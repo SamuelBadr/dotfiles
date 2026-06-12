@@ -57,7 +57,6 @@ Host *
 	ServerAliveInterval 60
 	ServerAliveCountMax 3
 	AddKeysToAgent yes
-	IgnoreUnknown UseKeychain
 	UseKeychain yes
 	ControlMaster auto
 	ControlPath ~/.ssh/control-%C
