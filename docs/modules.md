@@ -6,7 +6,6 @@ This repo uses a module system to enable/disable optional components per machine
 
 | Module | Description | Default |
 |--------|-------------|---------|
-| `hermes` | Hermes agent config and secrets setup | `false` |
 | `pi_agent` | Pi coding agent configuration | `true` |
 | `gui_desktop` | GUI apps: nvim, bat, btop, starship, fzf | `false` |
 | `packages` | Brewfile and package installation | `false` |
@@ -25,7 +24,6 @@ Enable modules per-machine in your local chezmoi config:
 
 ```toml
 [data.modules]
-hermes = true
 pi_agent = true
 gui_desktop = true
 packages = true
@@ -40,7 +38,6 @@ ssh = false
 ```toml
 # ~/.config/chezmoi/chezmoi.toml
 [data.modules]
-hermes = false
 pi_agent = true
 gui_desktop = false
 packages = false
@@ -53,7 +50,6 @@ ssh = false
 ```toml
 # ~/.config/chezmoi/chezmoi.toml
 [data.modules]
-hermes = true
 pi_agent = true
 gui_desktop = true
 packages = true
@@ -64,20 +60,6 @@ ssh = false
 ## Secrets
 
 Secrets are stored in `.chezmoidata.toml` (plaintext, repo is private).
-
-Required for Hermes module:
-- `firecrawl_api_key`
-- `telegram_bot_token`
-- `sudo_password`
-- `hermes_api_key`
-
-Example:
-```toml
-firecrawl_api_key = "fc-xxx"
-telegram_bot_token = "***REMOVED***:xxx"
-sudo_password = "xxx"
-hermes_api_key = "sk-xxx"
-```
 
 ## Setup Commands
 
@@ -116,7 +98,7 @@ chezmoi apply --dry-run --verbose
    ```
 
 2. Gate files/scripts with:
-   ```typst
+   ```
    {{- if .modules.new_module -}}
    # file contents
    {{- end -}}
