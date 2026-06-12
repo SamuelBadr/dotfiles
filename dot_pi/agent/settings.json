@@ -1,12 +1,11 @@
 {
-  "lastChangelogVersion": "0.75.3",
+  "lastChangelogVersion": "0.79.1",
   "defaultProvider": "aqueduct",
-  "defaultModel": "coding",
-  "defaultThinkingLevel": "high",
+  "defaultModel": "large",
+  "defaultThinkingLevel": "low",
   "theme": "light",
   "packages": [
     "npm:pi-markdown-preview",
-    "git:https://github.com/badlogic/pi-diff-review",
     "https://github.com/davebcn87/pi-autoresearch",
     "npm:pi-subagents",
     "npm:@plannotator/pi-extension",

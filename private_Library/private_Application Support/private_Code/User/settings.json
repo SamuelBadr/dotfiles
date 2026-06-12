@@ -741,4 +741,5 @@
     },
     "diffEditor.ignoreTrimWhitespace": false,
     "chat.disableAIFeatures": true,
+    "editor.lineNumbers": "off",
 }

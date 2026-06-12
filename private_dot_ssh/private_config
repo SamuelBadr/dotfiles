@@ -1,36 +1,31 @@
-IdentityFile ~/.ssh/id_rsa
-
 Host VSC4
 	User samuel
 	HostName vsc4.vsc.ac.at
 	Port 27
-	IdentityFile id_rsa
 	IdentitiesOnly yes
 
 Host VSC5
 	User samuel
 	HostName vsc5.vsc.ac.at
 	Port 27
-	IdentityFile id_rsa
 	IdentitiesOnly yes
 
 Host VSC4B
 	User samuelb
 	HostName vsc4.vsc.ac.at
 	Port 27
-	IdentityFile id_rsa
 	IdentitiesOnly yes
 
 Host VSC5B
 	User samuelb
 	HostName vsc5.vsc.ac.at
 	Port 27
-	IdentityFile id_rsa
 	IdentitiesOnly yes
 
 Host MUSICA
 	User sb69466
-	HostName musica.vie.asc.ac.at
+	HostName 193.170.79.22
+	HostKeyAlias musica-193.170.79.22
 
 Host kauch
 	User samuel
@@ -50,3 +45,19 @@ Host CMSuebung
 	User cms2025_10
 	Hostname server4.physprak.tuwien.ac.at
 	IdentitiesOnly yes
+
+Host Sherbrooke
+    User stud56
+    Hostname quantum2026.ccs.usherbrooke.ca
+    IdentitiesOnly yes
+
+Host *
+	IdentityFile ~/.ssh/id_rsa
+	StrictHostKeyChecking no
+	ServerAliveInterval 60
+	ServerAliveCountMax 3
+	AddKeysToAgent yes
+	UseKeychain yes
+	ControlMaster auto
+	ControlPath ~/.ssh/control-%C
+	ControlPersist 10m
