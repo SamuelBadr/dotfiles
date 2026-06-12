@@ -25,6 +25,14 @@ else
 fi
 
 # Check specific module conditionals
+echo -n "  - hermes module conditional: "
+if chezmoi execute-template '{{ if .modules.hermes }}FAIL{{ else }}PASS{{ end }}' | grep -q PASS; then
+    echo "✓"
+else
+    echo "✗"
+    exit 1
+fi
+
 echo -n "  - pi_agent module conditional: "
 if chezmoi execute-template '{{ if .modules.pi_agent }}PASS{{ else }}FAIL{{ end }}' | grep -q PASS; then
     echo "✓"
