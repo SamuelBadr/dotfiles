@@ -1,15 +1,16 @@
 {
-  "lastChangelogVersion": "0.79.1",
-  "defaultProvider": "aqueduct",
-  "defaultModel": "large",
-  "defaultThinkingLevel": "low",
+  "lastChangelogVersion": "0.79.10",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.5",
+  "defaultThinkingLevel": "high",
   "theme": "light",
   "packages": [
     "npm:pi-markdown-preview",
     "https://github.com/davebcn87/pi-autoresearch",
     "npm:pi-subagents",
     "npm:@plannotator/pi-extension",
-    "npm:pi-mcp-adapter"
+    "npm:pi-mcp-adapter",
+    "npm:pi-web-access"
   ],
   "enabledModels": [
     "github-copilot/gpt-5.3-codex",

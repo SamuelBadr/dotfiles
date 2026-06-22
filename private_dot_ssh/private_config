@@ -61,3 +61,4 @@ Host *
 	ControlMaster auto
 	ControlPath ~/.ssh/control-%C
 	ControlPersist 10m
+	LocalForward 1234 localhost:1234
