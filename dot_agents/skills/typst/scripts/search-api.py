@@ -5,6 +5,9 @@ Usage:
     python3 scripts/search-api.py "position slice string"
     python3 scripts/search-api.py "image width" --top 5
     python3 scripts/search-api.py "query heading" --kind method
+    python3 scripts/search-api.py "query heading" --channel 0.15.0
+    python3 scripts/search-api.py "query heading" --channel 0.14.2
+    python3 scripts/search-api.py "query heading" --channel main
     python3 scripts/search-api.py "color" --kind type --json
     python3 scripts/search-api.py --name str.position
     python3 scripts/search-api.py --list-categories
@@ -33,6 +36,21 @@ def resolve_data_dir(override):
         return override
     script_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(script_dir, "..", "data")
+
+
+def resolve_index_paths(data_dir, channel):
+    """Return (api_path, bm25_path) for an API data channel."""
+    stems = {
+        "stable": "api",
+        "0.15.0": "api-0.15.0",
+        "0.14.2": "api-0.14.2",
+        "main": "api-main",
+    }
+    stem = stems[channel]
+    return (
+        os.path.join(data_dir, f"{stem}.json"),
+        os.path.join(data_dir, f"{stem}-bm25.json"),
+    )
 
 
 def bm25_search(query_tokens, bm25, top_n=20):
@@ -139,10 +157,17 @@ def main():
         "--list-categories", action="store_true", help="List all categories"
     )
     parser.add_argument("--data-dir", help="Override data directory")
+    parser.add_argument(
+        "--channel",
+        choices=["stable", "0.15.0", "0.14.2", "main"],
+        default="stable",
+        help="API data channel: stable release alias, legacy 0.14.2, or upstream main preview",
+    )
     args = parser.parse_args()
 
     data_dir = resolve_data_dir(args.data_dir)
-    api = load_json(os.path.join(data_dir, "api.json"))
+    api_path, bm25_path = resolve_index_paths(data_dir, args.channel)
+    api = load_json(api_path)
 
     if args.list_categories:
         cats = sorted(set(e["category"] for e in api))
@@ -171,7 +196,7 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    bm25 = load_json(os.path.join(data_dir, "api-bm25.json"))
+    bm25 = load_json(bm25_path)
     tokens = tokenize(args.query)
     if not tokens:
         print("No searchable terms in query", file=sys.stderr)

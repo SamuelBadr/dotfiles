@@ -1,9 +1,9 @@
 {
-  "lastChangelogVersion": "0.79.10",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
+  "lastChangelogVersion": "0.80.2",
+  "defaultProvider": "aqueduct",
+  "defaultModel": "large",
   "defaultThinkingLevel": "high",
-  "theme": "light",
+  "theme": "light/dark",
   "packages": [
     "npm:pi-markdown-preview",
     "https://github.com/davebcn87/pi-autoresearch",
@@ -13,10 +13,8 @@
     "npm:pi-web-access"
   ],
   "enabledModels": [
-    "github-copilot/gpt-5.3-codex",
     "aqueduct/coding",
     "openai-codex/gpt-5.5",
-    "fireworks/accounts/fireworks/models/kimi-k2p6",
-    "omlx/MLX-Qwopus3.5-9B-Coder-oQ4-fp16-mtp"
+    "aqueduct/large"
   ]
 }
