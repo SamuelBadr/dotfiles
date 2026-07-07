@@ -2,9 +2,17 @@
 from __future__ import annotations
 
 import argparse
+import math
 import re
 import sys
 from pathlib import Path
+
+try:
+    from Stemmer import Stemmer as _Stemmer
+
+    _STEMMER = _Stemmer("english")
+except ImportError:  # pystemmer not installed; search still works, just without stemming
+    _STEMMER = None
 
 ROOT = Path(__file__).resolve().parent.parent
 BOOK = ROOT / "references" / "Matrix_Computations_merged.md"
@@ -26,6 +34,9 @@ ITEM_ALIASES = {
     "eq": "equation",
     "alg": "algorithm",
 }
+
+ITEM_LABEL_RE = re.compile(r"^\s*(Theorem|Lemma|Corollary|Algorithm)\s+\d+(?:\.\d+)*\s*[.(]")
+TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 def load_lines() -> list[str]:
@@ -80,6 +91,21 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
 
 
+def tokenize(text: str) -> list[str]:
+    """Tokenize for keyword search: lowercase alphanumeric runs, then stem.
+
+    Splitting on [a-z0-9]+ (not whitespace) keeps 'convergence.' and
+    'well-conditioned' reachable as 'convergence' / 'conditioned'. Snowball
+    stemming (Porter2 via pystemmer) then normalizes morphological variants so
+    'compute' matches 'computing'/'computation'/'computational'. Stemming is
+    applied to both query and docs here, so BM25 matching stays symmetric.
+    """
+    tokens = TOKEN_RE.findall(text.lower())
+    if _STEMMER is not None:
+        return _STEMMER.stemWords(tokens)
+    return tokens
+
+
 def best_manifest_match(start: int, end: int, manifest: list[dict[str, object]]) -> dict[str, object] | None:
     candidates = []
     for row in manifest:
@@ -114,6 +140,41 @@ def format_match(start: int, end: int, manifest: list[dict[str, object]]) -> str
     if match is None:
         return ""
     return f"  -> references/sections/{match['file']}"
+
+
+def bm25_rank(
+    query_tokens: list[str], docs: list[tuple[list[str], object]]
+) -> list[tuple[float, object]]:
+    """Rank docs by BM25 score against query_tokens.
+
+    docs is a list of (tokens, payload) pairs. Returns (score, payload)
+    sorted descending. A score of 0 means no query token was present.
+    """
+    if not docs or not query_tokens:
+        return []
+    n_docs = len(docs)
+    doc_sets = [set(toks) for toks, _ in docs]
+    avgdl = sum(len(toks) for toks, _ in docs) / n_docs
+    df = {t: 0 for t in query_tokens}
+    for doc_set in doc_sets:
+        for t in query_tokens:
+            if t in doc_set:
+                df[t] += 1
+    k1, b = 1.5, 0.75
+    results: list[tuple[float, object]] = []
+    for (toks, payload), doc_set in zip(docs, doc_sets):
+        dl = len(toks)
+        score = 0.0
+        for t in query_tokens:
+            if t not in doc_set:
+                continue
+            f = toks.count(t)
+            idf = math.log((n_docs - df[t] + 0.5) / (df[t] + 0.5) + 1)
+            denom = f + k1 * (1 - b + b * dl / avgdl) if avgdl else f + k1
+            score += idf * f * (k1 + 1) / denom if denom else 0
+        results.append((score, payload))
+    results.sort(key=lambda x: -x[0])
+    return results
 
 
 def print_heading_matches(matches: list[dict[str, object]], manifest: list[dict[str, object]]) -> None:
@@ -206,22 +267,55 @@ def cmd_toc(args: argparse.Namespace, headings: list[dict[str, object]], manifes
 
 
 def cmd_heading(args: argparse.Namespace, headings: list[dict[str, object]], manifest: list[dict[str, object]]) -> None:
-    tokens = [token for token in normalize(" ".join(args.query)).split(" ") if token]
-    matches = []
-    for heading in headings:
-        title = normalize(str(heading["title"]))
-        if all(token in title for token in tokens):
-            matches.append(heading)
-    print_heading_matches(matches[: args.limit], manifest)
+    tokens = tokenize(" ".join(args.query))
+    if not tokens:
+        return
+    docs = [(tokenize(str(h["title"])), h) for h in headings]
+    ranked = [h for s, h in bm25_rank(tokens, docs) if s > 0]
+    if ranked:
+        print_heading_matches(ranked[: args.limit], manifest)
+        return
+    # Fallback: substring match catches prefixes ('grad' -> 'gradient') that
+    # word-level BM25 misses, so a browse query never silently returns nothing.
+    substr = [h for h in headings if all(t in normalize(str(h["title"])) for t in tokens)]
+    print_heading_matches(substr[: args.limit], manifest)
+
+
+SKIP_KINDS = {"frontmatter", "index", "chapter-intro"}
 
 
 def cmd_text(args: argparse.Namespace, lines: list[str], manifest: list[dict[str, object]]) -> None:
-    query = normalize(" ".join(args.query))
-    if not query:
+    tokens = tokenize(" ".join(args.query))
+    if not tokens:
         return
+    skip_ranges = [
+        (int(row["start"]), int(row["end"]))
+        for row in manifest
+        if str(row["kind"]) in SKIP_KINDS
+    ]
+
+    def is_content(lineno: int) -> bool:
+        for start, end in skip_ranges:
+            if start <= lineno <= end:
+                return False
+        return True
+
+    docs = [
+        (tokenize(line), (lineno, line))
+        for lineno, line in enumerate(lines, start=1)
+        if is_content(lineno)
+    ]
+    ranked = [(s, payload) for s, payload in bm25_rank(tokens, docs) if s > 0]
+    for _, (lineno, line) in ranked[: args.limit]:
+        print(f"{lineno:>6}: {line}{format_match(lineno, lineno, manifest)}")
+    if ranked:
+        return
+    # Fallback: substring match catches prefixes/compounds that tokenize away.
     shown = 0
     for lineno, line in enumerate(lines, start=1):
-        if query in normalize(line):
+        if not is_content(lineno):
+            continue
+        if all(t in normalize(line) for t in tokens):
             print(f"{lineno:>6}: {line}{format_match(lineno, lineno, manifest)}")
             shown += 1
             if shown >= args.limit:
@@ -248,6 +342,18 @@ def cmd_section(args: argparse.Namespace, manifest: list[dict[str, object]]) -> 
     print(f"no split file found for section reference {ref}")
 
 
+def find_block_end(start_lineno: int, lines: list[str]) -> int:
+    """Return the last line number of the canonical content block starting at start_lineno.
+
+    The block ends just before the next heading or labeled-item start.
+    """
+    for lineno in range(start_lineno + 1, len(lines) + 1):
+        line = lines[lineno - 1]
+        if HEADING_RE.match(line) or ITEM_LABEL_RE.match(line):
+            return lineno - 1
+    return len(lines)
+
+
 def cmd_item(kind: str, reference: str, lines: list[str], manifest: list[dict[str, object]]) -> None:
     normalized_kind = normalize_item_kind(kind)
     number = normalize_item_number(reference)
@@ -255,7 +361,21 @@ def cmd_item(kind: str, reference: str, lines: list[str], manifest: list[dict[st
     if not matches:
         print(f"no {normalized_kind} found for reference {number}")
         return
-    print_item_matches(normalized_kind, number, matches, manifest)
+    best = matches[0]
+    if best["quality"] != 0:
+        print_item_matches(normalized_kind, number, matches, manifest)
+        return
+    start = int(best["line"])
+    if normalized_kind == "equation":
+        print(f"{normalized_kind} {number} @ {start}: {lines[start - 1]}{format_match(start, start, manifest)}")
+        return
+    end = find_block_end(start, lines)
+    print(
+        f"{normalized_kind.capitalize()} {number} @ lines {start}-{end} "
+        f"({end - start + 1} lines){format_match(start, start, manifest)}"
+    )
+    for lineno in range(start, end + 1):
+        print(f"{lineno:>6}: {lines[lineno - 1]}")
 
 
 def cmd_ref(args: argparse.Namespace, lines: list[str], manifest: list[dict[str, object]]) -> None:

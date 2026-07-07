@@ -1,0 +1,446 @@
+# ============================================================================
+# Environment Variables
+# ============================================================================
+# Editor: VS Code on macOS, VS Code in VS Code terminal on Linux, otherwise nvim
+if [[ "$OSTYPE" == darwin* ]]; then
+    export EDITOR="code --wait --new-window"
+elif [[ "$TERM_PROGRAM" == "vscode" ]]; then
+    export EDITOR="code --wait --new-window"
+else
+    export EDITOR="nvim"
+fi
+export VISUAL="$EDITOR"
+export GITHUB_USERNAME="SamuelBadr"
+
+# Path configuration
+export PATH="$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
+
+if [[ $OSTYPE == darwin* ]]; then
+  # 15 is lowest setting on UI
+  # 8 was too fast causing duplicate keystrokes
+  # 10 i think this causes issues in bash cli when editing commands, not sure
+  defaults write -g InitialKeyRepeat -int 15
+
+  # 2 is lowest setting on UI
+  defaults write -g KeyRepeat -int 2
+
+  # allow holding key instead of mac default holding key to choose alternate key
+  defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+fi
+
+# ============================================================================
+# History Configuration
+# ============================================================================
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+
+setopt SHARE_HISTORY              # Share history between all sessions
+setopt HIST_IGNORE_ALL_DUPS       # Remove older duplicate entries from history
+setopt HIST_REDUCE_BLANKS         # Remove superfluous blanks from history items
+setopt INC_APPEND_HISTORY         # Write to history file immediately, not when shell exits
+setopt HIST_IGNORE_SPACE          # Don't record commands starting with space
+setopt HIST_VERIFY                # Show command with history expansion before running it
+
+# ============================================================================
+# Zsh Options
+# ============================================================================
+setopt AUTO_CD                    # cd by typing directory name if it's not a command
+setopt AUTO_PUSHD                 # Make cd push old directory onto directory stack
+setopt PUSHD_IGNORE_DUPS          # Don't push multiple copies of same directory
+setopt PUSHD_SILENT               # Don't print directory stack after pushd/popd
+setopt CORRECT                    # Spelling correction for commands
+setopt INTERACTIVE_COMMENTS       # Allow comments in interactive shells
+
+# ============================================================================
+# Completion System
+# ============================================================================
+# Add zsh-completions to fpath
+if type brew &>/dev/null; then
+    FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+fi
+
+# Enable completion caching for better performance
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+autoload -Uz compinit && compinit
+
+# Completion styling
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'       # Case insensitive matching
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"         # Colored completion
+zstyle ':completion:*' group-name ''                             # Group results by category
+zstyle ':completion:*:descriptions' format '%B%d%b'              # Bold descriptions
+zstyle ':completion:*:warnings' format 'No matches for: %d'      # Warning format
+zstyle ':completion:*' verbose yes                               # Verbose completion
+zstyle ':completion:*:*:kill:*' menu yes select                  # Process completion
+zstyle ':completion:*:kill:*' force-list always
+
+# ============================================================================
+# Key Bindings
+# ============================================================================
+# Use emacs key bindings (or use 'bindkey -v' for vi mode)
+bindkey -e
+
+# Better history navigation with cursor at end of line
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+bindkey '^P' up-line-or-beginning-search
+bindkey '^N' down-line-or-beginning-search
+
+# ============================================================================
+# Aliases - General
+# ============================================================================
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias ~='cd ~'
+alias -- -='cd -'
+
+# List directory contents (using eza - modern ls replacement)
+if command -v eza &>/dev/null; then
+    alias ls='eza --icons'
+    alias ll='eza -lah --icons --git'
+    alias la='eza -A --icons'
+    alias l='eza -F --icons'
+    alias lt='eza --tree --level=2 --icons'
+    alias llt='eza -lah --tree --level=2 --icons --git'
+fi
+
+# Shortcuts
+alias h='history'
+alias c='clear'
+alias e='$EDITOR'
+alias zshrc='$EDITOR ~/.zshrc'
+alias reload='source ~/.zshrc'
+
+# GUI tool aliases (only if available)
+if command -v bat &>/dev/null; then
+    alias cat='bat'
+fi
+
+# System
+# Homebrew update workaround for macOS network-extension routing issue:
+# avoid Homebrew's parallel updater; fetch/rebase taps serially over SSH.
+brew_serial_update() {
+  local repo branch api url rc
+
+  export HOMEBREW_CURLRC="${HOMEBREW_CURLRC:-$HOME/.config/homebrew/curlrc}"
+  export GIT_SSH_COMMAND='ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=1 -o ControlMaster=no'
+
+  if [ ! -f "$HOMEBREW_CURLRC" ]; then
+    mkdir -p "$(dirname "$HOMEBREW_CURLRC")"
+    cat > "$HOMEBREW_CURLRC" <<'CURLRC'
+interface = en0
+connect-timeout = 10
+max-time = 120
+CURLRC
+  fi
+
+  api="$HOME/Library/Caches/Homebrew/api/internal/packages.arm64_golden_gate.jws.json"
+  url="https://formulae.brew.sh/api/internal/packages.arm64_golden_gate.jws.json"
+  mkdir -p "$(dirname "$api")"
+
+  echo "==> Updating Homebrew API cache..."
+  /usr/bin/curl -q \
+    --config "$HOMEBREW_CURLRC" \
+    --fail \
+    --compressed \
+    --silent \
+    --show-error \
+    --location \
+    --remote-time \
+    --output "$api" \
+    --time-cond "$api" \
+    --user-agent "Homebrew/$(brew --version | head -1 | awk '{print $2}') serial-update" \
+    "$url" || return $?
+
+  echo "==> Updating Homebrew Git repositories serially..."
+  for repo in "$(brew --repo)" $(brew tap | while read -r tap; do brew --repo "$tap" 2>/dev/null; done); do
+    [ -d "$repo/.git" ] || continue
+
+    echo "==> $repo"
+    git -C "$repo" fetch --tags --force origin || return $?
+
+    branch="$(git -C "$repo" symbolic-ref --short HEAD 2>/dev/null || true)"
+    if [ -n "$branch" ] && git -C "$repo" rev-parse --verify --quiet "origin/$branch" >/dev/null; then
+      git -C "$repo" rebase "origin/$branch" || return $?
+    else
+      echo "Skipping rebase for $repo; no matching origin/$branch ref"
+    fi
+  done
+}
+
+up() {
+  brew_serial_update &&
+    HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade --greedy --overwrite -y &&
+    HOMEBREW_NO_AUTO_UPDATE=1 brew cleanup &&
+    if command -v npm >/dev/null; then
+      latest=$(npm view npm version 2>/dev/null)
+      current=$(npm -v)
+      if [ -n "$latest" ] && [ "$current" != "$latest" ]; then
+        npm install -g npm@latest
+      fi
+      npm update -g
+    fi &&
+    if command -v skills >/dev/null 2>&1; then
+      skills update -g -y && skills update -p -y
+    fi
+}
+
+# ============================================================================
+# Aliases - Chezmoi
+# ============================================================================
+alias cm='chezmoi'
+alias cma='chezmoi add'
+alias cme='chezmoi edit'
+alias cmcd='chezmoi cd'
+alias cmap='chezmoi apply'
+alias cmup='chezmoi update'
+alias cmdiff='chezmoi diff'
+
+# ============================================================================
+# Aliases - Julia
+# ============================================================================
+alias pluto='julia -e "using Pluto; Pluto.run()"'
+alias julia-update='juliaup update'
+
+# ============================================================================
+# Aliases - Git
+# ============================================================================
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gl='git log --oneline --graph --decorate'
+alias gla='git log --oneline --graph --decorate --all'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gb='git branch'
+alias gba='git branch -a'
+
+# ============================================================================
+# Functions
+# ============================================================================
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Quick find
+ff() {
+    find . -type f -iname "*$1*"
+}
+
+# Quick grep
+gg() {
+    grep -r "$1" .
+}
+
+# Extract various archive types
+extract() {
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2)   tar xjf "$1"     ;;
+            *.tar.gz)    tar xzf "$1"     ;;
+            *.bz2)       bunzip2 "$1"     ;;
+            *.rar)       unrar x "$1"     ;;
+            *.gz)        gunzip "$1"      ;;
+            *.tar)       tar xf "$1"      ;;
+            *.tbz2)      tar xjf "$1"     ;;
+            *.tgz)       tar xzf "$1"     ;;
+            *.zip)       unzip "$1"       ;;
+            *.Z)         uncompress "$1"  ;;
+            *.7z)        7z x "$1"        ;;
+            *)           echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# SSH into a server and attach/create a tmux session
+# Usage: ssh-tmux <server> [session-name]
+ssh-tmux() {
+  if [ -z "$1" ]; then
+    echo "Usage: ssh-tmux <server> [session-name]"
+    return 2
+  fi
+
+  local server="$1"
+  local session="${2:-main}"
+
+  ssh -t "$server" "tmux new-session -A -s '$session'"
+}
+
+# ============================================================================
+# Plugin Loading (order matters!)
+# ============================================================================
+# Plugin search paths (add more as needed)
+ZSH_PLUGIN_DIRS=(
+    /opt/homebrew/share              # macOS Homebrew
+    /opt/homebrew/opt/fzf/shell      # macOS Homebrew fzf
+    /usr/share/zsh/plugins           # Arch Linux
+    /usr/share/fzf                   # Arch Linux fzf
+    /usr/share                       # Other Linux distros
+    ~/.local/share/zsh/plugins       # User-local installs
+)
+
+# Helper function to source a plugin from the first found location
+source_plugin() {
+    local plugin=$1
+    for dir in $ZSH_PLUGIN_DIRS; do
+        local p="$dir/$plugin/$plugin.zsh"
+        [[ -f $p ]] && { source "$p"; return 0; }
+    done
+    return 1
+}
+
+# Load zsh-autosuggestions
+source_plugin zsh-autosuggestions && {
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
+}
+
+# Load syntax highlighting (must be loaded after all other plugins)
+source_plugin zsh-syntax-highlighting
+
+# Load fzf integration
+if source_plugin fzf key-bindings 2>/dev/null || [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
+    [[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
+    [[ -f /usr/share/fzf/completion.zsh ]] && source /usr/share/fzf/completion.zsh
+
+    export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
+    export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window=right:60%"
+    export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
+fi
+
+# ============================================================================
+# Interactive File Picker (fzf + fd + rg + bat)
+# ============================================================================
+# Only load if fzf is available
+if command -v fzf &>/dev/null; then
+# File picker by name - search filenames, preview with bat, open in nvim
+# Usage: fp [query]
+fp() {
+    local file
+    file=$(fd --type f --hidden --follow --exclude .git \
+        | fzf --query="$1" \
+              --preview 'bat --style=numbers,changes --color=always {}' \
+              --preview-window 'right:60%:wrap' \
+              --bind 'ctrl-/:toggle-preview' \
+              --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+              --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open in nvim')
+    [[ -n "$file" ]] && nvim "$file"
+}
+
+# Content search - search inside files with rg, preview context, open in nvim at line
+# Usage: rgs [query]
+rgs() {
+    local selection
+    selection=$(rg --color=always --line-number --no-heading --smart-case "${*:-}" \
+        | fzf --ansi \
+              --delimiter : \
+              --preview 'bat --style=numbers,changes --color=always --highlight-line {2} {1} 2>/dev/null' \
+              --preview-window 'right:60%:wrap:+{2}-5' \
+              --bind 'ctrl-/:toggle-preview' \
+              --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+              --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open at line')
+    if [[ -n "$selection" ]]; then
+        local file line
+        file=$(echo "$selection" | cut -d: -f1)
+        line=$(echo "$selection" | cut -d: -f2)
+        nvim "+$line" "$file"
+    fi
+}
+
+# Combined picker - toggle between filename and content search
+# Usage: fif (then use CTRL-T to toggle modes)
+# Starts in Content mode - type to search inside files
+# Press CTRL-T to switch to Files mode - type to filter filenames
+fif() {
+    local selection
+    selection=$(: | fzf --ansi --disabled \
+        --prompt 'Content> ' \
+        --bind 'change:reload:rg --column --line-number --no-heading --color=always --smart-case {q} || true' \
+        --bind 'ctrl-t:transform:[[ $FZF_PROMPT == "Content> " ]] &&
+            echo "unbind(change)+enable-search+clear-query+change-prompt(Files> )+reload:fd --type f --hidden --follow --exclude .git" ||
+            echo "disable-search+rebind(change)+clear-query+change-prompt(Content> )+reload:true"' \
+        --delimiter : \
+        --preview 'f={1}; [[ -f "$f" ]] && bat --style=numbers,changes --color=always --highlight-line {2} "$f" 2>/dev/null || bat --style=numbers,changes --color=always {} 2>/dev/null' \
+        --preview-window 'right:60%:wrap' \
+        --bind 'ctrl-/:toggle-preview' \
+        --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+        --header 'CTRL-T toggle Files/Content | CTRL-/ preview | ENTER open')
+
+    if [[ -n "$selection" ]]; then
+        local file line
+        if [[ "$selection" == *:* ]]; then
+            file=$(echo "$selection" | cut -d: -f1)
+            line=$(echo "$selection" | cut -d: -f2)
+            nvim "+$line" "$file"
+        else
+            nvim "$selection"
+        fi
+    fi
+}
+fi  # End of fzf block
+
+# ============================================================================
+# Tool Integrations
+# ============================================================================
+# zoxide - smarter cd command (use 'z' to jump to frequently used directories)
+if command -v zoxide &> /dev/null; then
+    eval "$(zoxide init zsh)"
+fi
+
+# ============================================================================
+# Prompt (load last)
+# ============================================================================
+if command -v starship &>/dev/null; then
+    eval "$(starship init zsh)"
+fi
+
+# >>> juliaup initialize >>>
+
+# !! Contents within this block are managed by juliaup !!
+
+path=('/home/samuel/.juliaup/bin' $path)
+export PATH
+
+# <<< juliaup initialize <<<
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/samuel/.lmstudio/bin"
+# End of LM Studio CLI section
+
+# Brew shellenv - works on both macOS and Linux
+if command -v brew &>/dev/null; then
+    eval "$(brew shellenv)"
+fi
+
+# >>> mamba initialize >>>
+# !! Contents within this block are managed by 'micromamba shell init' !!
+export MAMBA_EXE='/opt/homebrew/bin/micromamba';
+export MAMBA_ROOT_PREFIX='/Users/samuel/micromamba';
+__mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__mamba_setup"
+else
+    alias micromamba="$MAMBA_EXE"  # Fallback on help from micromamba activate
+fi
+unset __mamba_setup
+# <<< mamba initialize <<<

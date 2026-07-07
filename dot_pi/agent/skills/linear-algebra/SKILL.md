@@ -1,11 +1,11 @@
 ---
 name: linear-algebra
-description: Guide implementation and validation of numerical linear algebra algorithms in Julia using Golub and Van Loan's Matrix Computations as the primary reference. Use when working with matrix factorizations, least squares, conditioning, eigenvalue and SVD methods, sparse Krylov or iterative methods, matrix functions, or related scientific computing code.
+description: Guide implementation and validation of numerical linear algebra algorithms using Golub and Van Loan's Matrix Computations as the primary reference. Use when working with matrix factorizations, least squares, conditioning, eigenvalue and SVD methods, sparse Krylov or iterative methods, matrix functions, or related scientific computing code.
 ---
 
 # linear-algebra skill
 
-Use this skill for scientific-computing tasks where the agent should choose, justify, or implement a numerical linear algebra method in Julia with *Matrix Computations* by Golub and Van Loan as the primary source of truth.
+Use this skill for scientific-computing tasks where the agent should choose, justify, or implement a numerical linear algebra method with *Matrix Computations* by Golub and Van Loan as the primary source of truth.
 
 ## Primary references
 
@@ -16,18 +16,28 @@ Use this skill for scientific-computing tasks where the agent should choose, jus
 - Quick topic map: `references/topic-map.md`
 - Known errata: `references/errata.md`
 - Lookup helper: `scripts/book_lookup.py`
+- Shared knowledge bundle (preferred when available): `~/.agents/nla-knowledge/`
 
 ## Retrieval workflow
 
 1. Do not answer from memory when the book is relevant.
-2. Locate the right source first.
-3. Open the smallest relevant file in `references/sections/`.
-4. Pull in chapter context only when the local section is not enough.
-5. Use the merged file only for exact line-range lookups or debugging a reference.
+2. Prefer the shared bundle CLI when available: `python3 ~/.agents/nla-knowledge/scripts/nla_lookup.py lookup <reference>` or `search <query> --source gvl`. It provides stable IDs (`gvl:theorem:2.4.1`) and generated indexes across both NLA skills.
+3. Use local `scripts/book_lookup.py` as the fallback or for line/file debugging inside this skill.
+4. For a labeled item (theorem/algorithm/equation), lookup returns canonical content directly. Open the section file only to widen context.
+5. Pull in chapter context only when the local section is not enough.
+6. Use the merged file only for exact line-range lookups or debugging a reference.
 
 ## Lookup commands
 
-Topic search:
+Shared bundle lookup/search (preferred):
+
+```bash
+python3 ~/.agents/nla-knowledge/scripts/nla_lookup.py lookup gvl:theorem:2.4.1
+python3 ~/.agents/nla-knowledge/scripts/nla_lookup.py lookup 'theorem 2.4.1'
+python3 ~/.agents/nla-knowledge/scripts/nla_lookup.py search cholesky positive definite --source gvl
+```
+
+Local topic search (fallback / local debugging):
 
 ```bash
 python3 scripts/book_lookup.py heading "conjugate gradient"
@@ -61,7 +71,7 @@ Line-to-file mapping:
 python3 scripts/book_lookup.py file-at 30619
 ```
 
-The helper prints the best matching file under `references/sections/`. Open that file first.
+For `text`/`heading`, the helper prints file hints; open that file to widen. For labeled items (`theorem`/`algorithm`/`equation`), it prints the canonical content directly.
 
 ## Implementation stance
 
@@ -69,11 +79,11 @@ When writing code:
 
 1. Identify the mathematically appropriate algorithm from the book.
 2. Prefer numerically stable formulations discussed in the text over naive formulas.
-3. Then implement the algorithm idiomatically in Julia.
+3. Then implement the algorithm idiomatically in the target language.
 4. State important assumptions clearly: dimensions, rank conditions, symmetry, definiteness, conditioning, stopping criteria, and error model.
 5. When useful, cite the chapter/section or theorem that motivates the implementation.
 
-For Julia-specific style, type stability, allocation control, and package practices, follow the separate `julia` skill when available.
+For randomized NLA methods (randomized SVD, trace estimation, sketching, Nyström approximation), see the `randomized-linear-algebra` skill.
 
 ## Common entry points
 
