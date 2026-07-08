@@ -30,3 +30,6 @@
 .pi/agent/git/
 .pi/agent/git/**
 .pi/agent/skills/*/.git/**
+
+# Pi agent secrets (do not track)
+dot_pi/agent/private_auth.json
