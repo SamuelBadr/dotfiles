@@ -16,5 +16,8 @@
     "aqueduct/coding",
     "openai-codex/gpt-5.5",
     "aqueduct/large"
+  ],
+  "npmCommand": [
+    "bun"
   ]
 }

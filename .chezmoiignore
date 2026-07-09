@@ -33,3 +33,5 @@
 
 # Pi agent secrets (do not track)
 dot_pi/agent/private_auth.json
+
+.pi/agent/auth.json
