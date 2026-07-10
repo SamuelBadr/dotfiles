@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.80.5",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
+  "defaultModel": "gpt-5.6-terra",
   "defaultThinkingLevel": "high",
   "theme": "light/dark",
   "packages": [
@@ -15,7 +15,9 @@
   "enabledModels": [
     "aqueduct/coding",
     "openai-codex/gpt-5.5",
-    "aqueduct/large"
+    "aqueduct/large",
+    "openai-codex/gpt-5.6-sol",
+    "openai-codex/gpt-5.6-terra"
   ],
   "npmCommand": [
     "bun"
