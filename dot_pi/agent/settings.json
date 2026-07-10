@@ -1,7 +1,7 @@
 {
-  "lastChangelogVersion": "0.80.3",
-  "defaultProvider": "aqueduct",
-  "defaultModel": "large",
+  "lastChangelogVersion": "0.80.5",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "high",
   "theme": "light/dark",
   "packages": [
