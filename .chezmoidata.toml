@@ -1,0 +1,16 @@
+# Chezmoi Default Data
+# This file provides safe defaults for all machines.
+# Machine-specific overrides go in ~/.config/chezmoi/chezmoi.toml
+
+# =============================================================================
+# MODULES
+# =============================================================================
+# Enable/disable optional components per machine.
+# Set to true to include, false to exclude.
+
+[modules]
+  pi_agent = true       # Pi coding agent configuration
+  gui_desktop = false   # GUI apps: nvim, bat, btop, starship, fzf
+  packages = false      # Brewfile and package installation
+  shell = true          # Core shell: zshrc, gitconfig, tmux
+  ssh = false           # SSH configuration (opt-in due to sensitivity)
