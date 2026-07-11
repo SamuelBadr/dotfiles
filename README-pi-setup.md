@@ -9,7 +9,7 @@ The following pi configuration is now tracked in your chezmoi dotfiles repositor
 ### Core Configuration
 - `~/.pi/agent/settings.json` - Packages, default models, theme preferences
 - `~/.pi/agent/mcp.json` - MCP server configuration
-- `~/.pi/agent/models.json.tmpl` - Custom model providers (API key stored in keyring)
+- `~/.pi/agent/models.json` - Custom model providers and capabilities (no credentials)
 
 ### Customizations
 - `~/.pi/agent/agents/` - Custom agent definitions
@@ -26,7 +26,7 @@ These are intentionally excluded (cache/regenerable/sensitive):
 - `~/.pi/cache/` - regenerable cache
 - `~/.pi/agent/sessions/` - conversation history
 - `~/.pi/agent/mcp-cache.json` - regenerable
-- `~/.pi/agent/auth.json` - re-authenticate on new machine
+- `~/.pi/agent/auth.json` - machine-local credentials; re-authenticate on each machine
 - `~/.pi/agent/run-history.jsonl` - local history
 
 ## Setup on New Machine
@@ -36,24 +36,19 @@ These are intentionally excluded (cache/regenerable/sensitive):
 chezmoi apply
 ```
 
-### 2. Retrieve the API Key Secret
+### 2. Authenticate Aqueduct locally
 
-The Aqueduct API key is stored in your system keyring. On the new machine, you need to add it:
+Start pi, then run `/login aqueduct` and enter the API key:
 
-**Option A: If you have keyring sync (recommended)**
-- macOS: Ensure iCloud Keychain is enabled
-- Linux: Use the same keyring backend (gnome-keyring, kwallet, etc.)
-
-**Option B: Manual setup**
 ```bash
-chezmoi secret keyring set --service=chezmoi-aqueduct --user=aqueduct_api_key --value="YOUR_API_KEY"
-```
-
-### 3. Re-authenticate with pi
-```bash
-# Pi will prompt for authentication on first run
 pi
 ```
+
+Pi stores the credential in the machine-local `~/.pi/agent/auth.json` with `0600` permissions. Do not add that file to chezmoi. Repeat this one-time login on each machine.
+
+### 3. Re-authenticate other providers
+
+Use `/login` inside pi for any other API-key or OAuth providers needed on this machine. Their credentials also remain in the machine-local `auth.json`.
 
 ### 4. Verify packages are installed
 The setup script should have automatically installed packages from settings.json. Verify:
@@ -81,11 +76,8 @@ When you modify pi settings on your main machine:
 
 ## Troubleshooting
 
-### Models.json not rendering correctly
-Ensure the secret is set:
-```bash
-chezmoi secret keyring get --service=chezmoi-aqueduct --user=aqueduct_api_key
-```
+### Aqueduct models are unavailable
+Run `/login aqueduct` inside pi, then reopen `/model`. Confirm that `~/.pi/agent/auth.json` exists with `0600` permissions.
 
 ### Packages not installing
 Check if jq is installed (required by the setup script):

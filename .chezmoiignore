@@ -31,7 +31,5 @@
 .pi/agent/git/**
 .pi/agent/skills/*/.git/**
 
-# Pi agent secrets (do not track)
-dot_pi/agent/private_auth.json
-
+# Pi credentials are machine-local and must never be managed by chezmoi
 .pi/agent/auth.json
