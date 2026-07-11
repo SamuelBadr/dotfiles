@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "permissions": {
+    "deny": [
+      "Bash(*rm *)",
+      "Bash(*unlink *)",
+      "Bash(*rmdir *)",
+      "Bash(*shred *)",
+      "Bash(*srm *)",
+      "Bash(*find * -delete*)",
+      "Bash(*git *clean*)",
+      "Bash(*gio *remove*)",
+      "Bash(*trash*--empty*)",
+      "Bash(*empty-trash*)"
+    ]
+  }
+}

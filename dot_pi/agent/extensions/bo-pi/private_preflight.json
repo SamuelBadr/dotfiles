@@ -1,0 +1,15 @@
+{
+  "contextMessages": 1,
+  "explainKey": "ctrl+e",
+  "ruleSuggestionKey": "ctrl+n",
+  "model": {
+    "provider": "aqueduct",
+    "id": "main"
+  },
+  "policyModel": {
+    "provider": "aqueduct",
+    "id": "main"
+  },
+  "approvalMode": "destructive",
+  "debug": false
+}
