@@ -1,0 +1,11 @@
+# Preserve the existing POSIX login environment, if present.
+if [ -r "$HOME/.profile" ]; then
+  . "$HOME/.profile"
+fi
+
+# Keep user-installed commands, including chezmoi, on PATH.
+case ":${PATH-}:" in
+  *:"$HOME/bin":*) ;;
+  *) PATH="$HOME/bin${PATH:+:$PATH}" ;;
+esac
+export PATH
