@@ -1,3 +1,15 @@
+# ~/.zshrc is a zsh configuration. Keep accidental attempts to source it from
+# Bash (or another shell) from producing a cascade of zsh-specific errors.
+if [ -z "${ZSH_VERSION:-}" ]; then
+  if [ -n "${BASH_VERSION:-}" ]; then
+    printf '%s\n' \
+      '~/.zshrc is for zsh, not Bash.' \
+      'Start zsh with: exec zsh' \
+      'Make it the login shell with: chsh -s "$(command -v zsh)"' >&2
+  fi
+  return 0 2>/dev/null || exit 0
+fi
+
 # ============================================================================
 # Platform / Homebrew
 # ============================================================================
