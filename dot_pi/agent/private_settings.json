@@ -9,7 +9,8 @@
     "npm:pi-markdown-preview",
     "npm:pi-subagents",
     "npm:@plannotator/pi-extension",
-    "npm:pi-web-access"
+    "npm:pi-web-access",
+    "npm:pi-fff"
   ],
   "enabledModels": [
     "aqueduct/large",
