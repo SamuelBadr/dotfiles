@@ -15,6 +15,11 @@
 # Skill-local git repos (installed via `skills` CLI) — content is tracked, history is not
 .agents/skills/**/.git/**
 
+# ~/.pi/agent/skills/ is a runtime dir for symlinks created by the `skills` CLI.
+# Pi discovers skills natively from ~/.agents/skills/ (tracked above), so this dir
+# must never be managed by chezmoi.
+.pi/agent/skills/**
+
 # Temporary files
 *.tmp
 *.swp
@@ -37,7 +42,6 @@
 .pi/agent/npm/**
 .pi/agent/git/
 .pi/agent/git/**
-.pi/agent/skills/*/.git/**
 
 # Pi credentials are machine-local and must never be managed by chezmoi
 .pi/agent/auth.json

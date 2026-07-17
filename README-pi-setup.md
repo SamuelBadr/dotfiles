@@ -14,8 +14,7 @@ The following pi configuration is now tracked in your chezmoi dotfiles repositor
 ### Customizations
 - `~/.pi/agent/agents/` - Custom agent definitions
 - `~/.pi/agent/extensions/` - Custom extensions
-- `~/.pi/agent/skills/linear-algebra/` - Custom linear algebra skill
-- `~/.agents/skills/` - All custom skills (touying-author, typst, julia, obsidian, etc.)
+- `~/.agents/skills/` - All custom skills (build-julia-interfaces, typst, linear-algebra, etc.)
 
 ### Setup Script
 - `run_onchange_install-pi-packages.sh` - Automatically installs pi packages after apply
@@ -87,4 +86,5 @@ apt install jq   # Debian/Ubuntu
 ```
 
 ### Skills not loading
-Verify symlinks are created correctly in `~/.pi/agent/skills/`. Some skills reference `~/.agents/skills/`.
+Pi discovers skills natively from `~/.agents/skills/`. Run `chezmoi apply` to materialize the
+skill tree, then restart pi. (The old `~/.pi/agent/skills/` symlink-mirror dir is no longer used.)
