@@ -18,6 +18,13 @@ export SUPERMEMORY_API_KEY="***REMOVED***_BxRPQHfImYUpJNluHOcGDGIAQqWzaecEBHKsJv
 # Path configuration
 export PATH="$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
 
+# Bun and Bun-installed commands
+export BUN_INSTALL="$HOME/.bun"
+case ":$PATH:" in
+  *":$BUN_INSTALL/bin:"*) ;;
+  *) export PATH="$BUN_INSTALL/bin:$PATH" ;;
+esac
+
 # macOS key repeat tweaks (runs whenever an interactive shell starts on macOS)
 if [[ "$OSTYPE" == darwin* ]]; then
   defaults write -g InitialKeyRepeat -int 15
@@ -300,3 +307,4 @@ fi
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
