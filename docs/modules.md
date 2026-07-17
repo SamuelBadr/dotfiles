@@ -6,12 +6,10 @@ This repo uses a module system to enable/disable optional components per machine
 
 | Module | Description | Default |
 |--------|-------------|---------|
-| `hermes` | Hermes agent config and secrets setup | `false` |
 | `pi_agent` | Pi coding agent configuration | `true` |
 | `gui_desktop` | GUI apps: nvim, bat, btop, starship, fzf | `false` |
 | `packages` | Brewfile and package installation | `false` |
 | `shell` | Core shell: zshrc, gitconfig, tmux | `true` |
-| `ssh` | SSH configuration | `false` |
 
 ## Configuration
 
@@ -25,12 +23,10 @@ Enable modules per-machine in your local chezmoi config:
 
 ```toml
 [data.modules]
-hermes = true
 pi_agent = true
 gui_desktop = true
 packages = true
 shell = true
-ssh = false
 ```
 
 ## Example Configurations
@@ -40,12 +36,10 @@ ssh = false
 ```toml
 # ~/.config/chezmoi/chezmoi.toml
 [data.modules]
-hermes = false
 pi_agent = true
 gui_desktop = false
 packages = false
 shell = true
-ssh = false
 ```
 
 ### Workstation (Full)
@@ -53,31 +47,17 @@ ssh = false
 ```toml
 # ~/.config/chezmoi/chezmoi.toml
 [data.modules]
-hermes = true
 pi_agent = true
 gui_desktop = true
 packages = true
 shell = true
-ssh = false
 ```
 
 ## Secrets
 
-Secrets are stored in `.chezmoidata.toml` (plaintext, repo is private).
-
-Required for Hermes module:
-- `firecrawl_api_key`
-- `telegram_bot_token`
-- `sudo_password`
-- `hermes_api_key`
-
-Example:
-```toml
-firecrawl_api_key = "fc-xxx"
-telegram_bot_token = "***REMOVED***:xxx"
-sudo_password = "xxx"
-hermes_api_key = "sk-xxx"
-```
+Secrets should NOT be stored in this repo. Use `chezmoi add --encrypt` with age/Boring
+Crypto for any sensitive values, or keep them machine-local in `~/.config/chezmoi/chezmoi.toml`
+(which is not managed by chezmoi).
 
 ## Setup Commands
 

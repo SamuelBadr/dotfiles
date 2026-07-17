@@ -13,4 +13,3 @@
   gui_desktop = false   # GUI apps: nvim, bat, btop, starship, fzf
   packages = false      # Brewfile and package installation
   shell = true          # Core shell: zshrc, gitconfig, tmux
-  ssh = false           # SSH configuration (opt-in due to sensitivity)
