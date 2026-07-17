@@ -1,3 +1,4 @@
+{{- if .modules.workstation -}}
 {
     "window.autoDetectColorScheme": true,
     "security.workspace.trust.untrustedFiles": "open",
@@ -742,4 +743,4 @@
     "diffEditor.ignoreTrimWhitespace": false,
     "chat.disableAIFeatures": true,
     "editor.lineNumbers": "off",
-}
+}{{- end -}}

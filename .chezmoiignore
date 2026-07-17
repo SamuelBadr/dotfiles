@@ -1,7 +1,9 @@
 # Chezmoi ignore patterns
 # Files matching these patterns won't be managed by chezmoi
 
-# Julia Manifest files (auto-generated, should not be tracked)
+# Julia: global env Project.toml/Manifest.toml are machine-local churn
+# (startup.jl config is still tracked).
+.julia/environments/**/Project.toml
 .julia/environments/**/Manifest.toml
 
 # macOS
@@ -45,3 +47,7 @@
 
 # Pi credentials are machine-local and must never be managed by chezmoi
 .pi/agent/auth.json
+
+# Machine-local chezmoi config (holds per-machine module overrides like
+# [data.modules] workstation = true). Must NOT be managed by chezmoi itself.
+.config/chezmoi/chezmoi.toml
