@@ -39,6 +39,16 @@ Host hclm
 	User samuel
 	Hostname hclm.ifp.tuwien.ac.at
 
+Host hclm-backup
+	User samuel
+	Hostname hclm.ifp.tuwien.ac.at
+	IdentityFile ~/.ssh/id_rsa
+	IdentitiesOnly yes
+	BatchMode yes
+	StrictHostKeyChecking yes
+	ServerAliveInterval 60
+	ServerAliveCountMax 3
+
 Host frank
 	User samuel
 	Hostname 128.131.126.112

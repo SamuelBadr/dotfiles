@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.80.6",
+  "lastChangelogVersion": "0.80.10",
   "defaultProvider": "aqueduct",
-  "defaultModel": "large",
-  "defaultThinkingLevel": "max",
+  "defaultModel": "main",
+  "defaultThinkingLevel": "high",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
   "packages": [
