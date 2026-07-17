@@ -9,7 +9,6 @@ This repo uses a module system to enable/disable optional components per machine
 | `pi_agent` | Pi coding agent configuration | `true` |
 | `gui_desktop` | GUI apps: nvim, bat, btop, starship, fzf | `false` |
 | `packages` | Brewfile and package installation | `false` |
-| `shell` | Core shell: zshrc, gitconfig, tmux | `true` |
 
 ## Configuration
 
@@ -26,7 +25,6 @@ Enable modules per-machine in your local chezmoi config:
 pi_agent = true
 gui_desktop = true
 packages = true
-shell = true
 ```
 
 ## Example Configurations
@@ -39,7 +37,6 @@ shell = true
 pi_agent = true
 gui_desktop = false
 packages = false
-shell = true
 ```
 
 ### Workstation (Full)
@@ -50,7 +47,6 @@ shell = true
 pi_agent = true
 gui_desktop = true
 packages = true
-shell = true
 ```
 
 ## Secrets
