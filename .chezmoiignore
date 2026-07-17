@@ -6,6 +6,14 @@
 
 # macOS
 .DS_Store
+**/.DS_Store
+
+# Python bytecode caches
+**/__pycache__/**
+**/__pycache__/
+
+# Skill-local git repos (installed via `skills` CLI) — content is tracked, history is not
+.agents/skills/**/.git/**
 
 # Temporary files
 *.tmp
