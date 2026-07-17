@@ -25,8 +25,8 @@ else
 fi
 
 # Check specific module conditionals
-echo -n "  - pi_agent module conditional: "
-if chezmoi execute-template '{{ if .modules.pi_agent }}PASS{{ else }}FAIL{{ end }}' | grep -q PASS; then
+echo -n "  - workstation module conditional: "
+if chezmoi execute-template '{{ if .modules.workstation }}true{{ else }}false{{ end }}' >/dev/null 2>&1; then
     echo "✓"
 else
     echo "✗"

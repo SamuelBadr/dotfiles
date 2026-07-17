@@ -1,8 +1,3 @@
-{{- if not .modules.pi_agent -}}
-#!/usr/bin/env bash
-# Pi agent module is disabled. Exiting.
-exit 0
-{{- else -}}
 #!/usr/bin/env bash
 # Install Pi Coding Agent
 # This script runs once on first chezmoi apply
@@ -72,5 +67,3 @@ echo "  uv:   uv tool install @earendil-works/pi-coding-agent"
 echo "  pip:  pip install --user @earendil-works/pi-coding-agent"
 echo ""
 echo "Then run: pi"
-
-{{- end -}}
