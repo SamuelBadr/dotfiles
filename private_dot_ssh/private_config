@@ -32,7 +32,6 @@ Host MUSICA
 Host kauch
 	User samuel
 	HostName 128.131.127.236
-	LocalForward 127.0.0.1:1234 127.0.0.1:1234
 	ExitOnForwardFailure yes
 
 Host hclm
