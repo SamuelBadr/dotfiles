@@ -94,7 +94,8 @@
         "fallbackModels": [
           "aqueduct/coding",
           "aqueduct/main"
-        ]
+        ],
+        "tools": "read, grep, find, ls, bash, edit, write"
       },
       "verifier": {
         "model": "aqueduct/main",
