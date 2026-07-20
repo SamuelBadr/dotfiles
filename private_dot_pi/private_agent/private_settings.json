@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.80.10",
-  "defaultProvider": "aqueduct",
-  "defaultModel": "main",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-luna",
   "defaultThinkingLevel": "high",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
@@ -46,7 +46,8 @@
         "fallbackModels": [
           "aqueduct/main",
           "aqueduct/large"
-        ]
+        ],
+        "tools": ["read", "grep", "find", "ls", "bash", "write"]
       },
       "context-builder": {
         "model": "aqueduct/large",
@@ -54,7 +55,8 @@
         "fallbackModels": [
           "aqueduct/main",
           "aqueduct/coding"
-        ]
+        ],
+        "tools": ["read", "grep", "find", "ls", "bash", "write", "web_search"]
       },
       "researcher": {
         "model": "aqueduct/main",
@@ -62,7 +64,8 @@
         "fallbackModels": [
           "aqueduct/large",
           "aqueduct/coding"
-        ]
+        ],
+        "tools": ["read", "write", "web_search", "fetch_content", "get_search_content"]
       },
       "planner": {
         "model": "aqueduct/large",
@@ -70,7 +73,8 @@
         "fallbackModels": [
           "aqueduct/main",
           "aqueduct/coding"
-        ]
+        ],
+        "tools": ["read", "grep", "find", "ls", "write"]
       },
       "oracle": {
         "model": "aqueduct/large",
@@ -78,7 +82,8 @@
         "fallbackModels": [
           "aqueduct/main",
           "aqueduct/coding"
-        ]
+        ],
+        "tools": ["read", "grep", "find", "ls", "bash"]
       },
       "worker": {
         "model": "aqueduct/coding",
@@ -95,7 +100,7 @@
           "aqueduct/coding",
           "aqueduct/main"
         ],
-        "tools": "read, grep, find, ls, bash, edit, write"
+        "tools": ["read", "grep", "find", "ls", "bash", "edit", "write"]
       },
       "verifier": {
         "model": "aqueduct/main",
