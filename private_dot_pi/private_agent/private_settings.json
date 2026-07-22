@@ -1,7 +1,7 @@
 {
-  "lastChangelogVersion": "0.80.10",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-luna",
+  "lastChangelogVersion": "0.81.1",
+  "defaultProvider": "aqueduct",
+  "defaultModel": "large",
   "defaultThinkingLevel": "high",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
@@ -10,7 +10,8 @@
     "npm:pi-subagents",
     "npm:@plannotator/pi-extension",
     "npm:pi-web-access",
-    "npm:pi-fff"
+    "npm:pi-fff",
+    "git:github.com/algal/pi-openai-server-compaction"
   ],
   "enabledModels": [
     "aqueduct/large",
@@ -47,7 +48,15 @@
           "aqueduct/main",
           "aqueduct/large"
         ],
-        "tools": ["read", "grep", "find", "ls", "bash", "write", "contact_supervisor"]
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "write",
+          "contact_supervisor"
+        ]
       },
       "context-builder": {
         "model": "aqueduct/large",
@@ -56,7 +65,16 @@
           "aqueduct/main",
           "aqueduct/coding"
         ],
-        "tools": ["read", "grep", "find", "ls", "bash", "write", "web_search", "contact_supervisor"]
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "write",
+          "web_search",
+          "contact_supervisor"
+        ]
       },
       "researcher": {
         "model": "aqueduct/main",
@@ -65,7 +83,14 @@
           "aqueduct/large",
           "aqueduct/coding"
         ],
-        "tools": ["read", "write", "web_search", "fetch_content", "get_search_content", "contact_supervisor"]
+        "tools": [
+          "read",
+          "write",
+          "web_search",
+          "fetch_content",
+          "get_search_content",
+          "contact_supervisor"
+        ]
       },
       "planner": {
         "model": "aqueduct/large",
@@ -74,7 +99,14 @@
           "aqueduct/main",
           "aqueduct/coding"
         ],
-        "tools": ["read", "grep", "find", "ls", "write", "contact_supervisor"]
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "write",
+          "contact_supervisor"
+        ]
       },
       "oracle": {
         "model": "aqueduct/large",
@@ -83,7 +115,14 @@
           "aqueduct/main",
           "aqueduct/coding"
         ],
-        "tools": ["read", "grep", "find", "ls", "bash", "contact_supervisor"]
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "contact_supervisor"
+        ]
       },
       "worker": {
         "model": "aqueduct/coding",
@@ -100,7 +139,16 @@
           "aqueduct/coding",
           "aqueduct/main"
         ],
-        "tools": ["read", "grep", "find", "ls", "bash", "edit", "write", "contact_supervisor"]
+        "tools": [
+          "read",
+          "grep",
+          "find",
+          "ls",
+          "bash",
+          "edit",
+          "write",
+          "contact_supervisor"
+        ]
       },
       "verifier": {
         "model": "aqueduct/main",

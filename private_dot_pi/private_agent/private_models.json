@@ -255,6 +255,31 @@
           "contextWindow": 272000
         }
       }
+    },
+    "omlx": {
+      "baseUrl": "http://127.0.0.1:8000/v1",
+      "api": "openai-completions",
+      "apiKey": "***REMOVED***",
+      "authHeader": true,
+      "models": [
+        {
+          "id": "gemma-4-12b-coder-fable5-composer2.5-4bit",
+          "name": "gemma-4-12b-coder-fable5-composer2.5-4bit",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 262144,
+          "maxTokens": 8192
+        }
+      ]
     }
   }
 }
