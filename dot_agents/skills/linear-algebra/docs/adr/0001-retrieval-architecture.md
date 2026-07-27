@@ -1,5 +1,0 @@
-# BM25 navigation + canonical-content delivery (not vector RAG)
-
-The skill's job is accuracy insurance: surface canonical book content so the agent implements from the book, not memory. We split retrieval into two hops with different mechanisms. Search (`text`/`heading`) is *navigation* — ranked by BM25 so the real definition beats TOC/bibliography noise, returning excerpts (not full sections) so the agent can judge relevance without context pollution. Labeled-item lookup (`theorem`/`algorithm`/`equation`) is *delivery* — returns the canonical content block itself (from the label up to the next label or heading), not a pointer, so the authoritative formula/pseudocode is the lookup's output.
-
-Rejected: vector/embedding RAG (math embeds poorly; the book is fixed and labeled, so structure beats semantics), and "search returns full section content" (guesses at intent for an exploratory query — the failure mode an accuracy skill exists to prevent). BM25 is used only for navigation ranking; it is not a general retrieval layer.
