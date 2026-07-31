@@ -2,7 +2,7 @@
   "lastChangelogVersion": "0.83.0",
   "defaultProvider": "aqueduct",
   "defaultModel": "large",
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "max",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
   "packages": [
@@ -17,7 +17,8 @@
   "enabledModels": [
     "aqueduct/large",
     "openai-codex/gpt-5.6-sol",
-    "openai-codex/gpt-5.6-luna"
+    "openai-codex/gpt-5.6-luna",
+    "deepseek/deepseek-v4-flash"
   ],
   "subagents": {
     "defaultModel": "aqueduct/main",
