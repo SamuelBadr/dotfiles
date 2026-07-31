@@ -207,3 +207,4 @@ case ":$PATH:" in
   *) export PATH="$HOME/.omlx/bin:$PATH" ;;
 esac
 # oMLX: CLI shim path end
+export PUPPETEER_EXECUTABLE_PATH=/snap/chromium/current/usr/lib/chromium-browser/chrome
