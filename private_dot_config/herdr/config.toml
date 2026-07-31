@@ -3,6 +3,7 @@ onboarding = false
 [theme]
 name = "catppuccin-latte"
 
+auto_switch = false
 [experimental]
 kitty_graphics = true
 

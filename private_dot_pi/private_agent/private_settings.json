@@ -12,7 +12,8 @@
     "npm:pi-web-access",
     "npm:pi-fff",
     "git:github.com/algal/pi-openai-server-compaction",
-    "npm:@narumitw/pi-goal"
+    "npm:@narumitw/pi-goal",
+    "git:github.com/DietrichGebert/ponytail"
   ],
   "enabledModels": [
     "aqueduct/large",
