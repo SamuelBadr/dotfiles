@@ -42,8 +42,13 @@
 .pi/agent/node_modules/**
 .pi/agent/npm/
 .pi/agent/npm/**
-.pi/agent/git/
-.pi/agent/git/**
+
+# Pi skill packages cloned under ~/.pi/agent/git — content is tracked, history is not
+# (same pattern as .agents/skills above).
+.pi/agent/git/**/.git/**
+
+# Unrelated runtime clones (e.g. algal/pi-openai-server-compaction) stay untracked
+.pi/agent/git/github.com/algal/**
 
 # Pi credentials are machine-local and must never be managed by chezmoi
 .pi/agent/auth.json
