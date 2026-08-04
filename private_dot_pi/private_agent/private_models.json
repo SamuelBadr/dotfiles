@@ -42,38 +42,6 @@
           }
         },
         {
-          "id": "coding",
-          "name": "Aqueduct / qwen-3.5-397b",
-          "reasoning": true,
-          "thinkingLevelMap": {
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          },
-          "compat": {
-            "thinkingFormat": "chat-template",
-            "chatTemplateKwargs": {
-              "enable_thinking": {
-                "$var": "thinking.enabled"
-              }
-            }
-          },
-          "input": [
-            "text"
-          ],
-          "contextWindow": 262144,
-          "maxTokens": 81920,
-          "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0
-          }
-        },
-        {
           "id": "vision",
           "name": "Aqueduct / qwen-3.6-35b",
           "reasoning": true,
