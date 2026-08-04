@@ -1,18 +1,16 @@
 {
   "lastChangelogVersion": "0.83.0",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-sol",
-  "defaultThinkingLevel": "high",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-v4-flash",
+  "defaultThinkingLevel": "max",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
   "packages": [
     "npm:pi-markdown-preview",
     "npm:pi-subagents",
-    "npm:@plannotator/pi-extension",
     "npm:pi-web-access",
     "npm:pi-fff",
     "git:github.com/algal/pi-openai-server-compaction",
-    "npm:@narumitw/pi-goal",
     "git:github.com/DietrichGebert/ponytail"
   ],
   "enabledModels": [

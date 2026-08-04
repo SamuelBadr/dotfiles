@@ -24,9 +24,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/lucifer1004/claude-skill-typst.git",
       "skillPath": "skills/typst/SKILL.md",
-      "skillFolderHash": "82f1f9e09bbb4b4fb5a2de8d169c5d45f633e0be",
+      "skillFolderHash": "44a2bf61712b176a8276e6c43e1830f49c086e29",
       "installedAt": "2026-03-17T11:01:08.484Z",
-      "updatedAt": "2026-07-27T12:51:54.257Z"
+      "updatedAt": "2026-08-03T10:21:19.463Z"
     },
     "obsidian-cli": {
       "source": "git@github.com:kepano/obsidian-skills.git",
@@ -352,9 +352,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/JuliusBrussee/caveman.git",
       "skillPath": "skills/caveman/SKILL.md",
-      "skillFolderHash": "166040c027f7764d43df36abc5df0079bfc6394b",
+      "skillFolderHash": "3e4386ca694c65a65ba84024f0fe2646a8c9076a",
       "installedAt": "2026-07-31T14:54:25.988Z",
-      "updatedAt": "2026-07-31T14:54:25.988Z"
+      "updatedAt": "2026-08-03T12:58:26.661Z"
     }
   },
   "dismissed": {
