@@ -1,0 +1,94 @@
+{
+  "subagents": {
+    "defaultModel": "aqueduct/main",
+    "modelScope": {
+      "enforce": true,
+      "allow": [
+        "aqueduct/main",
+        "openai-codex/gpt-5.6-*"
+      ]
+    },
+    "agentOverrides": {
+      "delegate": {
+        "model": "aqueduct/main",
+        "thinking": "medium",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-luna",
+          "openai-codex/gpt-5.6-terra"
+        ]
+      },
+      "scout": {
+        "model": "aqueduct/main",
+        "thinking": "low",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-luna",
+          "openai-codex/gpt-5.6-terra"
+        ]
+      },
+      "context-builder": {
+        "model": "aqueduct/main",
+        "thinking": "medium",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-terra",
+          "openai-codex/gpt-5.6-sol"
+        ]
+      },
+      "researcher": {
+        "model": "aqueduct/main",
+        "thinking": "medium",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-terra",
+          "openai-codex/gpt-5.6-sol"
+        ]
+      },
+      "planner": {
+        "model": "aqueduct/main",
+        "thinking": "high",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-sol",
+          "openai-codex/gpt-5.6-terra"
+        ]
+      },
+      "oracle": {
+        "model": "aqueduct/main",
+        "thinking": "high",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-sol",
+          "openai-codex/gpt-5.6-terra"
+        ]
+      },
+      "advisor": {
+        "model": "aqueduct/main",
+        "thinking": "high",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-sol",
+          "openai-codex/gpt-5.6-terra"
+        ]
+      },
+      "worker": {
+        "model": "aqueduct/main",
+        "thinking": "medium",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-terra",
+          "openai-codex/gpt-5.6-sol"
+        ]
+      },
+      "reviewer": {
+        "model": "aqueduct/main",
+        "thinking": "high",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-terra",
+          "openai-codex/gpt-5.6-sol"
+        ]
+      },
+      "verifier": {
+        "model": "aqueduct/main",
+        "thinking": "medium",
+        "fallbackModels": [
+          "openai-codex/gpt-5.6-terra",
+          "openai-codex/gpt-5.6-sol"
+        ]
+      }
+    }
+  }
+}
