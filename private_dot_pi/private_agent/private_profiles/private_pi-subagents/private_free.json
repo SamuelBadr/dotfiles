@@ -5,6 +5,7 @@
       "enforce": true,
       "allow": [
         "aqueduct/main",
+        "aqueduct/large",
         "openai-codex/gpt-5.6-*"
       ]
     },
@@ -42,25 +43,28 @@
         ]
       },
       "planner": {
-        "model": "aqueduct/main",
+        "model": "aqueduct/large",
         "thinking": "high",
         "fallbackModels": [
+          "aqueduct/main",
           "openai-codex/gpt-5.6-sol",
           "openai-codex/gpt-5.6-terra"
         ]
       },
       "oracle": {
-        "model": "aqueduct/main",
+        "model": "aqueduct/large",
         "thinking": "high",
         "fallbackModels": [
+          "aqueduct/main",
           "openai-codex/gpt-5.6-sol",
           "openai-codex/gpt-5.6-terra"
         ]
       },
       "advisor": {
-        "model": "aqueduct/main",
+        "model": "aqueduct/large",
         "thinking": "high",
         "fallbackModels": [
+          "aqueduct/main",
           "openai-codex/gpt-5.6-sol",
           "openai-codex/gpt-5.6-terra"
         ]
