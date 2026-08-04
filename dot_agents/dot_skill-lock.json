@@ -1,15 +1,7 @@
 {
   "version": 3,
   "skills": {
-    "julia": {
-      "source": "mindrally/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/mindrally/skills.git",
-      "skillPath": "julia/SKILL.md",
-      "skillFolderHash": "eb6e4649ad223b878886a6c48d1cccd901e7c116",
-      "installedAt": "2026-03-01T21:59:47.276Z",
-      "updatedAt": "2026-03-01T21:59:47.276Z"
-    },
+
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",
@@ -28,24 +20,7 @@
       "installedAt": "2026-03-17T11:01:08.484Z",
       "updatedAt": "2026-08-03T10:21:19.463Z"
     },
-    "obsidian-cli": {
-      "source": "git@github.com:kepano/obsidian-skills.git",
-      "sourceType": "git",
-      "sourceUrl": "git@github.com:kepano/obsidian-skills.git",
-      "skillPath": "skills/obsidian-cli/SKILL.md",
-      "skillFolderHash": "",
-      "installedAt": "2026-03-26T17:23:44.935Z",
-      "updatedAt": "2026-03-26T17:23:44.935Z"
-    },
-    "obsidian-markdown": {
-      "source": "git@github.com:kepano/obsidian-skills.git",
-      "sourceType": "git",
-      "sourceUrl": "git@github.com:kepano/obsidian-skills.git",
-      "skillPath": "skills/obsidian-markdown/SKILL.md",
-      "skillFolderHash": "",
-      "installedAt": "2026-03-26T17:23:44.938Z",
-      "updatedAt": "2026-03-26T17:23:44.938Z"
-    },
+
     "touying-author": {
       "source": "apcamargo/typst-skills",
       "sourceType": "github",
