@@ -2,7 +2,7 @@
   "lastChangelogVersion": "0.83.0",
   "defaultProvider": "aqueduct",
   "defaultModel": "large",
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "max",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
   "packages": [
@@ -14,11 +14,11 @@
     "git:github.com/DietrichGebert/ponytail"
   ],
   "enabledModels": [
-    "aqueduct/main",
     "openai-codex/gpt-5.6-luna",
     "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-5.6-sol",
-    "deepseek/deepseek-v4-flash"
+    "deepseek/deepseek-v4-flash",
+    "aqueduct/large"
   ],
   "subagents": {
     "defaultModel": "aqueduct/large",

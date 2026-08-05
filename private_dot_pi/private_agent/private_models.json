@@ -126,20 +126,19 @@
           "compat": {
             "thinkingFormat": "chat-template",
             "chatTemplateKwargs": {
-              "enable_thinking": {
+              "thinking": {
                 "$var": "thinking.enabled"
               },
               "reasoning_effort": {
-                "$var": "thinking.effort",
-                "omitWhenOff": true
+                "$var": "thinking.effort"
               }
             }
           },
           "input": [
             "text"
           ],
-          "contextWindow": 131072,
-          "maxTokens": 32768,
+          "contextWindow": 262144,
+          "maxTokens": 32000,
           "cost": {
             "input": 0,
             "output": 0,
