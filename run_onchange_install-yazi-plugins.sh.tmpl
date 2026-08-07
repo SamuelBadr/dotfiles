@@ -1,0 +1,11 @@
+#!/bin/sh
+# Install Yazi packages pinned in package.toml (git rev + hash).
+# run_onchange: re-runs only when this script's content changes, i.e. when the
+# package.toml checksum below changes (plugin pins bumped). Exits non-zero when
+# ya is missing so chezmoi does NOT record it as run and retries next apply.
+# package.toml hash: {{ include "private_dot_config/yazi/package.toml" | sha256sum }}
+if ! command -v ya >/dev/null 2>&1; then
+	echo "ya (yazi package manager) not found; install yazi first, then: ya pkg install" >&2
+	exit 1
+fi
+ya pkg install
