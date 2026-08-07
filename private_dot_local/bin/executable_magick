@@ -1,0 +1,6 @@
+#!/bin/sh
+# ponytail: shim `magick` (IM7) onto IM6 `convert` so yazi's zoom.yazi plugin
+# works without sudo-installing ImageMagick 7. Flags zoom.yazi uses are all
+# IM6-compatible (verified: -auto-orient -strip -sample -quality + WEBP output).
+# Replace with real IM7 if a plugin version starts using IM7-only flags.
+exec convert "$@"

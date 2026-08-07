@@ -1,6 +1,9 @@
-# Adds one binding on top of the default keymap (defaults stay intact).
+# Adds bindings on top of the default keymap (defaults stay intact).
 # T is unbound in the default manager keymap, so no conflict.
 [mgr]
 prepend_keymap = [
 	{ on = "T", run = "plugin toggle-pane max-preview", desc = "Toggle maximized preview" },
+	{ on = "R", run = "refresh",                         desc = "Reload files and re-render preview" },
+	{ on = ">", run = "plugin zoom 1",                   desc = "Zoom in on hovered file" },
+	{ on = "<", run = "plugin zoom -1",                  desc = "Zoom out on hovered file" },
 ]
