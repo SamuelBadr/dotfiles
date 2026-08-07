@@ -1,7 +1,7 @@
 {
-  "lastChangelogVersion": "0.83.0",
+  "lastChangelogVersion": "0.84.0",
   "defaultProvider": "aqueduct",
-  "defaultModel": "large",
+  "defaultModel": "deepseek-v4-flash-284b",
   "defaultThinkingLevel": "max",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
@@ -11,40 +11,41 @@
     "npm:pi-web-access",
     "npm:pi-fff",
     "git:github.com/algal/pi-openai-server-compaction",
-    "git:github.com/DietrichGebert/ponytail"
+    "git:github.com/DietrichGebert/ponytail",
+    "https://github.com/gsanhueza/pi-token-speed"
   ],
   "enabledModels": [
     "openai-codex/gpt-5.6-luna",
-    "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-5.6-sol",
     "deepseek/deepseek-v4-flash",
-    "aqueduct/large"
+    "aqueduct/deepseek-v4-flash-284b"
   ],
   "subagents": {
-    "defaultModel": "aqueduct/large",
+    "defaultModel": "aqueduct/deepseek-v4-flash-284b",
     "modelScope": {
       "enforce": true,
       "allow": [
         "aqueduct/main",
         "aqueduct/large",
-        "openai-codex/gpt-5.6-*"
+        "openai-codex/gpt-5.6-*",
+        "aqueduct/deepseek-v4-flash-284b"
       ]
     },
     "agentOverrides": {
       "delegate": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
       "scout": {
-        "model": "aqueduct/main",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "low"
       },
       "context-builder": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
       "researcher": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
       "planner": {
@@ -60,7 +61,7 @@
         "thinking": "max"
       },
       "worker": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
       "reviewer": {
@@ -68,9 +69,11 @@
         "thinking": "max"
       },
       "verifier": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       }
     }
-  }
+  },
+  "tuiMode": "fullscreen",
+  "outputPad": 1
 }

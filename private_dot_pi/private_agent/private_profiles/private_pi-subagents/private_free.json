@@ -1,29 +1,30 @@
 {
   "subagents": {
-    "defaultModel": "aqueduct/large",
+    "defaultModel": "aqueduct/deepseek-v4-flash-284b",
     "modelScope": {
       "enforce": true,
       "allow": [
         "aqueduct/main",
         "aqueduct/large",
-        "openai-codex/gpt-5.6-*"
+        "openai-codex/gpt-5.6-*",
+        "aqueduct/deepseek-v4-flash-284b"
       ]
     },
     "agentOverrides": {
       "delegate": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
       "scout": {
-        "model": "aqueduct/main",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "low"
       },
       "context-builder": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
       "researcher": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
       "planner": {
@@ -39,7 +40,7 @@
         "thinking": "max"
       },
       "worker": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
       "reviewer": {
@@ -47,7 +48,7 @@
         "thinking": "max"
       },
       "verifier": {
-        "model": "aqueduct/large",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       }
     }

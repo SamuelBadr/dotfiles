@@ -46,64 +46,33 @@
           }
         },
         {
-          "id": "vision",
-          "name": "Aqueduct / qwen-3.6-35b",
+          "id": "deepseek-v4-flash-284b",
+          "name": "Aqueduct / deepseek-v4-flash-284b",
           "reasoning": true,
           "thinkingLevelMap": {
             "minimal": null,
-            "low": null,
+            "low": "low",
             "medium": null,
             "high": "high",
             "xhigh": null,
-            "max": null
+            "max": "max"
           },
           "compat": {
             "thinkingFormat": "chat-template",
             "chatTemplateKwargs": {
-              "enable_thinking": {
+              "thinking": {
                 "$var": "thinking.enabled"
+              },
+              "reasoning_effort": {
+                "$var": "thinking.effort"
               }
             }
           },
           "input": [
-            "text",
-            "image"
+            "text"
           ],
-          "contextWindow": 262144,
-          "maxTokens": 16384,
-          "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0
-          }
-        },
-        {
-          "id": "ocr",
-          "name": "Aqueduct / qwen-3.6-35b",
-          "reasoning": true,
-          "thinkingLevelMap": {
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          },
-          "compat": {
-            "thinkingFormat": "chat-template",
-            "chatTemplateKwargs": {
-              "enable_thinking": {
-                "$var": "thinking.enabled"
-              }
-            }
-          },
-          "input": [
-            "text",
-            "image"
-          ],
-          "contextWindow": 262144,
-          "maxTokens": 16384,
+          "contextWindow": 393216,
+          "maxTokens": 262144,
           "cost": {
             "input": 0,
             "output": 0,
@@ -145,75 +114,8 @@
             "cacheRead": 0,
             "cacheWrite": 0
           }
-        },
-        {
-          "id": "tiny",
-          "name": "Aqueduct / gemma-4-e2b-it",
-          "reasoning": true,
-          "thinkingLevelMap": {
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          },
-          "compat": {
-            "thinkingFormat": "chat-template",
-            "chatTemplateKwargs": {
-              "enable_thinking": {
-                "$var": "thinking.enabled"
-              }
-            }
-          },
-          "input": [
-            "text",
-            "image"
-          ],
-          "contextWindow": 32768,
-          "maxTokens": 16384,
-          "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0
-          }
-        },
-        {
-          "id": "util",
-          "name": "Aqueduct / gemma-4-e2b-it",
-          "reasoning": true,
-          "thinkingLevelMap": {
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          },
-          "compat": {
-            "thinkingFormat": "chat-template",
-            "chatTemplateKwargs": {
-              "enable_thinking": {
-                "$var": "thinking.enabled"
-              }
-            }
-          },
-          "input": [
-            "text",
-            "image"
-          ],
-          "contextWindow": 32768,
-          "maxTokens": 16384,
-          "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0
-          }
         }
       ]
-    },
-    "openai-codex": {}
+    }
   }
 }

@@ -1,53 +1,52 @@
 {
   "subagents": {
-    "defaultModel": "aqueduct/main",
+    "defaultModel": "aqueduct/deepseek-v4-flash-284b",
     "modelScope": {
       "enforce": true,
       "allow": [
-        "aqueduct/main",
-        "openai-codex/gpt-5.6-*"
+        "aqueduct/deepseek-v4-flash-284b"
       ]
     },
     "agentOverrides": {
       "delegate": {
-        "model": "aqueduct/main",
-        "thinking": "medium"
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
       },
       "scout": {
-        "model": "aqueduct/main",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "low"
       },
       "context-builder": {
-        "model": "aqueduct/main",
-        "thinking": "medium"
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
       },
       "researcher": {
-        "model": "aqueduct/main",
-        "thinking": "medium"
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
       },
       "planner": {
-        "model": "aqueduct/main",
-        "thinking": "high"
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "max"
       },
       "oracle": {
-        "model": "aqueduct/main",
-        "thinking": "high"
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "max"
       },
       "advisor": {
-        "model": "aqueduct/main",
-        "thinking": "high"
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "max"
       },
       "worker": {
-        "model": "aqueduct/main",
-        "thinking": "medium"
-      },
-      "reviewer": {
-        "model": "aqueduct/main",
+        "model": "aqueduct/deepseek-v4-flash-284b",
         "thinking": "high"
       },
+      "reviewer": {
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "max"
+      },
       "verifier": {
-        "model": "aqueduct/main",
-        "thinking": "medium"
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
       }
     }
   }
