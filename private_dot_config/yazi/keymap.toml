@@ -1,0 +1,6 @@
+# Adds one binding on top of the default keymap (defaults stay intact).
+# T is unbound in the default manager keymap, so no conflict.
+[mgr]
+prepend_keymap = [
+	{ on = "T", run = "plugin toggle-pane max-preview", desc = "Toggle maximized preview" },
+]
