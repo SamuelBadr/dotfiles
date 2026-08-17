@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.84.1",
+  "lastChangelogVersion": "0.84.2",
   "defaultProvider": "aqueduct",
   "defaultModel": "deepseek-v4-flash-284b",
   "defaultThinkingLevel": "max",
@@ -12,7 +12,8 @@
     "npm:pi-fff",
     "git:github.com/algal/pi-openai-server-compaction",
     "git:github.com/DietrichGebert/ponytail",
-    "https://github.com/gsanhueza/pi-token-speed"
+    "https://github.com/gsanhueza/pi-token-speed",
+    "npm:pi-context-view"
   ],
   "enabledModels": [
     "openai-codex/gpt-5.6-luna",
