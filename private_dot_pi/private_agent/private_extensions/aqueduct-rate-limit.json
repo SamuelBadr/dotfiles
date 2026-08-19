@@ -1,0 +1,8 @@
+{
+  "limits": {
+    "aqueduct/deepseek-v4-flash-284b": {
+      "requests": 60,
+      "windowMs": 60000
+    }
+  }
+}
