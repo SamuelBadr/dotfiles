@@ -37,6 +37,11 @@ export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
 export BUN_INSTALL="$HOME/.bun"
 
+# Load the Parallel API key from macOS Keychain without storing it in dotfiles.
+if [[ -z ${PARALLEL_API_KEY:-} ]] && command -v security >/dev/null 2>&1; then
+  PARALLEL_API_KEY=$(security find-generic-password -a "$USER" -s pi-parallel-api-key -w 2>/dev/null) && export PARALLEL_API_KEY
+fi
+
 # PATH configuration. `typeset -U` keeps entries unique while preserving order.
 typeset -U path
 path=(

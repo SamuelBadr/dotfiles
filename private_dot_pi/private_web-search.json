@@ -1,4 +1,6 @@
 {
-  "workflow": "auto-summary",
-  "summaryModel": "aqueduct/large"
+  "workflow": "none",
+  "summaryModel": "aqueduct/deepseek-v4-flash-284b",
+  "parallelApiKey": "$PARALLEL_API_KEY",
+  "provider": "parallel"
 }
