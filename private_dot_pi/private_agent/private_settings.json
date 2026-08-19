@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.84.2",
-  "defaultProvider": "aqueduct",
-  "defaultModel": "deepseek-v4-flash-284b",
-  "defaultThinkingLevel": "max",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-sol",
+  "defaultThinkingLevel": "high",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
   "packages": [
