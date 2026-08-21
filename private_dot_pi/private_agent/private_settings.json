@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.84.2",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-sol",
-  "defaultThinkingLevel": "high",
+  "defaultProvider": "aqueduct",
+  "defaultModel": "deepseek-v4-flash-284b",
+  "defaultThinkingLevel": "max",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
   "packages": [
@@ -13,12 +13,13 @@
     "git:github.com/algal/pi-openai-server-compaction",
     "git:github.com/DietrichGebert/ponytail",
     "https://github.com/gsanhueza/pi-token-speed",
-    "npm:pi-context-view"
+    "npm:pi-context-view",
+    "git:github.com/jonjonrankin/pi-caveman",
+    "npm:pi-bansos"
   ],
   "enabledModels": [
     "openai-codex/gpt-5.6-luna",
     "openai-codex/gpt-5.6-sol",
-    "deepseek/deepseek-v4-flash",
     "aqueduct/deepseek-v4-flash-284b"
   ],
   "subagents": {
