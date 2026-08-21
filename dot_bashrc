@@ -1,0 +1,302 @@
+# ============================================================================
+# Environment Variables
+# ============================================================================
+# Editor: VS Code on macOS, VS Code in VS Code terminal on Linux, otherwise nvim
+if [[ "$OSTYPE" == darwin* ]]; then
+  export EDITOR="code --wait --new-window"
+elif [[ "${TERM_PROGRAM:-}" == "vscode" ]]; then
+  export EDITOR="code --wait --new-window"
+else
+  export EDITOR="nvim"
+fi
+export VISUAL="$EDITOR"
+export GITHUB_USERNAME="SamuelBadr"
+
+export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
+export SUPERMEMORY_API_KEY="***REMOVED***_BxRPQHfImYUpJNluHOcGDGIAQqWzaecEBHKsJvgPeaNfcasoFWodtTMKdmpXrfXx"
+
+# Path configuration
+export PATH="$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
+
+# macOS key repeat tweaks (runs whenever an interactive shell starts on macOS)
+if [[ "$OSTYPE" == darwin* ]]; then
+  defaults write -g InitialKeyRepeat -int 15
+  defaults write -g KeyRepeat -int 2
+  defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+fi
+
+# ============================================================================
+# Only run the rest for interactive shells
+# ============================================================================
+[[ $- != *i* ]] && return
+
+# ============================================================================
+# History Configuration (Bash equivalents)
+# ============================================================================
+export HISTFILE="$HOME/.bash_history"
+export HISTSIZE=50000
+export HISTFILESIZE=50000
+
+# Append rather than overwrite; multi-line commands as single entry
+shopt -s histappend
+shopt -s cmdhist
+
+# Similar to: ignore leading space + ignore duplicates + erase older dups
+# (erasedups is supported on modern bash; harmless if not)
+export HISTCONTROL="ignoreboth:erasedups"
+
+# Share history across sessions (approximation of zsh SHARE_HISTORY):
+# -a: append new lines to HISTFILE each prompt
+# -n: read new lines from HISTFILE each prompt
+__hist_sync() { history -a; history -n; }
+case "${PROMPT_COMMAND:-}" in
+  *__hist_sync*) : ;;
+  "") PROMPT_COMMAND="__hist_sync" ;;
+  *)  PROMPT_COMMAND="__hist_sync; $PROMPT_COMMAND" ;;
+esac
+
+# ============================================================================
+# Bash Options (shopt/readline equivalents)
+# ============================================================================
+# AUTO_CD
+shopt -s autocd 2>/dev/null || true
+
+# Directory stack behavior similar to AUTO_PUSHD / PUSHD_* (best-effort)
+shopt -s pushdignoredups 2>/dev/null || true
+shopt -s pushdsilent     2>/dev/null || true
+shopt -s pushdminus      2>/dev/null || true
+
+# INTERACTIVE_COMMENTS
+shopt -s interactive_comments
+
+# ============================================================================
+# Completion (bash-completion) + Readline tuning
+# ============================================================================
+# Enable bash-completion if available (Homebrew / Linux common paths)
+if command -v brew >/dev/null 2>&1; then
+  if [[ -r "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]]; then
+    # Homebrew bash-completion@2
+    source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
+  elif [[ -r "$(brew --prefix)/share/bash-completion/bash_completion" ]]; then
+    source "$(brew --prefix)/share/bash-completion/bash_completion"
+  fi
+fi
+[[ -r /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
+[[ -r /etc/bash_completion ]] && source /etc/bash_completion
+
+# Completion styling-ish (readline; not as powerful as zstyle)
+bind 'set completion-ignore-case on'
+bind 'set show-all-if-ambiguous on'
+bind 'set menu-complete-display-prefix on' 2>/dev/null || true
+
+# ============================================================================
+# Key Bindings (readline)
+# ============================================================================
+set -o emacs
+
+# Prefix history search on Up/Down (similar vibe to up-line-or-beginning-search)
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+bind '"\C-p": history-search-backward'
+bind '"\C-n": history-search-forward'
+
+# ============================================================================
+# Aliases - General
+# ============================================================================
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias '~'='cd ~'
+alias -- -='cd -'
+
+# Shortcuts
+alias h='history'
+alias c='clear'
+alias e='$EDITOR'
+alias bashrc='$EDITOR ~/.bashrc'
+alias reload='source ~/.bashrc'
+
+# System
+alias up='brew update && brew upgrade --greedy-auto-updates --overwrite && brew cleanup && if command -v npm >/dev/null; then latest=$(npm view npm version 2>/dev/null); current=$(npm -v); if [ -n "$latest" ] && [ "$current" != "$latest" ]; then npm install -g npm@latest; fi; npm update -g; fi'
+
+# ============================================================================
+# Aliases - Chezmoi
+# ============================================================================
+alias cm='chezmoi'
+alias cma='chezmoi add'
+alias cme='chezmoi edit'
+alias cmcd='chezmoi cd'
+alias cmap='chezmoi apply'
+alias cmup='chezmoi update'
+alias cmdiff='chezmoi diff'
+
+# ============================================================================
+# Aliases - Julia
+# ============================================================================
+alias pluto='julia -e "using Pluto; Pluto.run()"'
+alias julia-update='juliaup update'
+
+# ============================================================================
+# Aliases - Git
+# ============================================================================
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gl='git log --oneline --graph --decorate'
+alias gla='git log --oneline --graph --decorate --all'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gb='git branch'
+alias gba='git branch -a'
+
+# ============================================================================
+# Functions
+# ============================================================================
+mkcd() { mkdir -p "$1" && cd "$1"; }
+
+ff() { find . -type f -iname "*$1*"; }
+
+gg() { grep -r "$1" .; }
+
+extract() {
+  if [[ -f "$1" ]]; then
+    case "$1" in
+      *.tar.bz2) tar xjf "$1" ;;
+      *.tar.gz)  tar xzf "$1" ;;
+      *.bz2)     bunzip2 "$1" ;;
+      *.rar)     unrar x "$1" ;;
+      *.gz)      gunzip "$1" ;;
+      *.tar)     tar xf "$1" ;;
+      *.tbz2)    tar xjf "$1" ;;
+      *.tgz)     tar xzf "$1" ;;
+      *.zip)     unzip "$1" ;;
+      *.Z)       uncompress "$1" ;;
+      *.7z)      7z x "$1" ;;
+      *)         echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+# ============================================================================
+# fzf integration (bash scripts)
+# ============================================================================
+# Common locations: Homebrew + Linux
+if command -v brew >/dev/null 2>&1; then
+  [[ -r "$(brew --prefix)/opt/fzf/shell/key-bindings.bash" ]] && source "$(brew --prefix)/opt/fzf/shell/key-bindings.bash"
+  [[ -r "$(brew --prefix)/opt/fzf/shell/completion.bash"   ]] && source "$(brew --prefix)/opt/fzf/shell/completion.bash"
+fi
+[[ -r /usr/share/fzf/key-bindings.bash ]] && source /usr/share/fzf/key-bindings.bash
+[[ -r /usr/share/fzf/completion.bash   ]] && source /usr/share/fzf/completion.bash
+
+export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
+export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window=right:60%"
+export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
+
+# ============================================================================
+# Interactive File Picker (fzf + fd + rg + bat)
+# ============================================================================
+fp() {
+  local file
+  file=$(fd --type f --hidden --follow --exclude .git \
+    | fzf --query="$1" \
+          --preview 'bat --style=numbers,changes --color=always {}' \
+          --preview-window 'right:60%:wrap' \
+          --bind 'ctrl-/:toggle-preview' \
+          --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+          --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open in nvim')
+  [[ -n "$file" ]] && nvim "$file"
+}
+
+rgs() {
+  local selection
+  selection=$(rg --color=always --line-number --no-heading --smart-case "${*:-}" \
+    | fzf --ansi \
+          --delimiter : \
+          --preview 'bat --style=numbers,changes --color=always --highlight-line {2} {1} 2>/dev/null' \
+          --preview-window 'right:60%:wrap:+{2}-5' \
+          --bind 'ctrl-/:toggle-preview' \
+          --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+          --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open at line')
+
+  if [[ -n "$selection" ]]; then
+    local file line
+    file=$(echo "$selection" | cut -d: -f1)
+    line=$(echo "$selection" | cut -d: -f2)
+    nvim "+$line" "$file"
+  fi
+}
+
+fif() {
+  local selection
+  selection=$(: | fzf --ansi --disabled \
+    --prompt 'Content> ' \
+    --bind 'change:reload:rg --column --line-number --no-heading --color=always --smart-case {q} || true' \
+    --bind 'ctrl-t:transform:[ "$FZF_PROMPT" = "Content> " ] &&
+      echo "unbind(change)+enable-search+clear-query+change-prompt(Files> )+reload:fd --type f --hidden --follow --exclude .git" ||
+      echo "disable-search+rebind(change)+clear-query+change-prompt(Content> )+reload:true"' \
+    --delimiter : \
+    --preview 'f={1}; [ -f "$f" ] && bat --style=numbers,changes --color=always --highlight-line {2} "$f" 2>/dev/null || bat --style=numbers,changes --color=always {} 2>/dev/null' \
+    --preview-window 'right:60%:wrap' \
+    --bind 'ctrl-/:toggle-preview' \
+    --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
+    --header 'CTRL-T toggle Files/Content | CTRL-/ preview | ENTER open')
+
+  if [[ -n "$selection" ]]; then
+    local file line
+    if [[ "$selection" == *:* ]]; then
+      file=$(echo "$selection" | cut -d: -f1)
+      line=$(echo "$selection" | cut -d: -f2)
+      nvim "+$line" "$file"
+    else
+      nvim "$selection"
+    fi
+  fi
+}
+
+# ============================================================================
+# Tool Integrations
+# ============================================================================
+# zoxide (bash init)
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init bash)"
+fi
+
+# ============================================================================
+# Prompt (load last)
+# ============================================================================
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+fi
+
+# ============================================================================
+# juliaup initialize (bash equivalent)
+# ============================================================================
+[[ -d "$HOME/.juliaup/bin" ]] && export PATH="$HOME/.juliaup/bin:$PATH"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:$HOME/.lmstudio/bin"
+# End of LM Studio CLI section
+
+# tirith init (best effort; fall back if bash subcommand isn't supported)
+if command -v tirith >/dev/null 2>&1; then
+  eval "$(tirith init bash 2>/dev/null || tirith init 2>/dev/null)"
+fi
+
+# ============================================================================
+# Notes on zsh-only features:
+# - zstyle/compinit-based completion theming doesn't translate to bash; readline tuning above is the substitute.
+# - zsh-autosuggestions / zsh-syntax-highlighting are zsh plugins; bash equivalents exist but are different projects.
+# ============================================================================
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
