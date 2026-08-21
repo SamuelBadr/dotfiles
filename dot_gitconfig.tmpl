@@ -1,6 +1,7 @@
 [user]
 	name = Samuel Badr
 	email = samuel.badr@gmail.com
+{{- if .git.signing }}
 	signingkey = {{ .chezmoi.homeDir }}/.ssh/id_rsa.pub
 
 [gpg]
@@ -8,6 +9,7 @@
 
 [commit]
 	gpgsign = true
+{{- end }}
 
 [core]
 {{- if eq .chezmoi.os "darwin" }}
