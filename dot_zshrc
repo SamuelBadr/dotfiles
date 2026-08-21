@@ -212,4 +212,8 @@ case ":$PATH:" in
   *) export PATH="$HOME/.omlx/bin:$PATH" ;;
 esac
 # oMLX: CLI shim path end
-export PUPPETEER_EXECUTABLE_PATH=/snap/chromium/current/usr/lib/chromium-browser/chrome
+
+# Puppeteer: snap Chromium exists only on some Linux machines; no-op elsewhere.
+if [[ $OSTYPE == linux* && -x /snap/chromium/current/usr/lib/chromium-browser/chrome ]]; then
+  export PUPPETEER_EXECUTABLE_PATH=/snap/chromium/current/usr/lib/chromium-browser/chrome
+fi
