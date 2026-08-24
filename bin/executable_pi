@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# HPC login-node guard for pi.
+set -u
+REAL_PI="$HOME/.bun/bin/pi"
+
+export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8
+export JULIA_NUM_THREADS=8 NUMEXPR_NUM_THREADS=8 VECLIB_MAXIMUM_THREADS=8 BLIS_NUM_THREADS=8
+
+renice -n 5 -p $$ >/dev/null 2>&1 || true
+ionice -c 2 -n 4 -p $$ >/dev/null 2>&1 || true
+
+exec systemd-run --user --scope --quiet \
+  --property=MemoryMax=64G --property=MemorySwapMax=0 \
+  --property=TasksMax=1024 --property=CPUQuota=800% \
+  "$REAL_PI" "$@"

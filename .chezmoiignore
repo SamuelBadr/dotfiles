@@ -53,3 +53,9 @@
 # Machine-local chezmoi config (holds per-machine module overrides like
 # [data.modules] workstation = true). Must NOT be managed by chezmoi itself.
 .config/chezmoi/chezmoi.toml
+
+# HPC login-node guard: deployed only where [data] hpcLoginNode = true
+{{- if not .hpcLoginNode }}
+bin/pi
+.pi/agent/AGENTS.md
+{{- end }}
