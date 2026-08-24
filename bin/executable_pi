@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 # HPC login-node guard for pi.
 set -u
-REAL_PI="$HOME/.bun/bin/pi"
+
+# Real pi: env override, else bun layout, else npm/local layout.
+: "${REAL_PI:="$HOME/.bun/bin/pi"}"
+[ -x "$REAL_PI" ] || REAL_PI="$HOME/.local/bin/pi"
+if [ ! -x "$REAL_PI" ]; then
+  echo "pi: guard cannot find real pi (set REAL_PI=/path/to/pi to override)" >&2
+  exit 127
+fi
 
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8
 export JULIA_NUM_THREADS=8 NUMEXPR_NUM_THREADS=8 VECLIB_MAXIMUM_THREADS=8 BLIS_NUM_THREADS=8
