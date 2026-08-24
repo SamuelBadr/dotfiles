@@ -26,8 +26,6 @@ if [ -S "/run/user/$(id -u)/systemd/private" ]; then
     "$REAL_PI" "$@"
 fi
 
-# Degraded: no systemd --user on this host -> threads + priority + ulimit only.
-ulimit -u 16384 2>/dev/null || true
-ulimit -v 131072 2>/dev/null || true      # 128 GiB virtual address backstop
-echo "pi: no systemd --user; degraded guards (threads/nice/ulimit, no cgroup)" >&2
+# Degraded: no systemd --user -> threads + priority only (no hard caps here).
+echo "pi: no systemd --user; degraded guards (threads/nice/ionice, no hard caps)" >&2
 exec "$REAL_PI" "$@"
