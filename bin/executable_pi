@@ -10,13 +10,24 @@ if [ ! -x "$REAL_PI" ]; then
   exit 127
 fi
 
+# Thread caps (inherited by all children).
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8
 export JULIA_NUM_THREADS=8 NUMEXPR_NUM_THREADS=8 VECLIB_MAXIMUM_THREADS=8 BLIS_NUM_THREADS=8
 
+# Gentle CPU/I/O priority for the whole tree.
 renice -n 5 -p $$ >/dev/null 2>&1 || true
 ionice -c 2 -n 4 -p $$ >/dev/null 2>&1 || true
 
-exec systemd-run --user --scope --quiet \
-  --property=MemoryMax=64G --property=MemorySwapMax=0 \
-  --property=TasksMax=1024 --property=CPUQuota=800% \
-  "$REAL_PI" "$@"
+# Primary: cgroup scope via the systemd user manager (hard memory/swap/task caps).
+if [ -S "/run/user/$(id -u)/systemd/private" ]; then
+  exec systemd-run --user --scope --quiet \
+    --property=MemoryMax=64G --property=MemorySwapMax=0 \
+    --property=TasksMax=1024 --property=CPUQuota=800% \
+    "$REAL_PI" "$@"
+fi
+
+# Degraded: no systemd --user on this host -> threads + priority + ulimit only.
+ulimit -u 16384 2>/dev/null || true
+ulimit -v 131072 2>/dev/null || true      # 128 GiB virtual address backstop
+echo "pi: no systemd --user; degraded guards (threads/nice/ulimit, no cgroup)" >&2
+exec "$REAL_PI" "$@"
