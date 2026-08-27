@@ -8,5 +8,12 @@
 # Enable/disable optional components per machine.
 # Set to true to include, false to exclude.
 
+# Optional per-machine guards. Override these in ~/.config/chezmoi/chezmoi.toml
+# with [data] / [data.git] entries when needed.
+hpcLoginNode = false
+
+[git]
+  signing = false
+
 [modules]
   workstation = false  # GUI tools + Homebrew packages (nvim, bat, btop, starship, Brewfile)
