@@ -41,7 +41,7 @@ Host hclm
 Host hclm-backup
 	User samuel
 	Hostname hclm.ifp.tuwien.ac.at
-	IdentityFile ~/.ssh/id_rsa
+	IdentityFile ~/.ssh/id_ed25519
 	IdentitiesOnly yes
 	BatchMode yes
 	StrictHostKeyChecking yes
@@ -65,7 +65,7 @@ Host Sherbrooke
     IdentitiesOnly yes
 
 Host *
-	IdentityFile ~/.ssh/id_rsa
+	IdentityFile ~/.ssh/id_ed25519
 	StrictHostKeyChecking no
 	ServerAliveInterval 60
 	ServerAliveCountMax 3

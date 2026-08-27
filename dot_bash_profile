@@ -9,3 +9,8 @@ case ":${PATH-}:" in
   *) PATH="$HOME/bin${PATH:+:$PATH}" ;;
 esac
 export PATH
+
+# Interactive login shells get the full interactive setup (aliases, prompt, etc.).
+if [ -r "$HOME/.bashrc" ]; then
+  . "$HOME/.bashrc"
+fi
