@@ -13,8 +13,6 @@ export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
 
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
-# Supermemory key: load from env/keychain, never hardcode. Prior key leaked publicly - rotate it.
-export SUPERMEMORY_API_KEY="$SUPERMEMORY_API_KEY"
 
 # Path configuration
 export PATH="$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
