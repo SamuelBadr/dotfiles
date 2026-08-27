@@ -16,14 +16,7 @@ export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 export SUPERMEMORY_API_KEY="***REMOVED***_BxRPQHfImYUpJNluHOcGDGIAQqWzaecEBHKsJvgPeaNfcasoFWodtTMKdmpXrfXx"
 
 # Path configuration
-export PATH="$HOME/local/node-v25.9.0-linux-x64/bin:$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
-
-# Bun and Bun-installed commands
-export BUN_INSTALL="$HOME/.bun"
-case ":$PATH:" in
-  *":$BUN_INSTALL/bin:"*) ;;
-  *) export PATH="$BUN_INSTALL/bin:$PATH" ;;
-esac
+export PATH="$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
 
 # macOS key repeat tweaks (runs whenever an interactive shell starts on macOS)
 if [[ "$OSTYPE" == darwin* ]]; then
@@ -307,4 +300,3 @@ fi
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"

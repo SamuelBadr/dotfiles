@@ -15,9 +15,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/lucifer1004/claude-skill-typst.git",
       "skillPath": "skills/typst/SKILL.md",
-      "skillFolderHash": "f97ff2544e4da0bf04206135280d620988e86061",
+      "skillFolderHash": "48962b05951896f9932201e091397fdf1320805f",
       "installedAt": "2026-03-17T11:01:08.484Z",
-      "updatedAt": "2026-08-17T06:57:30.796Z"
+      "updatedAt": "2026-08-24T10:52:55.248Z"
     },
     "touying-author": {
       "source": "apcamargo/typst-skills",
@@ -296,9 +296,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/JuliusBrussee/caveman.git",
       "skillPath": "skills/caveman/SKILL.md",
-      "skillFolderHash": "bdf0c87a2bdd47fc7fe9008c40cc6491ee801b81",
+      "skillFolderHash": "75d927c628bcb304f061e193c80c21d617a314e5",
       "installedAt": "2026-07-31T14:54:25.988Z",
-      "updatedAt": "2026-08-16T21:07:07.597Z"
+      "updatedAt": "2026-08-23T18:56:16.562Z"
     },
     "to-questionnaire": {
       "source": "mattpocock/skills",

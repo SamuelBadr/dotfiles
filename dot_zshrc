@@ -217,3 +217,4 @@ esac
 if [[ $OSTYPE == linux* && -x /snap/chromium/current/usr/lib/chromium-browser/chrome ]]; then
   export PUPPETEER_EXECUTABLE_PATH=/snap/chromium/current/usr/lib/chromium-browser/chrome
 fi
+export TUWIEN_CUID=sbadr@tuwien.ac.at
