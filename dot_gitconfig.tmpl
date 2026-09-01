@@ -2,7 +2,7 @@
 	name = Samuel Badr
 	email = samuel.badr@gmail.com
 {{- if .git.signing }}
-	signingkey = {{ .chezmoi.homeDir }}/.ssh/id_rsa.pub
+	signingkey = {{ $home := .chezmoi.homeDir }}{{ if stat (joinPath $home ".ssh/id_ed25519.pub") }}{{ joinPath $home ".ssh/id_ed25519.pub" }}{{ else }}{{ joinPath $home ".ssh/id_rsa.pub" }}{{ end }}
 
 [gpg]
 	format = ssh
