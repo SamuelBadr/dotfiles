@@ -65,7 +65,6 @@ Host Sherbrooke
     IdentitiesOnly yes
 
 Host *
-	IdentityFile ~/.ssh/id_rsa
 	StrictHostKeyChecking no
 	ServerAliveInterval 60
 	ServerAliveCountMax 3
