@@ -8,9 +8,16 @@ workstations and headless cluster/login nodes.
 
 | Module | Description | Default |
 |--------|-------------|---------|
-| `workstation` | GUI apps + Homebrew packages (nvim, bat, btop, starship, Brewfile) | `false` |
+| `workstation` | GUI apps + Homebrew packages (nvim, bat, bottom, starship, Brewfile) | `false` |
 
-Everything else (shell, git, tmux, SSH, pi agent + skills) is always managed.
+Shell, Git, tmux, SSH, and Pi configuration are always managed. All skills
+are installed and updated by `skills`; chezmoi does not manage `~/.agents/skills`
+or its lock metadata.
+
+## Skills
+
+Install and update skills separately with `npx skills add ... -g` and
+`npx skills update -g`. `chezmoi apply` does not install or update them.
 
 ## Configuration
 

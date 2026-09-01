@@ -9,3 +9,9 @@ case ":${PATH-}:" in
   *) PATH="$HOME/bin${PATH:+:$PATH}" ;;
 esac
 export PATH
+
+# The cluster keeps /bin/bash as the account shell; use user-local zsh for
+# interactive login sessions when available.
+if [[ $- == *i* && -x "$HOME/.local/bin/zsh" ]]; then
+  exec "$HOME/.local/bin/zsh" -l
+fi

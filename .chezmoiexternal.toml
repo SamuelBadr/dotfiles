@@ -1,4 +1,0 @@
-[".agents/skills/rust-skills"]
-  type = "git-repo"
-  url = "https://github.com/leonardomso/rust-skills.git"
-  refreshPeriod = "168h"
