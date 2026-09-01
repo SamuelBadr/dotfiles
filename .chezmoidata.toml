@@ -16,4 +16,4 @@ hpcLoginNode = false
   signing = false
 
 [modules]
-  workstation = false  # GUI tools + Homebrew packages (nvim, bat, btop, starship, Brewfile)
+  workstation = false  # GUI tools + Homebrew packages (nvim, bat, bottom, starship, Brewfile)

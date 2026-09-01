@@ -14,8 +14,9 @@
 **/__pycache__/**
 **/__pycache__/
 
-# Skill-local git repos (installed via `skills` CLI) — content is tracked, history is not
-.agents/skills/**/.git/**
+# All skills and lock metadata are managed by the `skills` CLI.
+.agents/skills/**
+.agents/.skill-lock.json
 
 # ~/.pi/agent/skills/ is a runtime dir for symlinks created by the `skills` CLI.
 # Pi discovers skills natively from ~/.agents/skills/ (tracked above), so this dir
