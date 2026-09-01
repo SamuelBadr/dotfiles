@@ -29,6 +29,12 @@ fi
 # ============================================================================
 [[ $- != *i* ]] && return
 
+# Hand off interactive bash to per-user zsh on machines with a rootless zsh
+# install (~/.local/bin/zsh). Machine default login shell stays bash.
+if [[ -x "$HOME/.local/bin/zsh" ]]; then
+  exec "$HOME/.local/bin/zsh"
+fi
+
 # ============================================================================
 # History Configuration (Bash equivalents)
 # ============================================================================
