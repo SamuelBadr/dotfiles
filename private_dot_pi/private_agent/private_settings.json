@@ -20,7 +20,7 @@
     "openai-codex/gpt-5.6-luna",
     "openai-codex/gpt-5.6-sol",
     "aqueduct/deepseek-v4-flash-284b",
-    "bansos/x-preview-f-free"
+    "claude-bridge/claude-opus-5"
   ],
   "subagents": {
     "defaultModel": "aqueduct/deepseek-v4-flash-284b",
