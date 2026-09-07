@@ -1,6 +1,10 @@
 # Chezmoi ignore patterns
 # Files matching these patterns won't be managed by chezmoi
 
+# Repository-only regression checks.
+tests
+tests/**
+
 # Julia: global env Project.toml/Manifest.toml are machine-local churn
 # (startup.jl config is still tracked).
 .julia/environments/**/Project.toml
@@ -54,6 +58,15 @@
 # Machine-local chezmoi config (holds per-machine module overrides like
 # [data.modules] workstation = true). Must NOT be managed by chezmoi itself.
 .config/chezmoi/chezmoi.toml
+
+# Backup configuration belongs only to the explicitly opted-in Mac.
+.config/restic-hclm/archive/**
+{{- if not (and (eq .chezmoi.os "darwin") .modules.backupMac) }}
+.config/restic-hclm
+.config/restic-hclm/**
+Library
+Library/**
+{{- end }}
 
 # HPC login-node guard: deployed only where [data] hpcLoginNode = true
 {{- if not .hpcLoginNode }}

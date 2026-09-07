@@ -1,0 +1,21 @@
+# Reproducible downloads and caches only. Keep .git, source, environments,
+# Julia dev/packages/scratchspaces and application settings.
+{{ .chezmoi.homeDir }}/.Trash
+{{ .chezmoi.homeDir }}/.cache
+{{ .chezmoi.homeDir }}/.rustup
+{{ .chezmoi.homeDir }}/.npm/_cacache
+{{ .chezmoi.homeDir }}/.cargo/registry
+{{ .chezmoi.homeDir }}/.cargo/git
+{{ .chezmoi.homeDir }}/.julia/artifacts
+{{ .chezmoi.homeDir }}/.julia/compiled
+{{ .chezmoi.homeDir }}/.julia/registries
+{{ .chezmoi.homeDir }}/.omlx/cache
+{{ .chezmoi.homeDir }}/.omlx/models
+{{ .chezmoi.homeDir }}/.bun/install/cache
+{{ .chezmoi.homeDir }}/.codex/cache
+{{ .chezmoi.homeDir }}/.pi/cache
+{{ .chezmoi.homeDir }}/.pi/agent/cache
+
+# Conventional dependency downloads; tagged build caches handled by --exclude-caches.
+node_modules
+.DS_Store

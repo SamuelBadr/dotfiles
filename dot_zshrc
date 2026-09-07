@@ -25,11 +25,9 @@ fi
 # ============================================================================
 # Environment Variables
 # ============================================================================
-# Prefer VS Code, then nvim, then system vi.
+# Prefer VS Code, then system vi.
 if [[ $OSTYPE == darwin* || $TERM_PROGRAM == vscode ]] && (( $+commands[code] )); then
   export EDITOR="code --wait --new-window"
-elif (( $+commands[nvim] )); then
-  export EDITOR="nvim"
 else
   export EDITOR="vi"
 fi

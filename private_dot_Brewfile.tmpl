@@ -14,6 +14,8 @@ brew "bottom"        # System monitor
 
 # CLI Tools - Utilities
 brew "fzf"           # Fuzzy finder
+brew "fd"            # Shell file pickers
+brew "tmux"          # Managed tmux configuration
 brew "tealdeer"      # tldr - simplified man pages
 brew "chezmoi"       # Dotfiles manager
 
@@ -29,6 +31,13 @@ brew "zsh-syntax-highlighting"
 brew "starship"      # Shell prompt
 
 # Other
-brew "ccusage"       # Compiler cache usage
+brew "ccusage"       # Claude Code usage reporting
 brew "ghostscript"   # PostScript interpreter
+
+{{ if and (eq .chezmoi.os "darwin") .modules.backupMac -}}
+# Backup jobs use these directly; resticprofile is intentionally not required.
+brew "restic"
+brew "runitor"
+brew "coreutils"     # timeout
+{{ end -}}
 {{- end -}}

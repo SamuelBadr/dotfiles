@@ -1,8 +1,4 @@
 {
-  "lastChangelogVersion": "0.85.0",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-luna",
-  "defaultThinkingLevel": "max",
   "theme": "light/dark",
   "enableInstallTelemetry": false,
   "packages": [
@@ -15,12 +11,6 @@
     "npm:pi-context-view",
     "git:github.com/jonjonrankin/pi-caveman",
     "npm:pi-claude-bridge"
-  ],
-  "enabledModels": [
-    "openai-codex/gpt-5.6-luna",
-    "openai-codex/gpt-5.6-sol",
-    "aqueduct/deepseek-v4-flash-284b",
-    "claude-bridge/claude-opus-5"
   ],
   "subagents": {
     "defaultModel": "aqueduct/deepseek-v4-flash-284b",

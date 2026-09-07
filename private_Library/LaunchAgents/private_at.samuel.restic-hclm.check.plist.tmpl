@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>{{ .chezmoi.homeDir }}</string>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<key>RESTIC_CACHE_DIR</key>
+		<string>{{ .chezmoi.homeDir }}/Library/Caches/restic</string>
+		<key>RESTIC_PASSWORD_COMMAND</key>
+		<string>/usr/bin/security find-generic-password -a samuel -s restic-hclm-samuel-mac -w</string>
+		<key>RESTIC_REPOSITORY</key>
+		<string>sftp:hclm-backup:/mnt/hclmbck/BACKUP/samuel/restic-mac</string>
+	</dict>
+	<key>Label</key>
+	<string>at.samuel.restic-hclm.check</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>{{ .chezmoi.homeDir }}/.config/restic-hclm/run-on-ac</string>
+		<string>/opt/homebrew/bin/runitor</string>
+		<string>-no-output-in-ping</string>
+		<string>-uuid</string>
+		<string>{{ .backupPings.check }}</string>
+		<string>--</string>
+		<string>/usr/bin/caffeinate</string>
+		<string>-i</string>
+		<string>/opt/homebrew/bin/restic</string>
+		<string>-o</string>
+		<string>sftp.command=/usr/bin/ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=2 hclm-backup -s sftp</string>
+		<string>check</string>
+	</array>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/restic-hclm/check-error.log</string>
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/restic-hclm/check.log</string>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Day</key>
+		<integer>2</integer>
+		<key>Hour</key>
+		<integer>13</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
+</dict>
+</plist>

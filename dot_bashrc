@@ -1,11 +1,9 @@
 # ============================================================================
 # Environment Variables
 # ============================================================================
-# Prefer VS Code, then nvim, then system vi.
+# Prefer VS Code, then system vi.
 if [[ "$OSTYPE" == darwin* || "${TERM_PROGRAM:-}" == "vscode" ]] && command -v code >/dev/null 2>&1; then
   export EDITOR="code --wait --new-window"
-elif command -v nvim >/dev/null 2>&1; then
-  export EDITOR="nvim"
 else
   export EDITOR="vi"
 fi
@@ -16,13 +14,6 @@ export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 
 # Path configuration
 export PATH="$HOME/.bun/bin:$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
-
-# macOS key repeat tweaks (runs whenever an interactive shell starts on macOS)
-if [[ "$OSTYPE" == darwin* ]]; then
-  defaults write -g InitialKeyRepeat -int 15
-  defaults write -g KeyRepeat -int 2
-  defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
-fi
 
 # ============================================================================
 # Only run the rest for interactive shells
@@ -209,6 +200,14 @@ export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap 
 # ============================================================================
 # Interactive File Picker (fzf + fd + rg + bat)
 # ============================================================================
+_edit_file() {
+  if command -v code >/dev/null 2>&1; then
+    code --wait --goto "$1:${2:-1}"
+  else
+    vi "+${2:-1}" "$1"
+  fi
+}
+
 fp() {
   local file
   file=$(fd --type f --hidden --follow --exclude .git \
@@ -217,8 +216,8 @@ fp() {
           --preview-window 'right:60%:wrap' \
           --bind 'ctrl-/:toggle-preview' \
           --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
-          --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open in nvim')
-  [[ -n "$file" ]] && nvim "$file"
+          --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open in editor')
+  [[ -n "$file" ]] && _edit_file "$file"
 }
 
 rgs() {
@@ -236,7 +235,7 @@ rgs() {
     local file line
     file=$(echo "$selection" | cut -d: -f1)
     line=$(echo "$selection" | cut -d: -f2)
-    nvim "+$line" "$file"
+    _edit_file "$file" "$line"
   fi
 }
 
@@ -260,9 +259,9 @@ fif() {
     if [[ "$selection" == *:* ]]; then
       file=$(echo "$selection" | cut -d: -f1)
       line=$(echo "$selection" | cut -d: -f2)
-      nvim "+$line" "$file"
+      _edit_file "$file" "$line"
     else
-      nvim "$selection"
+      _edit_file "$selection"
     fi
   fi
 }

@@ -1,0 +1,13 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $desired := includeTemplate "pi-settings.json" . | mustFromJson -}}
+{{- $local := .chezmoi.stdin | default "{}" | mustFromJson -}}
+{{- range $key := list "defaultProvider" "defaultModel" "defaultThinkingLevel" "modelThinkingLevels" "enabledModels" "lastChangelogVersion" -}}
+  {{- if hasKey $local $key -}}
+    {{- $_ := set $desired $key (get $local $key) -}}
+  {{- end -}}
+{{- end -}}
+{{- if eq (toJson $local) (toJson $desired) -}}
+{{ .chezmoi.stdin }}
+{{- else -}}
+{{ $desired | toPrettyJson }}
+{{- end -}}

@@ -1,0 +1,52 @@
+# Backup setup
+
+## Roles
+
+- **Time Machine:** full Mac recovery. Connect the external SSD while charging, ideally daily. Its configuration was not changed.
+- **Restic:** encrypted off-site personal data backup to the existing SFTP repository.
+
+## Scope
+
+`sources` is the explicit source list. It includes projects (including Git and untracked work), documents, finances, photos, music, Downloads, Zotero, DnD, local scripts, hidden home configuration/development directories, and selected Library data (Mail, Keychains, Preferences, local iCloud files, Obsidian, Zotero, VS Code settings).
+
+`excludes` removes known reproducible caches/downloads. Restic also skips directories carrying the standard CACHEDIR.TAG and node_modules. Source trees and Julia dev/packages/scratchspaces remain included. No blanket `build`, `target`, or `.git` exclusion is used.
+
+Movies (currently TV downloads), installed applications, and most Library/system state are Time Machine-only. Browser profiles, Messages and other unlisted application data are not in the new off-site scope. New top-level personal folders/files outside the listed paths must be added to `sources`; hidden home entries are discovered by the `.*` glob. Restic does not follow symlinks into unlisted directories.
+
+`--exclude-cloud-files` remains enabled: evicted iCloud files are not backed up. Download important cloud-only files locally before relying on this backup. Partial snapshots remain monitoring failures; investigate unreadable personal paths rather than suppressing all warnings.
+
+## Schedule and impact
+
+Active jobs: `~/Library/LaunchAgents/at.samuel.restic-hclm.{backup,check}.plist`.
+
+- Backup: daily at noon, tagged `automatic,personal`.
+- Check: monthly on day 2 at 13:00; metadata integrity only. Payload verification and sample restores are deliberate maintenance tasks on AC. The previous monthly 10% payload read was removed to limit network/disk work.
+- Both use `run-on-ac` before monitoring or sleep prevention: skip on battery or unavailable SSH. No polling, forced wake, or automatic retry. launchd may deliver a missed calendar event after wake.
+- AC is checked at start only. Unplugging mid-run does not cancel it. caffeinate prevents idle sleep, not lid-close sleep.
+- SSH preflight is bounded to 15 seconds; connections have a 10-second timeout and running SSH uses 15-second keepalives/two missed responses. These are not total job runtime limits.
+- Repository lock contention fails promptly; no six-hour wait.
+
+## Retention: paused during scope transition
+
+The prune LaunchAgent is unloaded and disabled until a new personal snapshot, sample restore and integrity check have been verified. Old snapshots have NOT been deleted. Existing retention remains in its plist: 14 daily, 8 weekly, 12 monthly, 3 yearly. Review a forget dry run before reenabling monthly pruning; changing source paths creates a different default retention group.
+
+After validation and retention review, reenable with:
+
+```sh
+launchctl enable gui/$(id -u)/at.samuel.restic-hclm.prune
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/at.samuel.restic-hclm.prune.plist
+```
+
+## Monitoring and pending validation
+
+Existing runitor/Healthchecks monitoring is retained. Skips send no success heartbeat, and partial backups retain exit code 3. In Healthchecks, set the backup's allowed interval plus grace to total three days, and verify a test notification reaches you. Dashboard access/notification delivery has not been verified or changed here. Monthly check/prune monitors need their own intervals; pause the prune monitor while pruning is deliberately disabled.
+
+Pending on AC with stable connectivity: first narrowed backup, restore from that new snapshot, and completed repository integrity check. Do not enable pruning before this review. The initial narrowed backup may read files afresh because its source paths changed; existing repository deduplication still applies.
+
+The earlier metadata check was deliberately stopped at 90 seconds while loading indexes; integrity is still unverified. Ordinary unlock removed 21 stale locks. Two files restored from the old snapshot dcc4e098 matched current files exactly. Neither validates the new scope.
+
+## Tests and rollback
+
+Run `python3 ~/.config/restic-hclm/test_policy.py`. Tests mock power/network policy and exercise real restic against tiny synthetic data in a disposable local repository; no network or personal data is used. Both passed after scope changes.
+
+Pre-scope-change plists/configuration: `archive/20260906-084756-scope/`. Original configuration and unused resticprofile setup: `archive/20260905-074834/`. Restore the relevant plist/config files and reload their LaunchAgents to roll back; reenable pruning only after explicit review.

@@ -1,18 +1,47 @@
 # Chezmoi Modules
 
-This repo uses a single module to gate workstation-only configuration (GUI tools
-and Homebrew packages) so the same dotfiles repo can be applied on both
-workstations and headless cluster/login nodes.
+Workstation configuration is optional so this repo works on Macs and headless
+cluster/login nodes. Backup configuration requires a separate, explicit Mac opt-in.
 
 ## Modules
 
 | Module | Description | Default |
 |--------|-------------|---------|
-| `workstation` | GUI apps + Homebrew packages (nvim, bat, bottom, starship, Brewfile) | `false` |
+| `workstation` | Workstation tools, Brewfile, one-time macOS keyboard preferences | `false` |
+| `backupMac` | This Mac's restic configuration and LaunchAgents (macOS only) | `false` |
 
 Shell, Git, tmux, SSH, and Pi configuration are always managed. All skills
 are installed and updated by `skills`; chezmoi does not manage `~/.agents/skills`
 or its lock metadata.
+
+## Pi settings ownership
+
+Stable preferences and package configuration live in `.chezmoitemplates/pi-settings.json`.
+A native chezmoi modify-template manages `~/.pi/agent/settings.json` while preserving
+machine-local `defaultProvider`, `defaultModel`, `defaultThinkingLevel`,
+`modelThinkingLevels`, `enabledModels`, and `lastChangelogVersion`. Model changes
+and version bookkeeping no longer create drift; unchanged JSON is kept byte-for-byte.
+On a new machine Pi chooses its own model defaults until you select/save them.
+
+Edit the stable JSON in the source repo, not the modify-template. Do not replace
+this setup using `chezmoi add ~/.pi/agent/settings.json`; that would recapture
+runtime choices. Other preference/package changes remain intentional drift and
+should be reviewed and copied into the stable JSON when wanted.
+
+## Mac backups
+
+The current Mac opts in with `[data.modules] backupMac = true` in the untracked
+local chezmoi config. `[data.backupPings]` supplies the `backup`, `check`, and
+`prune` Healthchecks ping IDs. These are capability-bearing secrets; do not commit
+them. Restic's repository password remains in Keychain, and SSH keys remain local.
+
+Only the source list, exclusions, scripts, tests, README and three LaunchAgents
+are managed. Logs, archives, repository caches, credentials and launchd runtime
+state are not tracked. `chezmoi apply` deploys files but does not bootstrap/reload
+jobs or start backups. On a replacement Mac, restore the Keychain/SSH credentials,
+install the Brewfile dependencies, review paths, then load backup/check jobs manually.
+Pruning is deliberately disabled in its plist until scope/restore/integrity checks
+pass; see `~/.config/restic-hclm/README.md` before reenabling it.
 
 ## Skills
 
@@ -83,6 +112,9 @@ chezmoi diff
 
 # Dry run
 chezmoi apply --dry-run
+
+# Offline regression checks (from the source repo)
+python3 tests/test_dotfiles.py
 ```
 
 ## Adding a New Module

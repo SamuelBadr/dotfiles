@@ -1,0 +1,30 @@
+# Personal off-site backup. Absolute paths; restic --files-from expands globs.
+# Hidden home entries include shell configuration, SSH keys and local dev sources.
+{{ .chezmoi.homeDir }}/.*
+
+# Personal files, including photos, finances and unfinished/untracked work.
+{{ .chezmoi.homeDir }}/Desktop
+{{ .chezmoi.homeDir }}/Documents
+{{ .chezmoi.homeDir }}/Downloads
+{{ .chezmoi.homeDir }}/Projects
+{{ .chezmoi.homeDir }}/Finances
+{{ .chezmoi.homeDir }}/DnD
+{{ .chezmoi.homeDir }}/Zotero
+{{ .chezmoi.homeDir }}/Pictures
+{{ .chezmoi.homeDir }}/Music
+{{ .chezmoi.homeDir }}/Games
+{{ .chezmoi.homeDir }}/Public
+{{ .chezmoi.homeDir }}/bin
+{{ .chezmoi.homeDir }}/docs
+{{ .chezmoi.homeDir }}/juliaformatter-prek-hook
+{{ .chezmoi.homeDir }}/tuvpn-tuwien
+{{ .chezmoi.homeDir }}/*.key
+
+# Selected application data; full system/application recovery belongs to TM.
+{{ .chezmoi.homeDir }}/Library/Mail
+{{ .chezmoi.homeDir }}/Library/Keychains
+{{ .chezmoi.homeDir }}/Library/Preferences
+{{ .chezmoi.homeDir }}/Library/Mobile Documents
+{{ .chezmoi.homeDir }}/Library/Application Support/obsidian
+{{ .chezmoi.homeDir }}/Library/Application Support/Zotero
+{{ .chezmoi.homeDir }}/Library/Application Support/Code/User

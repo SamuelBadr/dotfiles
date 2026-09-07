@@ -1,0 +1,12 @@
+#!/bin/sh
+# Check before runitor: skipped runs must not send success heartbeats.
+# ponytail: AC checked at start only; unplugging mid-run does not cancel work.
+if ! pmset -g batt | grep -q "Now drawing from 'AC Power'"; then
+    printf '%s Skipped: not on AC power.\n' "$(date -Iseconds)"
+    exit 0
+fi
+if ! timeout 15 ssh -o BatchMode=yes -o ConnectTimeout=10 hclm-backup true; then
+    printf '%s Skipped: backup server unavailable.\n' "$(date -Iseconds)" >&2
+    exit 0
+fi
+exec "$@"
