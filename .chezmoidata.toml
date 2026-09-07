@@ -16,5 +16,5 @@ hpcLoginNode = false
   signing = false
 
 [modules]
-  workstation = false  # GUI tools + Homebrew packages (bat, bottom, starship, Brewfile)
+  workstation = false  # GUI tools + Homebrew packages (bottom, starship, Brewfile)
   backupMac = false    # Explicit opt-in for this Mac's restic setup; never enable on HPC
