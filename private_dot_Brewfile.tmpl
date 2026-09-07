@@ -21,6 +21,8 @@ brew "chezmoi"       # Dotfiles manager
 
 # Development Tools
 brew "git"
+brew "node"          # Node.js and npm
+brew "rustup"        # Rust toolchain manager
 brew "juliaup"       # Julia version manager
 brew "uv"            # Python package manager
 brew "typst"         # Markup-based typesetting
@@ -31,11 +33,13 @@ brew "zsh-syntax-highlighting"
 brew "starship"      # Shell prompt
 
 # Other
-brew "ccusage"       # Claude Code usage reporting
 brew "ghostscript"   # PostScript interpreter
 
+# GUI editor
+cask "zed"
+
 {{ if and (eq .chezmoi.os "darwin") .modules.backupMac -}}
-# Backup jobs use these directly; resticprofile is intentionally not required.
+# Backup jobs use these directly.
 brew "restic"
 brew "runitor"
 brew "coreutils"     # timeout

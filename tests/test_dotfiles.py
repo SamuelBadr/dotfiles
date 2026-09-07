@@ -41,16 +41,16 @@ bashrc = (source / 'dot_bashrc').read_text()
 helper = '_edit_file() {' + bashrc.split('_edit_file() {', 1)[1].split('\n}', 1)[0] + '\n}'
 with tempfile.TemporaryDirectory() as tmp:
     tmp = Path(tmp)
-    for command in ['code', 'vi']:
+    for command in ['zed', 'nano']:
         p = tmp / command
         p.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
         p.chmod(0o700)
     def edit():
         return subprocess.check_output(['/bin/bash', '-c', helper + '\n_edit_file "file with spaces" 12'],
                                        env=dict(os.environ, PATH=str(tmp)), text=True)
-    assert edit() == '--wait\n--goto\nfile with spaces:12\n'
-    (tmp / 'code').unlink()
-    assert edit() == '+12\nfile with spaces\n'
+    assert edit() == '--wait\nfile with spaces:12\n'
+    (tmp / 'zed').unlink()
+    assert edit() == 'file with spaces\n'
 
     config = tmp / 'chezmoi.toml'
     config.write_text('[data.modules]\nworkstation = false\nbackupMac = false\n')

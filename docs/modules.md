@@ -14,6 +14,16 @@ Shell, Git, tmux, SSH, and Pi configuration are always managed. All skills
 are installed and updated by `skills`; chezmoi does not manage `~/.agents/skills`
 or its lock metadata.
 
+## Tool ownership
+
+- **Editor:** Zed with `--wait`; nano fallback when Zed is unavailable.
+- **Node:** Homebrew `node` and npm. NVM is a separate per-user Node version
+  manager; no NVM installation or version file exists here, so its old shell
+  initialization was dead code and has been removed.
+- **Rust:** Homebrew `rustup` supplies the manager; rustup owns the stable
+  toolchain in `~/.rustup` and the active Rust binaries in `~/.cargo/bin`.
+  Do not install the Homebrew `rust` formula alongside it.
+
 ## Pi settings ownership
 
 Stable preferences and package configuration live in `.chezmoitemplates/pi-settings.json`.

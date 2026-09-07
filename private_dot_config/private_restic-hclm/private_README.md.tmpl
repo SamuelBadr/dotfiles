@@ -49,4 +49,4 @@ The earlier metadata check was deliberately stopped at 90 seconds while loading 
 
 Run `python3 ~/.config/restic-hclm/test_policy.py`. Tests mock power/network policy and exercise real restic against tiny synthetic data in a disposable local repository; no network or personal data is used. Both passed after scope changes.
 
-Pre-scope-change plists/configuration: `archive/20260906-084756-scope/`. Original configuration and unused resticprofile setup: `archive/20260905-074834/`. Restore the relevant plist/config files and reload their LaunchAgents to roll back; reenable pruning only after explicit review.
+Earlier pre-scope backup configuration: `archive/20260906-084756-scope/`. Restore relevant plist/config files and reload their LaunchAgents only for rollback; reenable pruning only after explicit review.

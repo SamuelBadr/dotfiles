@@ -1,11 +1,11 @@
 # ============================================================================
 # Environment Variables
 # ============================================================================
-# Prefer VS Code, then system vi.
-if [[ "$OSTYPE" == darwin* || "${TERM_PROGRAM:-}" == "vscode" ]] && command -v code >/dev/null 2>&1; then
-  export EDITOR="code --wait --new-window"
+# Prefer Zed, then nano.
+if command -v zed >/dev/null 2>&1; then
+  export EDITOR="zed --wait"
 else
-  export EDITOR="vi"
+  export EDITOR="nano"
 fi
 export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
@@ -201,10 +201,14 @@ export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap 
 # Interactive File Picker (fzf + fd + rg + bat)
 # ============================================================================
 _edit_file() {
-  if command -v code >/dev/null 2>&1; then
-    code --wait --goto "$1:${2:-1}"
+  if command -v zed >/dev/null 2>&1; then
+    if [[ -n "${2:-}" ]]; then
+      zed --wait "$1:$2"
+    else
+      zed --wait "$1"
+    fi
   else
-    vi "+${2:-1}" "$1"
+    nano "$1"
   fi
 }
 
@@ -300,7 +304,3 @@ fi
 # - zstyle/compinit-based completion theming doesn't translate to bash; readline tuning above is the substitute.
 # - zsh-autosuggestions / zsh-syntax-highlighting are zsh plugins; bash equivalents exist but are different projects.
 # ============================================================================
-
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"

@@ -25,11 +25,11 @@ fi
 # ============================================================================
 # Environment Variables
 # ============================================================================
-# Prefer VS Code, then system vi.
-if [[ $OSTYPE == darwin* || $TERM_PROGRAM == vscode ]] && (( $+commands[code] )); then
-  export EDITOR="code --wait --new-window"
+# Prefer Zed, then nano.
+if (( $+commands[zed] )); then
+  export EDITOR="zed --wait"
 else
-  export EDITOR="vi"
+  export EDITOR="nano"
 fi
 export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
