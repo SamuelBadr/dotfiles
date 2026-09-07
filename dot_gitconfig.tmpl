@@ -11,6 +11,9 @@
 	gpgsign = true
 {{- end }}
 
+[core]
+	excludesfile = {{ .chezmoi.homeDir }}/.gitignore_global
+
 [merge]
 	conflictstyle = diff3
 

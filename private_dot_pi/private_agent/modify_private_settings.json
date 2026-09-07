@@ -6,7 +6,7 @@
     {{- $_ := set $desired $key (get $local $key) -}}
   {{- end -}}
 {{- end -}}
-{{- if eq (toJson $local) (toJson $desired) -}}
+{{- if deepEqual $local $desired -}}
 {{ .chezmoi.stdin }}
 {{- else -}}
 {{ $desired | toPrettyJson }}

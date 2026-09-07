@@ -17,7 +17,7 @@ Movies (currently TV downloads), installed applications, and most Library/system
 
 ## Schedule and impact
 
-Active jobs: `~/Library/LaunchAgents/at.samuel.restic-hclm.{backup,check}.plist`.
+Active jobs: `~/Library/LaunchAgents/at.samuel.restic-hclm.{backup,check,prune}.plist`.
 
 - Backup: daily at noon, tagged `automatic,personal`.
 - Check: monthly on day 2 at 13:00; metadata integrity only. Payload verification and sample restores are deliberate maintenance tasks on AC. The previous monthly 10% payload read was removed to limit network/disk work.
@@ -26,27 +26,18 @@ Active jobs: `~/Library/LaunchAgents/at.samuel.restic-hclm.{backup,check}.plist`
 - SSH preflight is bounded to 15 seconds; connections have a 10-second timeout and running SSH uses 15-second keepalives/two missed responses. These are not total job runtime limits.
 - Repository lock contention fails promptly; no six-hour wait.
 
-## Retention: paused during scope transition
+## Retention
 
-The prune LaunchAgent is unloaded and disabled until a new personal snapshot, sample restore and integrity check have been verified. Old snapshots have NOT been deleted. Existing retention remains in its plist: 14 daily, 8 weekly, 12 monthly, 3 yearly. Review a forget dry run before reenabling monthly pruning; changing source paths creates a different default retention group.
+Monthly `forget --prune` is enabled after validating the narrowed scope. Policy: 14 daily, 8 weekly, 12 monthly, 3 yearly. On 2026-09-07, the dry run was reviewed and the actual run removed 3 obsolete snapshots and reclaimed 21.322 GiB; 17 snapshots remain. Future runs use the same policy.
 
-After validation and retention review, reenable with:
+## Monitoring and validation
 
-```sh
-launchctl enable gui/$(id -u)/at.samuel.restic-hclm.prune
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/at.samuel.restic-hclm.prune.plist
-```
+Existing runitor/Healthchecks monitoring is retained. Skips send no success heartbeat, and partial backups retain exit code 3. In Healthchecks, set the backup's allowed interval plus grace to total three days, and verify a test notification reaches you. Dashboard notification delivery remains unverified. Monthly check/prune monitors should retain their own intervals.
 
-## Monitoring and pending validation
-
-Existing runitor/Healthchecks monitoring is retained. Skips send no success heartbeat, and partial backups retain exit code 3. In Healthchecks, set the backup's allowed interval plus grace to total three days, and verify a test notification reaches you. Dashboard access/notification delivery has not been verified or changed here. Monthly check/prune monitors need their own intervals; pause the prune monitor while pruning is deliberately disabled.
-
-Pending on AC with stable connectivity: first narrowed backup, restore from that new snapshot, and completed repository integrity check. Do not enable pruning before this review. The initial narrowed backup may read files afresh because its source paths changed; existing repository deduplication still applies.
-
-The earlier metadata check was deliberately stopped at 90 seconds while loading indexes; integrity is still unverified. Ordinary unlock removed 21 stale locks. Two files restored from the old snapshot dcc4e098 matched current files exactly. Neither validates the new scope.
+On 2026-09-07, narrowed snapshot `01747801` scanned 25.035 GiB and stored 795.866 MiB. `.gitconfig` and `Projects/ParquetIR.jl/Project.toml` restored byte-for-byte. Metadata `restic check` completed with no errors. No repository locks remain. Payload verification beyond the restore samples remains an occasional deliberate AC maintenance task.
 
 ## Tests and rollback
 
 Run `python3 ~/.config/restic-hclm/test_policy.py`. Tests mock power/network policy and exercise real restic against tiny synthetic data in a disposable local repository; no network or personal data is used. Both passed after scope changes.
 
-Earlier pre-scope backup configuration: `archive/20260906-084756-scope/`. Restore relevant plist/config files and reload their LaunchAgents only for rollback; reenable pruning only after explicit review.
+Earlier pre-scope backup configuration: `archive/20260906-084756-scope/`. Restore relevant plist/config files and reload their LaunchAgents only for rollback.
