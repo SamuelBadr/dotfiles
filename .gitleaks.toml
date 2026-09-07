@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+# Anchor to the variable name: catches a quoted all-alphanumeric literal value,
+# ignores env-var references ($VAR) and standard redaction markers.
+[[rules]]
+id = "supermemory-hardcoded-key"
+description = "hardcoded Supermemory API key in shell rc exports"
+regex = '''SUPERMEMORY_API_KEY\s*=\s*"[A-Za-z0-9]{12,}"'''
