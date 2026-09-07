@@ -123,26 +123,6 @@ source_plugin zsh-autosuggestions && {
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
 }
 
-# fzf shell integration.
-fzf_shell_dirs=()
-[[ -n ${HOMEBREW_PREFIX:-} ]] && fzf_shell_dirs+=("$HOMEBREW_PREFIX/opt/fzf/shell")
-fzf_shell_dirs+=(/usr/share/fzf)
-
-for dir in "${fzf_shell_dirs[@]}"; do
-  if [[ -r $dir/key-bindings.zsh ]]; then
-    source "$dir/key-bindings.zsh" 2>/dev/null
-    [[ -r $dir/completion.zsh ]] && source "$dir/completion.zsh" 2>/dev/null
-    break
-  fi
-done
-unset fzf_shell_dirs
-
-if command -v fzf >/dev/null 2>&1; then
-  export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
-  export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window=right:60%"
-  export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
-fi
-
 # Syntax highlighting should be loaded after other plugins.
 source_plugin zsh-syntax-highlighting
 
