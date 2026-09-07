@@ -163,13 +163,6 @@ fi
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 fi
-# oMLX: CLI shim path begin
-case ":$PATH:" in
-  *":$HOME/.omlx/bin:"*) ;;
-  *) export PATH="$HOME/.omlx/bin:$PATH" ;;
-esac
-# oMLX: CLI shim path end
-
 # Puppeteer: snap Chromium exists only on some Linux machines; no-op elsewhere.
 if [[ $OSTYPE == linux* && -x /snap/chromium/current/usr/lib/chromium-browser/chrome ]]; then
   export PUPPETEER_EXECUTABLE_PATH=/snap/chromium/current/usr/lib/chromium-browser/chrome
