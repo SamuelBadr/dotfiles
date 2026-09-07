@@ -23,35 +23,16 @@ elif command -v brew >/dev/null 2>&1; then
 fi
 
 # ============================================================================
-# Environment Variables
+# Shared Environment (EDITOR, PATH, GITHUB_USERNAME, up, pluto)
 # ============================================================================
-# Prefer Zed, then nano.
-if (( $+commands[zed] )); then
-  export EDITOR="zed --wait"
-else
-  export EDITOR="nano"
-fi
-export VISUAL="$EDITOR"
-export GITHUB_USERNAME="SamuelBadr"
-export BUN_INSTALL="$HOME/.bun"
+# Shell-neutral configuration lives here so zsh and the bash fallback stay in
+# sync. Load after Homebrew so brew-installed tool dirs are on PATH already.
+[[ -r $HOME/.config/shell/common.sh ]] && . "$HOME/.config/shell/common.sh"
 
 # Load the Parallel API key from macOS Keychain without storing it in dotfiles.
 if [[ -z ${PARALLEL_API_KEY:-} ]] && command -v security >/dev/null 2>&1; then
   PARALLEL_API_KEY=$(security find-generic-password -a "$USER" -s pi-parallel-api-key -w 2>/dev/null) && export PARALLEL_API_KEY
 fi
-
-# PATH configuration. `typeset -U` keeps entries unique while preserving order.
-typeset -U path
-path=(
-  "$BUN_INSTALL/bin"
-  "$HOME/.cargo/bin"
-  "$HOME/.juliaup/bin"
-  "$HOME/.julia/bin"
-  "$HOME/bin"
-  "$HOME/.local/bin"
-  $path
-)
-export PATH
 
 # ============================================================================
 # History Configuration
@@ -117,28 +98,6 @@ bindkey '^[[A' up-line-or-beginning-search
 bindkey '^[[B' down-line-or-beginning-search
 bindkey '^P' up-line-or-beginning-search
 bindkey '^N' down-line-or-beginning-search
-
-# ============================================================================
-# Functions
-# ============================================================================
-# System update shortcut. Remove a legacy alias before defining the function.
-unalias up 2>/dev/null
-up() {
-  if command -v brew >/dev/null 2>&1; then
-    brew update
-    brew upgrade --greedy --overwrite -y
-    brew cleanup
-  fi
-
-  if command -v pi >/dev/null 2>&1; then
-    pi update --all
-  fi
-
-  if command -v skills >/dev/null 2>&1; then
-    skills update -g -y
-    skills update -p -y
-  fi
-}
 
 # ============================================================================
 # Plugin Loading

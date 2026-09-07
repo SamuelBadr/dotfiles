@@ -31,26 +31,43 @@ assert fixed['enabledModels'] == ['local/chosen-model']
 assert json.loads(render('').stdout) == base
 assert render('{invalid').returncode != 0, 'Invalid input must fail, not overwrite'
 
-for shell, name in [('bash', 'dot_bashrc'), ('zsh', 'dot_zshrc')]:
+for shell, name in [('bash', 'dot_bashrc'), ('zsh', 'dot_zshrc'),
+                    ('bash', 'dot_bash_profile'), ('bash', 'bin/executable_pi'),
+                    ('bash', 'private_dot_config/shell/common.sh'),
+                    ('zsh', 'private_dot_config/shell/common.sh')]:
     subprocess.run([shell, '-n', str(source / name)], check=True)
     assert 'nvim' not in (source / name).read_text()
 assert 'defaults write' not in (source / 'dot_bashrc').read_text()
 
-# Exercise the actual file-picker editor helper without sourcing shell startup.
+# Both shells must source the shared shell-neutral setup.
+for rc in ('dot_zshrc', 'dot_bashrc'):
+    assert '.config/shell/common.sh' in (source / rc).read_text(), f'{rc} must source common.sh'
+
+# The shortcut layer is deliberately tiny: only `up` and `pluto` survive.
+common = (source / 'private_dot_config/shell/common.sh').read_text()
 bashrc = (source / 'dot_bashrc').read_text()
-helper = '_edit_file() {' + bashrc.split('_edit_file() {', 1)[1].split('\n}', 1)[0] + '\n}'
+assert bashrc.count('alias ') == 0, 'dot_bashrc must not define aliases'
+aliases = [l.split('alias ', 1)[1].split('=')[0] for l in common.splitlines() if l.startswith('alias ')]
+assert aliases == ['pluto'], 'common.sh must define only the pluto alias'
+assert 'up()' in common, 'common.sh must define the up function'
+
+# Exercise the shared EDITOR selection (zed preferred, nano fallback).
+editor = ('if command -v zed >/dev/null 2>&1; then\n' +
+          common.split('command -v zed >/dev/null 2>&1; then', 1)[1].split('\nfi\n', 1)[0] +
+          '\nfi\nprintf "%s" "$EDITOR"\n')
 with tempfile.TemporaryDirectory() as tmp:
     tmp = Path(tmp)
     for command in ['zed', 'nano']:
         p = tmp / command
         p.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
         p.chmod(0o700)
-    def edit():
-        return subprocess.check_output(['/bin/bash', '-c', helper + '\n_edit_file "file with spaces" 12'],
-                                       env=dict(os.environ, PATH=str(tmp)), text=True)
-    assert edit() == '--wait\nfile with spaces:12\n'
+    out = subprocess.check_output(['/bin/bash', '-c', editor],
+                                  env=dict(os.environ, PATH=str(tmp)), text=True)
+    assert out == 'zed --wait', out
     (tmp / 'zed').unlink()
-    assert edit() == 'file with spaces\n'
+    out = subprocess.check_output(['/bin/bash', '-c', editor],
+                                  env=dict(os.environ, PATH=str(tmp)), text=True)
+    assert out == 'nano', out
 
     config = tmp / 'chezmoi.toml'
     config.write_text('[data.modules]\nworkstation = false\nbackupMac = false\n')
@@ -58,6 +75,5 @@ with tempfile.TemporaryDirectory() as tmp:
                                        'managed'], text=True)
     assert 'restic-hclm' not in managed, 'Backup setup leaked to another machine'
     assert 'Library' not in managed.splitlines(), 'Mac-only parent directory leaked'
-    assert '.config/nvim' not in managed
     assert 'tests/test_dotfiles.py' not in managed
-print('PASS: Pi runtime preservation, stable preferences, invalid JSON, editor fallbacks, machine gating')
+print('PASS: Pi runtime preservation, stable preferences, invalid JSON, editor fallbacks, shell syntax, common.sh wiring, machine gating')

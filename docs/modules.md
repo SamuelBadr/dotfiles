@@ -16,6 +16,9 @@ or its lock metadata.
 
 ## Tool ownership
 
+- **Shell shortcuts:** shared, shell-neutral setup lives in `~/.config/shell/common.sh`
+  (sourced by both zsh and the bash fallback). By design it defines only `up` and
+  `pluto`; treat additions as deliberate. zsh-specific config stays in `~/.zshrc`.
 - **Editor:** Zed with `--wait`; nano fallback when Zed is unavailable.
 - **Node:** Homebrew `node` and npm. NVM is a separate per-user Node version
   manager; no NVM installation or version file exists here, so its old shell

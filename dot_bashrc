@@ -1,17 +1,12 @@
 # ============================================================================
-# Environment Variables
+# ~/.bashrc — interactive bash (fallback shell).
+# The canonical interactive shell is zsh; bash is kept as a thin fallback for
+# machines (e.g. HPC login nodes) where zsh is not user-installable. Shared,
+# shell-neutral setup lives in ~/.config/shell/common.sh.
 # ============================================================================
-# Prefer Zed, then nano.
-if command -v zed >/dev/null 2>&1; then
-  export EDITOR="zed --wait"
-else
-  export EDITOR="nano"
-fi
-export VISUAL="$EDITOR"
-export GITHUB_USERNAME="SamuelBadr"
 
-# Path configuration
-export PATH="$HOME/.bun/bin:$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
+# Shared environment; also needed for non-interactive bash.
+[ -r "$HOME/.config/shell/common.sh" ] && . "$HOME/.config/shell/common.sh"
 
 # ============================================================================
 # Only run the rest for interactive shells
@@ -25,8 +20,9 @@ if [[ -x "$HOME/.local/bin/zsh" ]]; then
 fi
 
 # ============================================================================
-# History Configuration (Bash equivalents)
+# Interactive fallback (no user-local zsh on this machine)
 # ============================================================================
+# History
 export HISTFILE="$HOME/.bash_history"
 export HISTSIZE=50000
 export HISTFILESIZE=50000
@@ -36,12 +32,9 @@ shopt -s histappend
 shopt -s cmdhist
 
 # Similar to: ignore leading space + ignore duplicates + erase older dups
-# (erasedups is supported on modern bash; harmless if not)
 export HISTCONTROL="ignoreboth:erasedups"
 
-# Share history across sessions (approximation of zsh SHARE_HISTORY):
-# -a: append new lines to HISTFILE each prompt
-# -n: read new lines from HISTFILE each prompt
+# Share history across sessions: -a append each prompt, -n read new lines.
 __hist_sync() { history -a; history -n; }
 case "${PROMPT_COMMAND:-}" in
   *__hist_sync*) : ;;
@@ -49,27 +42,14 @@ case "${PROMPT_COMMAND:-}" in
   *)  PROMPT_COMMAND="__hist_sync; $PROMPT_COMMAND" ;;
 esac
 
-# ============================================================================
-# Bash Options (shopt/readline equivalents)
-# ============================================================================
-# AUTO_CD
+# Options
 shopt -s autocd 2>/dev/null || true
-
-# Directory stack behavior similar to AUTO_PUSHD / PUSHD_* (best-effort)
-shopt -s pushdignoredups 2>/dev/null || true
-shopt -s pushdsilent     2>/dev/null || true
-shopt -s pushdminus      2>/dev/null || true
-
-# INTERACTIVE_COMMENTS
+shopt -s pushdignoredups pushdsilent pushdminus 2>/dev/null || true
 shopt -s interactive_comments
 
-# ============================================================================
-# Completion (bash-completion) + Readline tuning
-# ============================================================================
-# Enable bash-completion if available (Homebrew / Linux common paths)
+# Completion (bash-completion) + readline tuning
 if command -v brew >/dev/null 2>&1; then
   if [[ -r "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]]; then
-    # Homebrew bash-completion@2
     source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
   elif [[ -r "$(brew --prefix)/share/bash-completion/bash_completion" ]]; then
     source "$(brew --prefix)/share/bash-completion/bash_completion"
@@ -78,91 +58,18 @@ fi
 [[ -r /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
 [[ -r /etc/bash_completion ]] && source /etc/bash_completion
 
-# Completion styling-ish (readline; not as powerful as zstyle)
 bind 'set completion-ignore-case on'
 bind 'set show-all-if-ambiguous on'
 bind 'set menu-complete-display-prefix on' 2>/dev/null || true
 
-# ============================================================================
-# Key Bindings (readline)
-# ============================================================================
+# Key bindings
 set -o emacs
-
-# Prefix history search on Up/Down (similar vibe to up-line-or-beginning-search)
 bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
 bind '"\C-p": history-search-backward'
 bind '"\C-n": history-search-forward'
 
-# ============================================================================
-# Aliases - General
-# ============================================================================
-# Navigation
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias '~'='cd ~'
-alias -- -='cd -'
-
-# Shortcuts
-alias h='history'
-alias c='clear'
-alias e='$EDITOR'
-alias bashrc='$EDITOR ~/.bashrc'
-alias reload='source ~/.bashrc'
-
-# System
-alias up='brew update && brew upgrade --greedy-auto-updates --overwrite && brew cleanup && if command -v npm >/dev/null; then latest=$(npm view npm version 2>/dev/null); current=$(npm -v); if [ -n "$latest" ] && [ "$current" != "$latest" ]; then npm install -g npm@latest; fi; npm update -g; fi'
-
-# ============================================================================
-# Aliases - Chezmoi
-# ============================================================================
-alias cm='chezmoi'
-alias cma='chezmoi add'
-alias cme='chezmoi edit'
-alias cmcd='chezmoi cd'
-alias cmap='chezmoi apply'
-alias cmup='chezmoi update'
-alias cmdiff='chezmoi diff'
-
-# ============================================================================
-# Aliases - Julia
-# ============================================================================
-alias pluto='julia -e "using Pluto; Pluto.run()"'
-alias julia-update='juliaup update'
-
-# ============================================================================
-# Aliases - Git
-# ============================================================================
-alias g='git'
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gcm='git commit -m'
-alias gp='git push'
-alias gpl='git pull'
-alias gd='git diff'
-alias gds='git diff --staged'
-alias gl='git log --oneline --graph --decorate'
-alias gla='git log --oneline --graph --decorate --all'
-alias gco='git checkout'
-alias gcb='git checkout -b'
-alias gb='git branch'
-alias gba='git branch -a'
-
-# ============================================================================
-# Functions
-# ============================================================================
-mkcd() { mkdir -p "$1" && cd "$1"; }
-
-ff() { find . -type f -iname "*$1*"; }
-
-gg() { grep -r "$1" .; }
-
-# ============================================================================
-# fzf integration (bash scripts)
-# ============================================================================
-# Common locations: Homebrew + Linux
+# fzf shell integration (best effort)
 if command -v brew >/dev/null 2>&1; then
   [[ -r "$(brew --prefix)/opt/fzf/shell/key-bindings.bash" ]] && source "$(brew --prefix)/opt/fzf/shell/key-bindings.bash"
   [[ -r "$(brew --prefix)/opt/fzf/shell/completion.bash"   ]] && source "$(brew --prefix)/opt/fzf/shell/completion.bash"
@@ -170,105 +77,12 @@ fi
 [[ -r /usr/share/fzf/key-bindings.bash ]] && source /usr/share/fzf/key-bindings.bash
 [[ -r /usr/share/fzf/completion.bash   ]] && source /usr/share/fzf/completion.bash
 
-export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
-export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window=right:60%"
-export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
-
-# ============================================================================
-# Interactive File Picker (fzf + fd + rg + bat)
-# ============================================================================
-_edit_file() {
-  if command -v zed >/dev/null 2>&1; then
-    if [[ -n "${2:-}" ]]; then
-      zed --wait "$1:$2"
-    else
-      zed --wait "$1"
-    fi
-  else
-    nano "$1"
-  fi
-}
-
-fp() {
-  local file
-  file=$(fd --type f --hidden --follow --exclude .git \
-    | fzf --query="$1" \
-          --preview 'bat --style=numbers,changes --color=always {}' \
-          --preview-window 'right:60%:wrap' \
-          --bind 'ctrl-/:toggle-preview' \
-          --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
-          --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open in editor')
-  [[ -n "$file" ]] && _edit_file "$file"
-}
-
-rgs() {
-  local selection
-  selection=$(rg --color=always --line-number --no-heading --smart-case "${*:-}" \
-    | fzf --ansi \
-          --delimiter : \
-          --preview 'bat --style=numbers,changes --color=always --highlight-line {2} {1} 2>/dev/null' \
-          --preview-window 'right:60%:wrap:+{2}-5' \
-          --bind 'ctrl-/:toggle-preview' \
-          --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
-          --header 'CTRL-/ toggle preview | CTRL-D/U scroll preview | ENTER open at line')
-
-  if [[ -n "$selection" ]]; then
-    local file line
-    file=$(echo "$selection" | cut -d: -f1)
-    line=$(echo "$selection" | cut -d: -f2)
-    _edit_file "$file" "$line"
-  fi
-}
-
-fif() {
-  local selection
-  selection=$(: | fzf --ansi --disabled \
-    --prompt 'Content> ' \
-    --bind 'change:reload:rg --column --line-number --no-heading --color=always --smart-case {q} || true' \
-    --bind 'ctrl-t:transform:[ "$FZF_PROMPT" = "Content> " ] &&
-      echo "unbind(change)+enable-search+clear-query+change-prompt(Files> )+reload:fd --type f --hidden --follow --exclude .git" ||
-      echo "disable-search+rebind(change)+clear-query+change-prompt(Content> )+reload:true"' \
-    --delimiter : \
-    --preview 'f={1}; [ -f "$f" ] && bat --style=numbers,changes --color=always --highlight-line {2} "$f" 2>/dev/null || bat --style=numbers,changes --color=always {} 2>/dev/null' \
-    --preview-window 'right:60%:wrap' \
-    --bind 'ctrl-/:toggle-preview' \
-    --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up' \
-    --header 'CTRL-T toggle Files/Content | CTRL-/ preview | ENTER open')
-
-  if [[ -n "$selection" ]]; then
-    local file line
-    if [[ "$selection" == *:* ]]; then
-      file=$(echo "$selection" | cut -d: -f1)
-      line=$(echo "$selection" | cut -d: -f2)
-      _edit_file "$file" "$line"
-    else
-      _edit_file "$selection"
-    fi
-  fi
-}
-
-# ============================================================================
-# Tool Integrations
-# ============================================================================
-# zoxide (bash init)
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init bash)"
+if command -v fzf >/dev/null 2>&1; then
+  export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
+  export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window=right:60%"
+  export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
 fi
 
-# ============================================================================
-# Prompt (load last)
-# ============================================================================
-if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init bash)"
-fi
-
-# ============================================================================
-# juliaup initialize (bash equivalent)
-# ============================================================================
-[[ -d "$HOME/.juliaup/bin" ]] && export PATH="$HOME/.juliaup/bin:$PATH"
-
-# ============================================================================
-# Notes on zsh-only features:
-# - zstyle/compinit-based completion theming doesn't translate to bash; readline tuning above is the substitute.
-# - zsh-autosuggestions / zsh-syntax-highlighting are zsh plugins; bash equivalents exist but are different projects.
-# ============================================================================
+# Tool integrations (best effort)
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init bash)"
+command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"
