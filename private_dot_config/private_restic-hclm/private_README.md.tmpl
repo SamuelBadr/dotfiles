@@ -36,8 +36,6 @@ Existing runitor/Healthchecks monitoring is retained. Skips send no success hear
 
 On 2026-09-07, narrowed snapshot `01747801` scanned 25.035 GiB and stored 795.866 MiB. `.gitconfig` and `Projects/ParquetIR.jl/Project.toml` restored byte-for-byte. Metadata `restic check` completed with no errors. No repository locks remain. Payload verification beyond the restore samples remains an occasional deliberate AC maintenance task.
 
-## Tests and rollback
+## Tests
 
-Run `python3 ~/.config/restic-hclm/test_policy.py`. Tests mock power/network policy and exercise real restic against tiny synthetic data in a disposable local repository; no network or personal data is used. Both passed after scope changes.
-
-Earlier pre-scope backup configuration: `archive/20260906-084756-scope/`. Restore relevant plist/config files and reload their LaunchAgents only for rollback.
+Run `python3 ~/.config/restic-hclm/test_policy.py`. Tests mock power/network policy and exercise real restic against tiny synthetic data in a disposable local repository; no network or personal data is used.

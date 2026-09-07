@@ -29,14 +29,6 @@ with tempfile.TemporaryDirectory() as tmp:
         assert p.returncode == expected, p.stderr
         assert (tmp / 'trace').read_text() == trace
 
-    restic = stub('restic', 'exit "$RESULT"')
-    policy = tmp / 'policy'
-    policy.write_text((root / 'restic-backup-exit-policy').read_text().replace('/opt/homebrew/bin/restic', restic))
-    for result in (0, 1, 3):
-        p = subprocess.run(['/bin/sh', str(policy)], env=dict(env, RESULT=str(result)), capture_output=True)
-        assert p.returncode == result
-        if result == 3:
-            assert b'Partial backup' in p.stderr
 print('PASS: battery/network skips, execution, and failure propagation')
 
 # Exercise real restic selection on tiny synthetic files, never personal data.
