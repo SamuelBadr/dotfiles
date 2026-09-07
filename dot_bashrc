@@ -44,7 +44,6 @@ esac
 
 # Options
 shopt -s autocd 2>/dev/null || true
-shopt -s pushdignoredups pushdsilent pushdminus 2>/dev/null || true
 shopt -s interactive_comments
 
 # Completion (bash-completion) + readline tuning
@@ -69,20 +68,5 @@ bind '"\e[B": history-search-forward'
 bind '"\C-p": history-search-backward'
 bind '"\C-n": history-search-forward'
 
-# fzf shell integration (best effort)
-if command -v brew >/dev/null 2>&1; then
-  [[ -r "$(brew --prefix)/opt/fzf/shell/key-bindings.bash" ]] && source "$(brew --prefix)/opt/fzf/shell/key-bindings.bash"
-  [[ -r "$(brew --prefix)/opt/fzf/shell/completion.bash"   ]] && source "$(brew --prefix)/opt/fzf/shell/completion.bash"
-fi
-[[ -r /usr/share/fzf/key-bindings.bash ]] && source /usr/share/fzf/key-bindings.bash
-[[ -r /usr/share/fzf/completion.bash   ]] && source /usr/share/fzf/completion.bash
-
-if command -v fzf >/dev/null 2>&1; then
-  export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
-  export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window=right:60%"
-  export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
-fi
-
-# Tool integrations (best effort)
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init bash)"
+# Prompt
 command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"

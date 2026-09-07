@@ -52,9 +52,6 @@ setopt HIST_VERIFY                # Show command with history expansion before r
 # Zsh Options
 # ============================================================================
 setopt AUTO_CD                    # cd by typing directory name if it's not a command
-setopt AUTO_PUSHD                 # Make cd push old directory onto directory stack
-setopt PUSHD_IGNORE_DUPS          # Don't push multiple copies of same directory
-setopt PUSHD_SILENT               # Don't print directory stack after pushd/popd
 setopt INTERACTIVE_COMMENTS       # Allow comments in interactive shells
 
 # ============================================================================
@@ -76,7 +73,6 @@ autoload -Uz compinit && compinit
 
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'       # Case insensitive matching
-[[ -n ${LS_COLORS:-} ]] && zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' group-name ''                             # Group results by category
 zstyle ':completion:*:descriptions' format '%B%d%b'              # Bold descriptions
 zstyle ':completion:*:warnings' format 'No matches for: %d'      # Warning format
@@ -149,13 +145,6 @@ fi
 
 # Syntax highlighting should be loaded after other plugins.
 source_plugin zsh-syntax-highlighting
-
-# ============================================================================
-# Tool Integrations
-# ============================================================================
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh)"
-fi
 
 # ============================================================================
 # Prompt (load last)
