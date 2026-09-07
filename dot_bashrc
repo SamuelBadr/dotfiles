@@ -10,8 +10,6 @@ fi
 export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
 
-export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
-
 # Path configuration
 export PATH="$HOME/.bun/bin:$HOME/.cargo/bin:$HOME/.julia/bin:$HOME/bin:$HOME/.local/bin:$PATH"
 
@@ -161,27 +159,6 @@ ff() { find . -type f -iname "*$1*"; }
 
 gg() { grep -r "$1" .; }
 
-extract() {
-  if [[ -f "$1" ]]; then
-    case "$1" in
-      *.tar.bz2) tar xjf "$1" ;;
-      *.tar.gz)  tar xzf "$1" ;;
-      *.bz2)     bunzip2 "$1" ;;
-      *.rar)     unrar x "$1" ;;
-      *.gz)      gunzip "$1" ;;
-      *.tar)     tar xf "$1" ;;
-      *.tbz2)    tar xjf "$1" ;;
-      *.tgz)     tar xzf "$1" ;;
-      *.zip)     unzip "$1" ;;
-      *.Z)       uncompress "$1" ;;
-      *.7z)      7z x "$1" ;;
-      *)         echo "'$1' cannot be extracted via extract()" ;;
-    esac
-  else
-    echo "'$1' is not a valid file"
-  fi
-}
-
 # ============================================================================
 # fzf integration (bash scripts)
 # ============================================================================
@@ -289,15 +266,6 @@ fi
 # juliaup initialize (bash equivalent)
 # ============================================================================
 [[ -d "$HOME/.juliaup/bin" ]] && export PATH="$HOME/.juliaup/bin:$PATH"
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:$HOME/.lmstudio/bin"
-# End of LM Studio CLI section
-
-# tirith init (best effort; fall back if bash subcommand isn't supported)
-if command -v tirith >/dev/null 2>&1; then
-  eval "$(tirith init bash 2>/dev/null || tirith init 2>/dev/null)"
-fi
 
 # ============================================================================
 # Notes on zsh-only features:

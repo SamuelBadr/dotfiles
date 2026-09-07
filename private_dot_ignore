@@ -57,6 +57,5 @@ venv/
 .julia/compiled/
 
 # macOS
-.DS_Store
 .AppleDouble
 .LSOverride

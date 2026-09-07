@@ -3,7 +3,6 @@
 
 # Repository-only regression checks.
 tests
-tests/**
 
 # Julia: global env Project.toml/Manifest.toml are machine-local churn
 # (startup.jl config is still tracked).
@@ -12,11 +11,9 @@ tests/**
 
 # macOS
 .DS_Store
-**/.DS_Store
 
 # Python bytecode caches
 **/__pycache__/**
-**/__pycache__/
 
 # All skills and lock metadata are managed by the `skills` CLI.
 .agents/skills/**
@@ -34,19 +31,13 @@ tests/**
 
 # Pi coding agent: private/volatile state
 .pi/agent/sessions/
-.pi/agent/sessions/**
 
 # Usually generated/temporary
 .pi/agent/logs/
-.pi/agent/logs/**
 .pi/agent/cache/
-.pi/agent/cache/**
 .pi/agent/tmp/
-.pi/agent/tmp/**
 .pi/agent/node_modules/
-.pi/agent/node_modules/**
 .pi/agent/npm/
-.pi/agent/npm/**
 
 # Pi package install cache — pi reinstates everything in settings.json "packages"
 # on demand, so the whole dir is runtime state and must never be tracked.
@@ -65,7 +56,6 @@ tests/**
 .config/restic-hclm
 .config/restic-hclm/**
 Library
-Library/**
 {{- end }}
 
 # HPC login-node guard: deployed only where [data] hpcLoginNode = true
