@@ -10,9 +10,8 @@ if [ ! -x "$REAL_PI" ]; then
   exit 127
 fi
 
-# Thread caps (inherited by all children).
-export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8
-export JULIA_NUM_THREADS=8 NUMEXPR_NUM_THREADS=8 VECLIB_MAXIMUM_THREADS=8 BLIS_NUM_THREADS=8
+# Thread caps (inherited by all children) for the libs this stack actually reads.
+export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 JULIA_NUM_THREADS=8
 
 # Gentle CPU/I/O priority for the whole tree.
 renice -n 5 -p $$ >/dev/null 2>&1 || true

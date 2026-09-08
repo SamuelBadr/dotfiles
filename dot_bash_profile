@@ -4,11 +4,7 @@ if [ -r "$HOME/.profile" ]; then
 fi
 
 # Keep user-installed commands, including chezmoi, on PATH.
-case ":${PATH-}:" in
-  *:"$HOME/bin":*) ;;
-  *) PATH="$HOME/bin${PATH:+:$PATH}" ;;
-esac
-export PATH
+export PATH="$HOME/bin:$PATH"
 
 # The cluster keeps /bin/bash as the account shell; use user-local zsh for
 # interactive login sessions when available.
