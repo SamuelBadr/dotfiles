@@ -56,7 +56,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert '.pi/agent/settings.json' in managed, 'Pi settings must be tracked as a plain file'
 
 # Pi settings: tracked directly, not templated, must carry the current package set.
-pi_settings = (source / 'private_dot_pi/private_agent/settings.json').read_text()
+pi_settings = (source / 'private_dot_pi/private_agent/private_settings.json').read_text()
 assert '{{' not in pi_settings, 'Pi settings must not be templated'
 pi_json = json.loads(pi_settings)
 assert 'https://github.com/ayghri/i-have-adhd' in pi_json['packages']
