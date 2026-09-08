@@ -82,4 +82,39 @@ with tempfile.TemporaryDirectory() as tmp:
 brewfile = (source / 'Brewfile').read_text()
 assert '{{' not in brewfile, 'Brewfile must not be templated'
 assert 'HOMEBREW_BUNDLE_FILE' in common, 'common.sh must point brew at the repo manifest'
-print('PASS: Pi runtime preservation, stable preferences, invalid JSON, editor fallbacks, shell syntax, common.sh wiring, machine gating')
+# The `pi` wrapper syncs installed packages into the repo manifest on install/remove.
+def pi_sync_check():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        h, r = tmp / 'h', tmp / 'r'
+        (h / '.pi' / 'agent').mkdir(parents=True)
+        (r / '.chezmoitemplates').mkdir(parents=True)
+        seed = (source / '.chezmoitemplates/pi-settings.json').read_text()
+        manifest = r / '.chezmoitemplates/pi-settings.json'
+        manifest.write_text(seed)
+        (h / '.pi' / 'agent' / 'settings.json').write_text(seed)
+        fp = tmp / 'bin' / 'pi'
+        fp.parent.mkdir()
+        fp.write_text('''#!/bin/sh
+f="$HOME/.pi/agent/settings.json"
+case "$1" in
+ install) python3 -c "import json;d=json.load(open('$f'));d['packages'].append('npm:testpkg');json.dump(d,open('$f','w'),indent=2)";;
+ remove)  python3 -c "import json;d=json.load(open('$f'));d['packages']=[p for p in d['packages'] if p!='npm:testpkg'];json.dump(d,open('$f','w'),indent=2)";;
+esac
+''')
+        fp.chmod(0o700)
+        env = dict(os.environ, HOME=str(h), PI_CHEZMOI_REPO=str(r),
+                   PATH=f'{fp.parent}:/usr/bin:/bin')
+        common = source / 'private_dot_config/shell/common.sh'
+        run = lambda verb: subprocess.run(
+            ['/bin/bash', '-c', f'. "{common}"; pi {verb} testpkg'],
+            env=env, capture_output=True, text=True).returncode
+        assert run('install') == 0
+        assert 'npm:testpkg' in json.loads(manifest.read_text())['packages']
+        assert run('update --all') == 0  # non-install/remove verbs must not sync
+        assert 'npm:testpkg' in json.loads(manifest.read_text())['packages']
+        assert run('remove') == 0
+        assert 'npm:testpkg' not in json.loads(manifest.read_text())['packages']
+pi_sync_check()
+
+print('PASS: Pi runtime preservation, stable preferences, invalid JSON, editor fallbacks, shell syntax, common.sh wiring, machine gating, pi package sync')
