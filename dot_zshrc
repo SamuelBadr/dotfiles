@@ -23,35 +23,16 @@ elif command -v brew >/dev/null 2>&1; then
 fi
 
 # ============================================================================
-# Environment Variables
+# Shared Environment (EDITOR, PATH, GITHUB_USERNAME, up, pluto)
 # ============================================================================
-# Prefer Zed, then nano.
-if (( $+commands[zed] )); then
-  export EDITOR="zed --wait"
-else
-  export EDITOR="nano"
-fi
-export VISUAL="$EDITOR"
-export GITHUB_USERNAME="SamuelBadr"
-export BUN_INSTALL="$HOME/.bun"
+# Shell-neutral configuration lives here so zsh and the bash fallback stay in
+# sync. Load after Homebrew so brew-installed tool dirs are on PATH already.
+[[ -r $HOME/.config/shell/common.sh ]] && . "$HOME/.config/shell/common.sh"
 
 # Load the Parallel API key from macOS Keychain without storing it in dotfiles.
 if [[ -z ${PARALLEL_API_KEY:-} ]] && command -v security >/dev/null 2>&1; then
   PARALLEL_API_KEY=$(security find-generic-password -a "$USER" -s pi-parallel-api-key -w 2>/dev/null) && export PARALLEL_API_KEY
 fi
-
-# PATH configuration. `typeset -U` keeps entries unique while preserving order.
-typeset -U path
-path=(
-  "$BUN_INSTALL/bin"
-  "$HOME/.cargo/bin"
-  "$HOME/.juliaup/bin"
-  "$HOME/.julia/bin"
-  "$HOME/bin"
-  "$HOME/.local/bin"
-  $path
-)
-export PATH
 
 # ============================================================================
 # History Configuration
@@ -71,9 +52,6 @@ setopt HIST_VERIFY                # Show command with history expansion before r
 # Zsh Options
 # ============================================================================
 setopt AUTO_CD                    # cd by typing directory name if it's not a command
-setopt AUTO_PUSHD                 # Make cd push old directory onto directory stack
-setopt PUSHD_IGNORE_DUPS          # Don't push multiple copies of same directory
-setopt PUSHD_SILENT               # Don't print directory stack after pushd/popd
 setopt INTERACTIVE_COMMENTS       # Allow comments in interactive shells
 
 # ============================================================================
@@ -95,7 +73,6 @@ autoload -Uz compinit && compinit
 
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'       # Case insensitive matching
-[[ -n ${LS_COLORS:-} ]] && zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' group-name ''                             # Group results by category
 zstyle ':completion:*:descriptions' format '%B%d%b'              # Bold descriptions
 zstyle ':completion:*:warnings' format 'No matches for: %d'      # Warning format
@@ -117,28 +94,6 @@ bindkey '^[[A' up-line-or-beginning-search
 bindkey '^[[B' down-line-or-beginning-search
 bindkey '^P' up-line-or-beginning-search
 bindkey '^N' down-line-or-beginning-search
-
-# ============================================================================
-# Functions
-# ============================================================================
-# System update shortcut. Remove a legacy alias before defining the function.
-unalias up 2>/dev/null
-up() {
-  if command -v brew >/dev/null 2>&1; then
-    brew update
-    brew upgrade --greedy --overwrite -y
-    brew cleanup
-  fi
-
-  if command -v pi >/dev/null 2>&1; then
-    pi update --all
-  fi
-
-  if command -v skills >/dev/null 2>&1; then
-    skills update -g -y
-    skills update -p -y
-  fi
-}
 
 # ============================================================================
 # Plugin Loading
@@ -168,35 +123,8 @@ source_plugin zsh-autosuggestions && {
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
 }
 
-# fzf shell integration.
-fzf_shell_dirs=()
-[[ -n ${HOMEBREW_PREFIX:-} ]] && fzf_shell_dirs+=("$HOMEBREW_PREFIX/opt/fzf/shell")
-fzf_shell_dirs+=(/usr/share/fzf)
-
-for dir in "${fzf_shell_dirs[@]}"; do
-  if [[ -r $dir/key-bindings.zsh ]]; then
-    source "$dir/key-bindings.zsh" 2>/dev/null
-    [[ -r $dir/completion.zsh ]] && source "$dir/completion.zsh" 2>/dev/null
-    break
-  fi
-done
-unset fzf_shell_dirs
-
-if command -v fzf >/dev/null 2>&1; then
-  export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
-  export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window=right:60%"
-  export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
-fi
-
 # Syntax highlighting should be loaded after other plugins.
 source_plugin zsh-syntax-highlighting
-
-# ============================================================================
-# Tool Integrations
-# ============================================================================
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh)"
-fi
 
 # ============================================================================
 # Prompt (load last)
@@ -204,13 +132,6 @@ fi
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 fi
-# oMLX: CLI shim path begin
-case ":$PATH:" in
-  *":$HOME/.omlx/bin:"*) ;;
-  *) export PATH="$HOME/.omlx/bin:$PATH" ;;
-esac
-# oMLX: CLI shim path end
-
 # Puppeteer: snap Chromium exists only on some Linux machines; no-op elsewhere.
 if [[ $OSTYPE == linux* && -x /snap/chromium/current/usr/lib/chromium-browser/chrome ]]; then
   export PUPPETEER_EXECUTABLE_PATH=/snap/chromium/current/usr/lib/chromium-browser/chrome
