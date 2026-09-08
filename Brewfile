@@ -10,7 +10,6 @@ brew "ripgrep"       # Better grep
 brew "bottom"        # System monitor
 
 # CLI Tools - Utilities
-brew "tmux"          # Managed tmux configuration
 brew "tealdeer"      # tldr - simplified man pages
 brew "chezmoi"       # Dotfiles manager
 
