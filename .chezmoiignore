@@ -67,3 +67,11 @@ Library
 bin/pi
 .pi/agent/AGENTS.md
 {{- end }}
+
+# Workstation-only files (gated here rather than with in-file templates).
+{{- if not .modules.workstation }}
+.config/starship.toml
+{{- end }}
+{{- if not (and (eq .chezmoi.os "darwin") .modules.workstation) }}
+.chezmoiscripts/macos-keyboard.sh
+{{- end }}

@@ -1,4 +1,3 @@
-{{- if .modules.workstation -}}
 # Minimal starship prompt
 
 format = '\[$hostname$directory$git_branch$git_status\] $character'
@@ -39,4 +38,3 @@ deleted = '*'
 [character]
 success_symbol = ''
 error_symbol = '[!](red)'
-{{- end -}}
