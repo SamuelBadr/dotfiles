@@ -47,22 +47,21 @@ are listed unconditionally even though only the `backupMac` machine runs them.
 
 ## Pi settings ownership
 
-`.chezmoitemplates/pi-settings.json` is the shared source of truth for Pi
-configuration (packages, subagent config, theme, tuiMode). A chezmoi
-modify-template deploys it to `~/.pi/agent/settings.json` while preserving
-machine-local runtime keys (`defaultProvider`, `defaultModel`,
-`defaultThinkingLevel`, `modelThinkingLevels`, `enabledModels`,
-`lastChangelogVersion`).
+`~/.pi/agent/settings.json` is tracked **directly** as a plain dotfile
+(`private_dot_pi/private_agent/settings.json`) — no template, no merge. It holds
+the full desired Pi state: packages, subagent config, theme, tuiMode, and the
+model defaults (`defaultProvider`, `defaultModel`, `defaultThinkingLevel`,
+`enabledModels`, `lastChangelogVersion`).
 
 Package installs stay in sync automatically: `~/.config/shell/common.sh` wraps
-`pi` so `pi install` / `pi remove` copy the live `packages` list back into the
-manifest and commit+push it; every machine inherits the change on its next
-`chezmoi update`. `pi update --all` only reconciles checkouts, never the list,
-so no sync is needed there. Other stable config (theme, subagent models) is
-edited in the repo manifest.
+`pi` so `pi install` / `pi remove` run `chezmoi re-add` on the file, and
+chezmoi's `autoCommit`/`autoPush` (configured on workstations) ships it; every
+machine inherits the change on its next `chezmoi update`. `pi update --all` only
+reconciles checkouts, never the packages list, so no sync is needed there.
 
-Edit the stable JSON in the source repo. Do not `chezmoi add
-~/.pi/agent/settings.json`; that would recapture machine-local runtime choices.
+Because the file is now shared, model/provider choices replicate across machines
+too. Editing it outside the wrapper behaves like any dotfile: it drifts until
+you `chezmoi re-add` it, and `chezmoi apply` will overwrite local edits.
 
 ## Mac backups
 

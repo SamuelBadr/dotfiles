@@ -1,0 +1,81 @@
+{
+  "defaultModel": "deepseek-v4-flash-284b",
+  "defaultProvider": "aqueduct",
+  "defaultThinkingLevel": "max",
+  "enableInstallTelemetry": false,
+  "enabledModels": [
+    "openai-codex/gpt-5.6-luna",
+    "openai-codex/gpt-5.6-sol",
+    "aqueduct/deepseek-v4-flash-284b",
+    "claude-bridge/claude-opus-5",
+    "openai-codex/gpt-6-astra"
+  ],
+  "lastChangelogVersion": "0.85.1",
+  "outputPad": 1,
+  "packages": [
+    "npm:pi-subagents",
+    "npm:pi-web-access",
+    "npm:pi-fff",
+    "git:github.com/algal/pi-openai-server-compaction",
+    "git:github.com/DietrichGebert/ponytail",
+    "npm:pi-context-view",
+    "npm:pi-claude-bridge",
+    "https://github.com/ayghri/i-have-adhd"
+  ],
+  "subagents": {
+    "agentOverrides": {
+      "advisor": {
+        "model": "aqueduct/large",
+        "thinking": "max"
+      },
+      "context-builder": {
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
+      },
+      "delegate": {
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
+      },
+      "oracle": {
+        "model": "aqueduct/large",
+        "thinking": "max"
+      },
+      "planner": {
+        "model": "aqueduct/large",
+        "thinking": "max"
+      },
+      "researcher": {
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
+      },
+      "reviewer": {
+        "model": "aqueduct/large",
+        "thinking": "max"
+      },
+      "scout": {
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "low"
+      },
+      "verifier": {
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
+      },
+      "worker": {
+        "model": "aqueduct/deepseek-v4-flash-284b",
+        "thinking": "high"
+      }
+    },
+    "defaultModel": "aqueduct/deepseek-v4-flash-284b",
+    "modelScope": {
+      "allow": [
+        "aqueduct/main",
+        "aqueduct/large",
+        "openai-codex/gpt-5.6-*",
+        "aqueduct/deepseek-v4-flash-284b"
+      ],
+      "enforce": true
+    }
+  },
+  "theme": "light/dark",
+  "tuiMode": "fullscreen"
+}

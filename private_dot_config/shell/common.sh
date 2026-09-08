@@ -68,37 +68,17 @@ up() {
 alias pluto='julia -e "using Pluto; Pluto.run()"'
 
 # ---------------------------------------------------------------------------
-# pi: keep the repo manifest in sync with what is installed.
-# After `pi install` / `pi remove`, copy the live `packages` list into
-# .chezmoitemplates/pi-settings.json and commit+push, so every machine
-# inherits the change on its next `chezmoi update`. The six runtime keys
-# (defaultModel, provider, thinking...) stay machine-local via the
-# modify-template. Override _PI_REPO for a relocated chezmoi source.
+# pi: keep the repo in sync with what is installed.
+# ~/.pi/agent/settings.json is tracked directly (a plain managed dotfile).
+# After `pi install` / `pi remove`, re-add it so the change is captured and
+# chezmoi's autoCommit/autoPush ships it; every machine inherits on its next
+# `chezmoi update`. Other edits to the file behave like any dotfile: re-add to
+# keep them. `pi update --all` never changes the packages list, so no sync.
 # ---------------------------------------------------------------------------
-_pi_repo="${PI_CHEZMOI_REPO:-$HOME/.local/share/chezmoi}"
-_pi_manifest="$_pi_repo/.chezmoitemplates/pi-settings.json"
-
-_pi_sync_manifest() {
-  [ -f "$_pi_manifest" ] && [ -f "$HOME/.pi/agent/settings.json" ] || return 0
-  python3 - "$_pi_manifest" "$HOME/.pi/agent/settings.json" <<'PY' 2>/dev/null || return 0
-import json, sys
-man, live = sys.argv[1], sys.argv[2]
-with open(live) as f: lj = json.load(f)
-with open(man) as f: mj = json.load(f)
-mj["packages"] = lj.get("packages", [])
-with open(man, "w") as f:
-    json.dump(mj, f, indent=2, ensure_ascii=False)
-    f.write("\n")
-PY
-  if git -C "$_pi_repo" rev-parse --git-dir >/dev/null 2>&1; then
-    git -C "$_pi_repo" add .chezmoitemplates/pi-settings.json \
-      && git -C "$_pi_repo" commit -q -m "Sync pi packages" \
-      && git -C "$_pi_repo" push -q
-  fi
-}
-
 pi() {
   command pi "$@"; local _s=$?
-  case "${1:-}" in install|remove) _pi_sync_manifest 2>/dev/null || true ;; esac
+  case "${1:-}" in
+    install|remove) chezmoi re-add "$HOME/.pi/agent/settings.json" >/dev/null 2>&1 || true ;;
+  esac
   return "$_s"
 }

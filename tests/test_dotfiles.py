@@ -6,30 +6,6 @@ import subprocess
 import tempfile
 
 source = Path(__file__).resolve().parents[1]
-base = json.loads((source / '.chezmoitemplates/pi-settings.json').read_text())
-template = (source / 'private_dot_pi/private_agent/modify_private_settings.json').read_text()
-
-def render(text):
-    return subprocess.run(['chezmoi', '--source', str(source), 'execute-template',
-                           '--with-stdin', template], input=text, text=True,
-                          capture_output=True)
-
-local = dict(base, defaultProvider='local', defaultModel='chosen-model',
-             defaultThinkingLevel='high', enabledModels=['local/chosen-model'],
-             modelThinkingLevels={'local/chosen-model': 'high'}, lastChangelogVersion='test')
-text = json.dumps(local, indent=4) + '\n'
-r = render(text)
-assert r.returncode == 0, r.stderr
-assert r.stdout == text, 'Runtime-only edits/formatting must not drift'
-local['theme'] = 'deliberate drift'
-r = render(json.dumps(local))
-assert r.returncode == 0, r.stderr
-fixed = json.loads(r.stdout)
-assert fixed['theme'] == base['theme']
-assert fixed['defaultModel'] == 'chosen-model'
-assert fixed['enabledModels'] == ['local/chosen-model']
-assert json.loads(render('').stdout) == base
-assert render('{invalid').returncode != 0, 'Invalid input must fail, not overwrite'
 
 for shell, name in [('bash', 'dot_bashrc'), ('zsh', 'dot_zshrc'),
                     ('bash', 'dot_bash_profile'), ('bash', 'bin/executable_pi'),
@@ -72,49 +48,50 @@ with tempfile.TemporaryDirectory() as tmp:
     config = tmp / 'chezmoi.toml'
     config.write_text('[data.modules]\nworkstation = false\nbackupMac = false\n')
     managed = subprocess.check_output(['chezmoi', '--config', str(config), '--source', str(source),
-                                       'managed'], text=True)
+                                       'managed'], text=True).splitlines()
     assert 'restic-hclm' not in managed, 'Backup setup leaked to another machine'
-    assert 'Library' not in managed.splitlines(), 'Mac-only parent directory leaked'
+    assert 'Library' not in managed, 'Mac-only parent directory leaked'
     assert 'tests/test_dotfiles.py' not in managed
     assert 'Brewfile' not in managed, 'Repo-only Homebrew manifest must not deploy'
+    assert '.pi/agent/settings.json' in managed, 'Pi settings must be tracked as a plain file'
+
+# Pi settings: tracked directly, not templated, must carry the current package set.
+pi_settings = (source / 'private_dot_pi/private_agent/settings.json').read_text()
+assert '{{' not in pi_settings, 'Pi settings must not be templated'
+pi_json = json.loads(pi_settings)
+assert 'https://github.com/ayghri/i-have-adhd' in pi_json['packages']
+assert 'git:github.com/jonjonrankin/pi-caveman' not in pi_json['packages']
 
 # Homebrew parses the manifest itself, so it must stay free of template syntax.
 brewfile = (source / 'Brewfile').read_text()
 assert '{{' not in brewfile, 'Brewfile must not be templated'
 assert 'HOMEBREW_BUNDLE_FILE' in common, 'common.sh must point brew at the repo manifest'
-# The `pi` wrapper syncs installed packages into the repo manifest on install/remove.
-def pi_sync_check():
+
+# The `pi` wrapper re-adds settings.json after install/remove (and after no other verb).
+def pi_dispatch_check():
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
-        h, r = tmp / 'h', tmp / 'r'
+        h = tmp / 'h'
         (h / '.pi' / 'agent').mkdir(parents=True)
-        (r / '.chezmoitemplates').mkdir(parents=True)
-        seed = (source / '.chezmoitemplates/pi-settings.json').read_text()
-        manifest = r / '.chezmoitemplates/pi-settings.json'
-        manifest.write_text(seed)
-        (h / '.pi' / 'agent' / 'settings.json').write_text(seed)
-        fp = tmp / 'bin' / 'pi'
-        fp.parent.mkdir()
-        fp.write_text('''#!/bin/sh
-f="$HOME/.pi/agent/settings.json"
-case "$1" in
- install) python3 -c "import json;d=json.load(open('$f'));d['packages'].append('npm:testpkg');json.dump(d,open('$f','w'),indent=2)";;
- remove)  python3 -c "import json;d=json.load(open('$f'));d['packages']=[p for p in d['packages'] if p!='npm:testpkg'];json.dump(d,open('$f','w'),indent=2)";;
-esac
-''')
-        fp.chmod(0o700)
-        env = dict(os.environ, HOME=str(h), PI_CHEZMOI_REPO=str(r),
-                   PATH=f'{fp.parent}:/usr/bin:/bin')
-        common = source / 'private_dot_config/shell/common.sh'
-        run = lambda verb: subprocess.run(
-            ['/bin/bash', '-c', f'. "{common}"; pi {verb} testpkg'],
-            env=env, capture_output=True, text=True).returncode
-        assert run('install') == 0
-        assert 'npm:testpkg' in json.loads(manifest.read_text())['packages']
-        assert run('update --all') == 0  # non-install/remove verbs must not sync
-        assert 'npm:testpkg' in json.loads(manifest.read_text())['packages']
-        assert run('remove') == 0
-        assert 'npm:testpkg' not in json.loads(manifest.read_text())['packages']
-pi_sync_check()
+        (h / '.pi' / 'agent' / 'settings.json').write_text('{}')
+        fb = tmp / 'bin'
+        fb.mkdir()
+        trace = tmp / 'trace'
+        (fb / 'pi').write_text('#!/bin/sh\necho "pi $*" >> "$TRACE"\nexit 0\n')
+        (fb / 'chezmoi').write_text('#!/bin/sh\necho "chezmoi $*" >> "$TRACE"\nexit 0\n')
+        for p in (fb / 'pi', fb / 'chezmoi'):
+            p.chmod(0o700)
+        env = dict(os.environ, HOME=str(h), TRACE=str(trace), PATH=f'{fb}:/usr/bin:/bin')
+        common_path = source / 'private_dot_config/shell/common.sh'
+        def run(v):
+            return subprocess.run(['/bin/bash', '-c', f'. "{common_path}"; pi {v}'],
+                                  env=env, capture_output=True, text=True).returncode
+        assert run('install npm:x') == 0
+        assert run('remove npm:x') == 0
+        assert run('update --all') == 0
+        calls = trace.read_text()
+        assert 'pi install npm:x' in calls and 'pi remove npm:x' in calls
+        assert calls.count('re-add') == 2, f'expected re-add only after install/remove:\n{calls}'
+pi_dispatch_check()
 
-print('PASS: Pi runtime preservation, stable preferences, invalid JSON, editor fallbacks, shell syntax, common.sh wiring, machine gating, pi package sync')
+print('PASS: shell syntax, common.sh wiring, editor fallbacks, machine gating, pi settings tracking, brew hygiene')
