@@ -4,6 +4,10 @@
 # Repository-only regression checks.
 tests
 
+# Repository-only Homebrew manifest. HOMEBREW_BUNDLE_FILE points brew at the
+# source copy so `brew bundle add/remove` edit it in place; never deploy to ~.
+Brewfile
+
 # Julia: global env Project.toml/Manifest.toml are machine-local churn
 # (startup.jl config is still tracked).
 .julia/environments/**/Project.toml

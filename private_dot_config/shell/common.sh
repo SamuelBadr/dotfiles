@@ -15,6 +15,12 @@ export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
 export BUN_INSTALL="$HOME/.bun"
 
+# Point Homebrew at the manifest in the chezmoi source repo, so the native
+# `brew bundle add/remove` commands edit the tracked file instead of a copy.
+if [ -r "$HOME/.local/share/chezmoi/Brewfile" ]; then
+  export HOMEBREW_BUNDLE_FILE="$HOME/.local/share/chezmoi/Brewfile"
+fi
+
 # ---------------------------------------------------------------------------
 # PATH
 # Prepend user-local tool dirs once each. Order (highest first) matches the

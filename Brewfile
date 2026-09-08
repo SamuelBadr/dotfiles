@@ -1,7 +1,7 @@
-{{- if .modules.workstation -}}
-# Brewfile - Homebrew package manager configuration
-# Install all packages with: brew bundle --global
-# Update this file with current packages: brew bundle dump --global --force
+# Brewfile - the package manifest for this repo.
+# HOMEBREW_BUNDLE_FILE (set in ~/.config/shell/common.sh) points brew here, so
+# `brew bundle add <pkg>` / `brew bundle remove <pkg>` edit this file directly.
+# Install everything listed: brew bundle install
 
 # CLI Tools - Modern Replacements
 brew "ripgrep"       # Better grep
@@ -31,10 +31,7 @@ brew "starship"      # Shell prompt
 # GUI editor
 cask "zed"
 
-{{ if and (eq .chezmoi.os "darwin") .modules.backupMac -}}
 # Backup jobs use these directly.
 brew "restic"
 brew "runitor"
 brew "coreutils"     # timeout
-{{ end -}}
-{{- end -}}

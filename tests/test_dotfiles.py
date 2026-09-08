@@ -76,4 +76,10 @@ with tempfile.TemporaryDirectory() as tmp:
     assert 'restic-hclm' not in managed, 'Backup setup leaked to another machine'
     assert 'Library' not in managed.splitlines(), 'Mac-only parent directory leaked'
     assert 'tests/test_dotfiles.py' not in managed
+    assert 'Brewfile' not in managed, 'Repo-only Homebrew manifest must not deploy'
+
+# Homebrew parses the manifest itself, so it must stay free of template syntax.
+brewfile = (source / 'Brewfile').read_text()
+assert '{{' not in brewfile, 'Brewfile must not be templated'
+assert 'HOMEBREW_BUNDLE_FILE' in common, 'common.sh must point brew at the repo manifest'
 print('PASS: Pi runtime preservation, stable preferences, invalid JSON, editor fallbacks, shell syntax, common.sh wiring, machine gating')

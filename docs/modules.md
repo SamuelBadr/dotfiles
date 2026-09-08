@@ -7,15 +7,36 @@ cluster/login nodes. Backup configuration requires a separate, explicit Mac opt-
 
 | Module | Description | Default |
 |--------|-------------|---------|
-| `workstation` | Workstation tools, Brewfile, one-time macOS keyboard preferences | `false` |
+| `workstation` | Workstation tool configuration, one-time macOS keyboard preferences | `false` |
 | `backupMac` | This Mac's restic configuration and LaunchAgents (macOS only) | `false` |
 
 Shell, Git, tmux, SSH, and Pi configuration are always managed. All skills
 are installed and updated by `skills`; chezmoi does not manage `~/.agents/skills`
 or its lock metadata.
 
+## Homebrew packages
+
+`Brewfile` in the repo root is the package manifest. It is repository-only
+(`.chezmoiignore`d, never deployed to `~`); `HOMEBREW_BUNDLE_FILE` in
+`~/.config/shell/common.sh` points Homebrew at it, so the native commands edit
+the tracked file directly:
+
+```bash
+brew bundle add <pkg>       # install-and-record; use --cask for casks
+brew bundle remove <pkg>    # drop the entry
+brew bundle install         # install everything listed
+brew bundle cleanup         # list installed packages missing from the manifest
+```
+
+The manifest is deliberately not templated, so Homebrew can parse it. It is
+shared by all machines: the backup formulae (`restic`, `runitor`, `coreutils`)
+are listed unconditionally even though only the `backupMac` machine runs them.
+
 ## Tool ownership
 
+- **Shell shortcuts:** shared, shell-neutral setup lives in `~/.config/shell/common.sh`
+  (sourced by both zsh and the bash fallback). By design it defines only `up` and
+  `pluto`; treat additions as deliberate. zsh-specific config stays in `~/.zshrc`.
 - **Editor:** Zed with `--wait`; nano fallback when Zed is unavailable.
 - **Node:** Homebrew `node` and npm. NVM is a separate per-user Node version
   manager; no NVM installation or version file exists here, so its old shell
