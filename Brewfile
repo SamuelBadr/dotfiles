@@ -10,7 +10,6 @@ brew "ripgrep"       # Better grep
 brew "bottom"        # System monitor
 
 # CLI Tools - Utilities
-brew "fd"            # Shell file pickers
 brew "tmux"          # Managed tmux configuration
 brew "tealdeer"      # tldr - simplified man pages
 brew "chezmoi"       # Dotfiles manager
@@ -35,3 +34,5 @@ cask "zed"
 brew "restic"
 brew "runitor"
 brew "coreutils"     # timeout
+# Additional completion definitions for zsh
+brew "zsh-completions"
