@@ -35,3 +35,33 @@ brew "runitor"
 brew "coreutils"     # timeout
 # Additional completion definitions for zsh
 brew "zsh-completions"
+# Incredibly fast JavaScript runtime, bundler, test runner, and package manager
+brew "bun"
+# Get a file from an HTTP, HTTPS or FTP server
+brew "curl"
+# GitHub command-line tool
+brew "gh"
+# Git extension for versioning large files
+brew "git-lfs"
+# Audit git repos for secrets
+brew "gitleaks"
+# Open client for Cisco AnyConnect VPN
+brew "openconnect"
+# Swiss-army knife of markup format conversion
+brew "pandoc"
+# PDF rendering library (based on the xpdf-3.0 code base)
+brew "poppler"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.14"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
+# Open agent skills ecosystem
+brew "skills"
+# Permanent TouchID support for sudo
+brew "sudo-touchid"
+# Agent multiplexer that lives in your terminal
+brew "herdr"
+# AI agent toolkit
+brew "pi-coding-agent"
+# Terminal-based AI coding assistant
+cask "claude-code"
