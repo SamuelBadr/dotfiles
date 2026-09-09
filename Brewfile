@@ -51,8 +51,6 @@ brew "openconnect"
 brew "pandoc"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.14"
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
 # Open agent skills ecosystem

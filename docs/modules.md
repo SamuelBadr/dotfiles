@@ -44,11 +44,11 @@ are listed unconditionally even though only the `backupMac` machine runs them.
 - **Rust:** Homebrew `rustup` supplies the manager; rustup owns the stable
   toolchain in `~/.rustup` and the active Rust binaries in `~/.cargo/bin`.
   Do not install the Homebrew `rust` formula alongside it.
-- **Bun:** Homebrew formula `bun`. Global store stays in `~/.bun`
-  (`BUN_INSTALL`, set in `common.sh`); no standalone-script install.
+- **Bun:** intentionally not installed — pi and Claude Code run under
+  `node` (below); re-add with `brew install bun` if JS tooling needs it.
 - **Pi and Claude Code:** Homebrew `pi-coding-agent` (formula) and
-  `claude-code` (cask) provide the `pi` and `claude` binaries — no run_one-
-  ce/install scripts, no bun globals.
+  `claude-code` (cask) provide the `pi` and `claude` binaries — no run_once
+  scripts, no bun globals.
 
 ## Pi settings ownership
 

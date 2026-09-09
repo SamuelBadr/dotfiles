@@ -13,7 +13,6 @@ else
 fi
 export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
-export BUN_INSTALL="$HOME/.bun"
 
 # Point Homebrew at the manifest in the chezmoi source repo, so the native
 # `brew bundle add/remove` commands edit the tracked file instead of a copy.
@@ -24,7 +23,7 @@ fi
 # ---------------------------------------------------------------------------
 # PATH
 # Prepend user-local tool dirs once each. Order (highest first) matches the
-# original zsh array: bun, cargo, juliaup, julia, ~/bin, ~/.local/bin.
+# original zsh array: cargo, juliaup, julia, ~/bin, ~/.local/bin.
 # Prepend in reverse so the desired first entry ends up at the front.
 # ---------------------------------------------------------------------------
 for _shell_path_dir in \
@@ -32,8 +31,7 @@ for _shell_path_dir in \
   "$HOME/bin" \
   "$HOME/.julia/bin" \
   "$HOME/.juliaup/bin" \
-  "$HOME/.cargo/bin" \
-  "$BUN_INSTALL/bin"
+  "$HOME/.cargo/bin"
 do
   case ":$PATH:" in
     *":$_shell_path_dir:"*) ;;
