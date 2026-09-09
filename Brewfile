@@ -35,8 +35,6 @@ brew "runitor"
 brew "coreutils"     # timeout
 # Additional completion definitions for zsh
 brew "zsh-completions"
-# Incredibly fast JavaScript runtime, bundler, test runner, and package manager
-brew "bun"
 # Get a file from an HTTP, HTTPS or FTP server
 brew "curl"
 # GitHub command-line tool
@@ -63,3 +61,56 @@ brew "herdr"
 brew "pi-coding-agent"
 # Terminal-based AI coding assistant
 cask "claude-code"
+# View, print, and comment on PDF documents
+cask "adobe-acrobat-reader"
+# OpenAI's official ChatGPT desktop app
+cask "chatgpt"
+# Menu bar usage monitor for Codex and Claude
+cask "codexbar"
+# API documentation browser and code snippet manager
+cask "dash"
+# Matrix collaboration client
+cask "element"
+# Launcher for *Epic Games* games
+cask "epic-games"
+# Web browser
+cask "firefox"
+cask "font-maple-mono"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty@tip"
+# Web browser
+cask "google-chrome"
+# Game launcher
+cask "heroic"
+# Free and open-source media player
+cask "iina"
+# Keyboard customiser
+cask "karabiner-elements"
+# File archiver
+cask "keka"
+# Full TeX Live distribution without GUI applications
+cask "mactex-no-gui"
+# Window dimming utility
+cask "monocle-app"
+# Knowledge base that works on top of a local folder of plain text Markdown files
+cask "obsidian"
+# Utility to uninstall apps and remove leftover files from old/uninstalled apps
+cask "pearcleaner"
+# Quick Look generator for Markdown files
+cask "qlmarkdown"
+# Print driver for printing documents directly to a pdf file
+cask "rwts-pdfwriter"
+# Team communication and collaboration software
+cask "slack"
+# Quicklook extension for source files
+cask "syntax-highlight"
+# Messaging app with a focus on speed and security
+cask "telegram"
+# Open-source BitTorrent client
+cask "transmission"
+# Native desktop client for WhatsApp
+cask "whatsapp"
+# Video communication and virtual meeting platform
+cask "zoom"
+# Collect, organize, cite, and share research sources
+cask "zotero@beta"
