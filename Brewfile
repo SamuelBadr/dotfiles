@@ -114,3 +114,5 @@ cask "whatsapp"
 cask "zoom"
 # Collect, organize, cite, and share research sources
 cask "zotero@beta"
+# Review-first terminal diff viewer for agent-authored changesets
+brew "hunk"

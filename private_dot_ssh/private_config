@@ -23,6 +23,9 @@ Host VSC5B
 	HostName vsc5.vsc.ac.at
 	Port 27
 	IdentitiesOnly yes
+	ControlPersist 8h       # VSC 2FA: auth once per work session; herdr reuses this master
+	ServerAliveInterval 60   # keep the idle master alive so the HPC doesn't drop it
+	ServerAliveCountMax 4
 
 Host MUSICA
 	User sb69466
