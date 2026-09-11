@@ -9,7 +9,7 @@
     "aqueduct/deepseek-v4-flash-284b",
     "claude-bridge/claude-opus-5",
     "openai-codex/gpt-6-astra",
-    "claude-bridge/claude-fable-5"
+    "claude-bridge/claude-fable-5-1"
   ],
   "lastChangelogVersion": "0.85.1",
   "outputPad": 1,
@@ -20,7 +20,6 @@
     "git:github.com/algal/pi-openai-server-compaction",
     "git:github.com/DietrichGebert/ponytail",
     "npm:pi-context-view",
-    "npm:pi-claude-bridge",
     "https://github.com/ayghri/i-have-adhd",
     "git:github.com/elidickinson/pi-claude-bridge@main"
   ],
