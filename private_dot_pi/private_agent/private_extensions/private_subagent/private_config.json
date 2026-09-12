@@ -1,7 +1,0 @@
-{
-  "toolDescriptionMode": "compact",
-  "asyncByDefault": true,
-  "globalConcurrencyLimit": 6,
-  "maxSubagentSpawnsPerSession": 24,
-  "maxSubagentDepth": 1
-}
