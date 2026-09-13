@@ -19,8 +19,8 @@
     "git:github.com/algal/pi-openai-server-compaction",
     "git:github.com/DietrichGebert/ponytail",
     "npm:pi-context-view",
-    "https://github.com/ayghri/i-have-adhd",
-    "git:github.com/elidickinson/pi-claude-bridge@main"
+    "git:github.com/elidickinson/pi-claude-bridge@main",
+    "git:github.com/ayghri/i-have-adhd"
   ],
   "theme": "light/dark",
   "tuiMode": "fullscreen",
