@@ -38,9 +38,8 @@ are listed unconditionally even though only the `backupMac` machine runs them.
   (sourced by both zsh and the bash fallback). By design it defines only `up` and
   `pluto`; treat additions as deliberate. zsh-specific config stays in `~/.zshrc`.
 - **Editor:** Zed with `--wait`; nano fallback when Zed is unavailable.
-- **Node:** Homebrew `node` and npm. NVM is a separate per-user Node version
-  manager; no NVM installation or version file exists here, so its old shell
-  initialization was dead code and has been removed.
+- **Node:** Homebrew `node` and npm on workstations. An existing per-user NVM
+  installation is activated as a fallback on machines such as HPC login nodes.
 - **Rust:** Homebrew `rustup` supplies the manager; rustup owns the stable
   toolchain in `~/.rustup` and the active Rust binaries in `~/.cargo/bin`.
   Do not install the Homebrew `rust` formula alongside it.

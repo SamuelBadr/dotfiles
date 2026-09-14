@@ -43,6 +43,10 @@ done
 export PATH
 unset _shell_path_dir
 
+# Use an existing per-user Node installation on machines without Homebrew.
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
 # ---------------------------------------------------------------------------
 # The only userland shortcuts that survive cleanup: update the system, and
 # launch Pluto. Everything else was unmeasured dead weight and removed.

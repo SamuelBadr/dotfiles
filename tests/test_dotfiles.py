@@ -45,6 +45,15 @@ with tempfile.TemporaryDirectory() as tmp:
                                   env=dict(os.environ, PATH=str(tmp)), text=True)
     assert out == 'nano', out
 
+    h = tmp / 'home'
+    nvm = h / '.nvm'
+    nvm.mkdir(parents=True)
+    (nvm / 'nvm.sh').write_text('export NVM_TEST_LOADED=1\n')
+    out = subprocess.check_output(['/bin/bash', '-c',
+                                   f'. "{source / "private_dot_config/shell/common.sh"}"; printf %s "$NVM_TEST_LOADED"'],
+                                  env=dict(os.environ, HOME=str(h), PATH='/usr/bin:/bin'), text=True)
+    assert out == '1', 'existing NVM installation must be activated'
+
     config = tmp / 'chezmoi.toml'
     config.write_text('[data.modules]\nworkstation = false\nbackupMac = false\n')
     managed = subprocess.check_output(['chezmoi', '--config', str(config), '--source', str(source),
