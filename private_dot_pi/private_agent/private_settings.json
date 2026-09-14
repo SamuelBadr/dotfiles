@@ -16,7 +16,6 @@
   "packages": [
     "npm:pi-web-access",
     "npm:pi-fff",
-    "git:github.com/algal/pi-openai-server-compaction",
     "git:github.com/DietrichGebert/ponytail",
     "npm:pi-context-view",
     "git:github.com/elidickinson/pi-claude-bridge@main",
