@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Reinstall every global skill recorded in ~/.agents/.skill-lock.json.
+#
+# chezmoi tracks the lock file but not the skill bodies (see .chezmoiignore), so
+# a fresh machine has the record but no skills. `skills experimental_install`
+# does not help: it only reads a project-local skills-lock.json, even with -g.
+#
+# Note: each install reports a "PromptScript does not support global skill
+# installation" failure. That agent has no global scope; every other agent,
+# including Pi and Claude Code, installs fine.
+set -euo pipefail
+
+lock="$HOME/.agents/.skill-lock.json"
+[[ -f $lock ]] || { echo "no lock file at $lock" >&2; exit 1; }
+
+# One `skills add` per source, passing a repeated -s per skill. A comma-joined
+# -s list is silently ignored and just prints the available skills instead.
+python3 - "$lock" <<'PY' | while read -r source args; do
+import json, sys
+from collections import defaultdict
+
+by_source = defaultdict(list)
+for name, entry in json.load(open(sys.argv[1]))["skills"].items():
+    by_source[entry["source"]].append(name)
+
+for source, names in sorted(by_source.items()):
+    print(source, " ".join(f"-s {n}" for n in sorted(names)))
+PY
+	echo "==> $source"
+	# shellcheck disable=SC2086 # deliberate word splitting of the -s flags
+	skills add "$source" -g -y $args
+done

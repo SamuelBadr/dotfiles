@@ -44,7 +44,7 @@
       "skillPath": "handle-julia-data/SKILL.md",
       "skillFolderHash": "0182cb059fadf1d53e443ae35c39309987803afb",
       "installedAt": "2026-07-10T16:22:42.842Z",
-      "updatedAt": "2026-07-10T16:22:42.842Z"
+      "updatedAt": "2026-09-14T09:22:37.851Z"
     },
     "develop-julia-packages": {
       "source": "Krastanov/JuliaLLMAgentSkills",
@@ -62,7 +62,7 @@
       "skillPath": "build-julia-interfaces/SKILL.md",
       "skillFolderHash": "6a6b3ca00cd679ef104db5ef23036501cb9332b4",
       "installedAt": "2026-07-10T16:22:42.844Z",
-      "updatedAt": "2026-07-10T16:22:42.844Z"
+      "updatedAt": "2026-09-14T09:22:41.189Z"
     },
     "rust-skills": {
       "source": "leonardomso/rust-skills",
