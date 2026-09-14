@@ -19,13 +19,14 @@ Brewfile
 # Python bytecode caches
 **/__pycache__/**
 
-# All skills and lock metadata are managed by the `skills` CLI.
+# Skill bodies are managed by the `skills` CLI and re-fetched from upstream.
+# The lock file (.agents/.skill-lock.json) is tracked, so the installed set is
+# reproducible on a new machine.
 .agents/skills/**
-.agents/.skill-lock.json
 
 # ~/.pi/agent/skills/ is a runtime dir for symlinks created by the `skills` CLI.
-# Pi discovers skills natively from ~/.agents/skills/ (tracked above), so this dir
-# must never be managed by chezmoi.
+# Pi discovers skills natively from ~/.agents/skills/, which the lock file above
+# restores, so this dir must never be managed by chezmoi.
 .pi/agent/skills/**
 
 # Temporary files
