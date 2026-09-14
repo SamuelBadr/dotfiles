@@ -1,0 +1,8 @@
+auto-update = off
+font-family = Maple Mono
+theme = dark:Atom One Dark,light:Atom One Light
+macos-titlebar-style = tabs
+custom-shader = shaders/cursor_sweep.glsl
+cursor-style = block
+shell-integration-features = no-cursor,ssh-terminfo
+keybind = global:option+space=toggle_quick_terminal
