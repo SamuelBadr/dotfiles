@@ -20,6 +20,7 @@
     "npm:pi-context-view",
     "git:github.com/elidickinson/pi-claude-bridge@main",
     "git:github.com/ayghri/i-have-adhd",
+    "npm:pi-herdr-agents",
     "npm:pi-markdown-preview"
   ],
   "theme": "light/dark",
