@@ -19,7 +19,8 @@
     "git:github.com/DietrichGebert/ponytail",
     "npm:pi-context-view",
     "git:github.com/elidickinson/pi-claude-bridge@main",
-    "git:github.com/ayghri/i-have-adhd"
+    "git:github.com/ayghri/i-have-adhd",
+    "npm:pi-markdown-preview"
   ],
   "theme": "light/dark",
   "tuiMode": "fullscreen",
