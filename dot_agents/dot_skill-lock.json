@@ -6,9 +6,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/lucifer1004/claude-skill-typst.git",
       "skillPath": "skills/typst/SKILL.md",
-      "skillFolderHash": "71282562166887a2a0dadecf3ae069c05d45193c",
+      "skillFolderHash": "0bc71f0888e9dcb237674f0af0ac57f0f3b3551e",
       "installedAt": "2026-03-17T11:01:08.484Z",
-      "updatedAt": "2026-09-07T21:30:36.637Z"
+      "updatedAt": "2026-09-14T12:21:24.800Z"
     },
     "touying-author": {
       "source": "apcamargo/typst-skills",
@@ -78,9 +78,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/tensor4all/tensor4all-rs.git",
       "skillPath": "skills/use-tensor4all-rs/SKILL.md",
-      "skillFolderHash": "edfba67e721803e154c748eaf71102183fbb72e4",
+      "skillFolderHash": "b559e7efba8d207f55501216711d4a54c92ffa8c",
       "installedAt": "2026-09-14T08:36:39.444Z",
-      "updatedAt": "2026-09-14T08:36:39.444Z"
+      "updatedAt": "2026-09-17T04:19:54.846Z"
     },
     "codebase-design": {
       "source": "mattpocock/skills",

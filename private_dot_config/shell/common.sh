@@ -43,29 +43,43 @@ done
 export PATH
 unset _shell_path_dir
 
-# Use an existing per-user Node installation on machines without Homebrew.
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
 # ---------------------------------------------------------------------------
 # The only userland shortcuts that survive cleanup: update the system, and
 # launch Pluto. Everything else was unmeasured dead weight and removed.
 # ---------------------------------------------------------------------------
 unalias up 2>/dev/null || true
+# Run a tool and print its output only when it fails or when a line matches
+# $1 (ANSI codes stripped for matching). Silent when nothing changed.
+_replay_if() {
+  local keep="$1"; shift
+  local out rc
+  out=$("$@" 2>&1); rc=$?
+  if [ "$rc" -ne 0 ]; then
+    printf '%s\n' "$out"
+    return "$rc"
+  fi
+  printf '%s\n' "$out" | sed "s/$(printf '\033')\[[0-9;]*m//g" | grep -qE "$keep" && printf '%s\n' "$out"
+  return 0
+}
+
 up() {
   if command -v brew >/dev/null 2>&1; then
-    brew update
+    _replay_if '==> (New|Updated|Renamed|Deleted) (Formulae|Casks)|==> New Versions' brew update --quiet
     brew upgrade --greedy --overwrite -y
     brew cleanup
   fi
 
   if command -v pi >/dev/null 2>&1; then
-    pi update --all
+    # Real changes: an extension checkout reset ("HEAD is now at"), a fresh
+    # clone, or a self update. The bare "git fetch ... -> FETCH_HEAD" lines
+    # print EVERY run for pinned @main repos even when upstream is unchanged,
+    # so they are noise, not a signal.
+    _replay_if 'HEAD is now at|Cloning into|Updated pi |Update note' pi update --all
   fi
 
   if command -v skills >/dev/null 2>&1; then
-    skills update -g -y
-    skills update -p -y
+    _replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -g -y
+    _replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
   fi
 }
 
