@@ -63,10 +63,11 @@ Brewfile
 Library
 {{- end }}
 
-# HPC login-node guard: deployed only where [data] hpcLoginNode = true
+# HPC login-node guard: `bin/pi` wrapper only where [data] hpcLoginNode = true.
+# ~/.pi/agent/AGENTS.md is managed on every machine; content is templated by
+# .hpcLoginNode (Slurm rules on HPC, global instructions elsewhere).
 {{- if not .hpcLoginNode }}
 bin/pi
-.pi/agent/AGENTS.md
 {{- end }}
 
 # Workstation-only files (gated here rather than with in-file templates).
