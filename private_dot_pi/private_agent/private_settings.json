@@ -11,19 +11,20 @@
     "openai-codex/gpt-6-astra",
     "claude-bridge/claude-fable-5-1"
   ],
-  "lastChangelogVersion": "0.85.1",
+  "lastChangelogVersion": "0.86.1",
   "outputPad": 1,
   "packages": [
     "npm:pi-web-access",
     "npm:pi-fff",
-    "git:github.com/DietrichGebert/ponytail",
+    "npm:@dietrichgebert/ponytail",
     "npm:pi-context-view",
-    "git:github.com/elidickinson/pi-claude-bridge@main",
+    "npm:pi-claude-bridge",
     "git:github.com/ayghri/i-have-adhd",
     "npm:pi-herdr-agents",
     "npm:pi-markdown-preview"
   ],
   "theme": "light/dark",
   "tuiMode": "fullscreen",
-  "hideThinkingBlock": false
+  "hideThinkingBlock": false,
+  "cacheWarming": "idle"
 }
