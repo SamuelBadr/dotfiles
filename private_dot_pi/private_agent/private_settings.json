@@ -33,5 +33,20 @@
     "claude-bridge/claude-opus-5-5": "high",
     "claude-bridge/claude-fable-5-1": "high",
     "aqueduct/deepseek-v4-flash-284b": "max"
-  }
+  },
+  "compaction": {
+    "enabled": true
+  },
+  "markdown": {
+    "mermaid": "streaming"
+  },
+  "showCacheMissNotices": true,
+  "collapseChangelog": true,
+  "quietStartup": true,
+  "defaultProjectTrust": "ask",
+  "doubleEscapeAction": "tree",
+  "treeFilterMode": "no-tools",
+  "fullscreenExitOutput": "resume-hint",
+  "fullscreenScrollbar": "auto",
+  "fullscreenCopyOnSelect": false
 }
