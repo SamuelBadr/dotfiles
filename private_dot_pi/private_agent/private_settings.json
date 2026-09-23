@@ -4,11 +4,11 @@
   "defaultThinkingLevel": "max",
   "enableInstallTelemetry": false,
   "enabledModels": [
-    "openai-codex/gpt-5.6-luna",
-    "openai-codex/gpt-5.6-sol",
     "aqueduct/deepseek-v4-flash-284b",
     "openai-codex/gpt-6-astra",
-    "claude-bridge/claude-opus-5-5"
+    "claude-bridge/claude-opus-5-5",
+    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6-luna"
   ],
   "lastChangelogVersion": "0.87.0",
   "outputPad": 1,
