@@ -20,7 +20,8 @@
     "git:github.com/ayghri/i-have-adhd",
     "npm:pi-herdr-agents",
     "npm:pi-markdown-preview",
-    "git:github.com/elidickinson/pi-claude-bridge"
+    "git:github.com/elidickinson/pi-claude-bridge",
+    "npm:@sting8k/pi-droid-styling"
   ],
   "theme": "light/dark",
   "tuiMode": "fullscreen",
