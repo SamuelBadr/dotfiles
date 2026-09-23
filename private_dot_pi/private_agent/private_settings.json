@@ -10,7 +10,7 @@
     "openai-codex/gpt-6-sol",
     "openai-codex/gpt-6-luna"
   ],
-  "lastChangelogVersion": "0.87.0",
+  "lastChangelogVersion": "0.87.1",
   "outputPad": 1,
   "packages": [
     "npm:pi-web-access",
@@ -20,8 +20,7 @@
     "git:github.com/ayghri/i-have-adhd",
     "npm:pi-herdr-agents",
     "npm:pi-markdown-preview",
-    "git:github.com/elidickinson/pi-claude-bridge",
-    "npm:@sting8k/pi-droid-styling"
+    "git:github.com/elidickinson/pi-claude-bridge"
   ],
   "theme": "light/dark",
   "tuiMode": "fullscreen",
