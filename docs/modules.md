@@ -136,7 +136,7 @@ for any sensitive values, or keep them machine-local in
    chezmoi apply
    ```
 
-### Preview Before Apply
+### Testing Before Apply
 
 ```bash
 # Check what modules are active
@@ -147,6 +147,9 @@ chezmoi diff
 
 # Dry run
 chezmoi apply --dry-run
+
+# Offline regression checks (from the source repo)
+python3 tests/test_dotfiles.py
 ```
 
 ## Adding a New Module

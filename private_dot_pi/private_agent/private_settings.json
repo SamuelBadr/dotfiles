@@ -36,6 +36,9 @@
   "compaction": {
     "enabled": true
   },
+  "branchSummary": {
+    "skipPrompt": true
+  },
   "markdown": {
     "mermaid": "streaming"
   },
