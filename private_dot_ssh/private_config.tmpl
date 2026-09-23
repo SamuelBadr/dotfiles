@@ -70,3 +70,5 @@ Host *
 	ControlMaster auto
 	ControlPath ~/.ssh/control-%C
 	ControlPersist 10m
+	# Mac-verified keys of the hosts above, so non-interactive hops (Pi) work.
+	UserKnownHostsFile ~/.ssh/known_hosts ~/.ssh/known_hosts.shared
