@@ -7,21 +7,20 @@
     "openai-codex/gpt-5.6-luna",
     "openai-codex/gpt-5.6-sol",
     "aqueduct/deepseek-v4-flash-284b",
-    "claude-bridge/claude-opus-5",
     "openai-codex/gpt-6-astra",
-    "claude-bridge/claude-fable-5-1"
+    "claude-bridge/claude-opus-5-5"
   ],
-  "lastChangelogVersion": "0.86.1",
+  "lastChangelogVersion": "0.87.0",
   "outputPad": 1,
   "packages": [
     "npm:pi-web-access",
     "npm:pi-fff",
     "npm:@dietrichgebert/ponytail",
     "npm:pi-context-view",
-    "npm:pi-claude-bridge",
     "git:github.com/ayghri/i-have-adhd",
     "npm:pi-herdr-agents",
-    "npm:pi-markdown-preview"
+    "npm:pi-markdown-preview",
+    "git:github.com/elidickinson/pi-claude-bridge"
   ],
   "theme": "light/dark",
   "tuiMode": "fullscreen",
