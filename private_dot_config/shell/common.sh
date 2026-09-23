@@ -43,12 +43,6 @@ done
 export PATH
 unset _shell_path_dir
 
-# Inside SSH sessions, use the agent symlink that ~/.ssh/rc keeps pointed at a
-# live forwarded agent, so long-lived herdr/tmux shells survive reconnects.
-if [ -n "${SSH_CONNECTION:-}" ] && [ -L "$HOME/.ssh/agent.sock" ]; then
-  export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
-fi
-
 # ---------------------------------------------------------------------------
 # The only userland shortcuts that survive cleanup: update the system, and
 # launch Pluto. Everything else was unmeasured dead weight and removed.

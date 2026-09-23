@@ -1,12 +1,7 @@
-# Shared by every machine. Only the darwin block (this Mac holds the private
-# keys) and the backup host are machine-specific.
+# Shared by every machine. Only the macOS Keychain options and the backup host
+# are machine-specific.
 {{- if eq .chezmoi.os "darwin" }}
 IgnoreUnknown UseKeychain
-
-# Trusted hosts: forward the Mac's agent so Pi there can ssh/rsync onwards.
-# Remotes don't re-forward it (this block exists only on the Mac).
-Host hclm kauch frank VSC4 VSC5 VSC4B VSC5B MUSICA
-	ForwardAgent yes
 
 Host *
 	AddKeysToAgent yes
@@ -15,6 +10,7 @@ Host *
 
 Host VSC4 VSC5 VSC4B VSC5B
 	Port 27
+	IdentitiesOnly yes
 
 Host VSC4B VSC5B
 	User samuelb
@@ -59,10 +55,12 @@ Host frank
 	User samuel
 	Hostname 128.131.126.112
 	Port 10492
+	IdentitiesOnly yes
 
 Host CMSuebung
 	User cms2025_10
 	Hostname server4.physprak.tuwien.ac.at
+	IdentitiesOnly yes
 
 Host *
 	ServerAliveInterval 15
@@ -70,5 +68,3 @@ Host *
 	ControlMaster auto
 	ControlPath ~/.ssh/control-%C
 	ControlPersist 10m
-	# Mac-verified keys of the hosts above, so non-interactive hops (Pi) work.
-	UserKnownHostsFile ~/.ssh/known_hosts ~/.ssh/known_hosts.shared

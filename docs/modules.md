@@ -45,18 +45,6 @@ are listed unconditionally even though only the `backupMac` machine runs them.
   toolchain in `~/.rustup` and the active Rust binaries in `~/.cargo/bin`.
   Do not install the Homebrew `rust` formula alongside it.
 
-## SSH
-
-`~/.ssh/config` is one template shared by every machine: host aliases are
-defined once. Only the Mac holds private keys; its darwin-only block adds the
-Keychain options and `ForwardAgent yes` for the trusted hosts, so Pi on those
-hosts can `ssh`/`rsync` onwards with the Mac's agent. Remotes never re-forward.
-`hclm-backup` exists only with `backupMac`.
-
-On the remotes, `~/.ssh/rc` points `~/.ssh/agent.sock` at a live forwarded
-agent on each login, and `common.sh` exports that path inside SSH sessions, so
-long-lived herdr/tmux shells keep working after reconnects.
-
 ## Pi settings ownership
 
 `~/.pi/agent/settings.json` is tracked **directly** as a plain dotfile
