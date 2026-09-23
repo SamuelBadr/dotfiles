@@ -47,5 +47,5 @@
   "treeFilterMode": "no-tools",
   "fullscreenExitOutput": "resume-hint",
   "fullscreenScrollbar": "auto",
-  "fullscreenCopyOnSelect": false
+  "fullscreenCopyOnSelect": true
 }

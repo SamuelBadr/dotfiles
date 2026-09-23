@@ -1,9 +1,6 @@
 # Chezmoi ignore patterns
 # Files matching these patterns won't be managed by chezmoi
 
-# Repository-only regression checks.
-tests
-
 # Repository-only Homebrew manifest. HOMEBREW_BUNDLE_FILE points brew at the
 # source copy so `brew bundle add/remove` edit it in place; never deploy to ~.
 Brewfile
