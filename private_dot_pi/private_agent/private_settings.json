@@ -25,5 +25,13 @@
   "theme": "light/dark",
   "tuiMode": "fullscreen",
   "hideThinkingBlock": false,
-  "cacheWarming": "idle"
+  "cacheWarming": "idle",
+  "modelThinkingLevels": {
+    "openai-codex/gpt-6-luna": "max",
+    "openai-codex/gpt-6-sol": "high",
+    "openai-codex/gpt-6-astra": "high",
+    "claude-bridge/claude-opus-5-5": "high",
+    "claude-bridge/claude-fable-5-1": "high",
+    "aqueduct/deepseek-v4-flash-284b": "max"
+  }
 }
