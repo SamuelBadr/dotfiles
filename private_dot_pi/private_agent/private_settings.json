@@ -34,7 +34,12 @@
     "aqueduct/deepseek-v4-flash-284b": "max"
   },
   "compaction": {
-    "enabled": true
+    "enabled": true,
+    "modelOverrides": {
+      "claude-bridge/claude-opus-5-5": { "reserveTokens": 400000 },
+      "claude-bridge/claude-opus-5": { "reserveTokens": 400000 },
+      "claude-bridge/claude-fable-5-1": { "reserveTokens": 400000 }
+    }
   },
   "branchSummary": {
     "skipPrompt": true
