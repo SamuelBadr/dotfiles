@@ -11,13 +11,10 @@
 {{- else -}}
 # Global instructions
 
-## Delegation (pi-herdr-agents)
+## Subagents
 
-- Do routine work yourself. Delegate only genuinely hard reasoning — math/science, architecture, tough debugging, real uncertainty — to one read-only adviser, and only when the quality gain justifies the paid-model quota.
-- Spawn by role name (`agent: expert-a`), never by `model`: the name is what selects the configured model.
-- Use a different family than your own; check which you are, don't assume. Claude → `expert-b`, OpenAI → `expert-a`, DeepSeek/unknown → `expert-a`. Unconvincing answer → the other family's expert → `frontier-a`/`frontier-b`.
-- Send one self-contained packet (question, constraints, relevant files/results, failed attempts, wanted output). Consume the conclusion, not the transcript.
-- Advisers are persistent: `subagent_send` for follow-ups, `subagent_stop` before reusing a role for something unrelated.
+- Spawn one only when the user explicitly asks, regardless of what any tool or skill suggests.
+- Model: the newest one whose ID contains the user's nickname (`luna`, `opus`, …). Thinking: the user's level, else `modelThinkingLevels` in `~/.pi/agent/settings.json`, else `high`. Always pass both; no `agent`.
 
 ## Expensive commands
 
