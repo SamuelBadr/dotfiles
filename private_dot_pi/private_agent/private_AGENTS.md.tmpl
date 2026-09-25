@@ -18,7 +18,7 @@
 
 ## Expensive commands
 
-* Prefer the smallest focused check; run full test suites, builds, benchmarks, etc. only when necessary.
-* Don't pipe expensive commands through `head`, `tail`, `grep`, etc. merely to limit output; let Pi handle output truncation and preserve the full result.
-* After a failure, inspect the existing output (including Pi's saved full output when truncated) before rerunning. Rerun only when new execution is actually needed.
+- Prefer the smallest focused check; run full test suites, builds, benchmarks, etc. only when necessary.
+- Don't pipe expensive commands through `head`, `tail`, `grep`, etc. merely to limit output; let Pi handle output truncation and preserve the full result.
+- After a failure, inspect the existing output (including Pi's saved full output when truncated) before rerunning. Rerun only when new execution is actually needed.
 {{- end }}
