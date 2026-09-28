@@ -6,9 +6,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/lucifer1004/claude-skill-typst.git",
       "skillPath": "skills/typst/SKILL.md",
-      "skillFolderHash": "0ddc195a8769ae67e2bf77bde1eb49a2743ba7f4",
+      "skillFolderHash": "768d4ea9e1da315d33112ecec5a29c91cd8e528b",
       "installedAt": "2026-03-17T11:01:08.484Z",
-      "updatedAt": "2026-09-22T05:44:13.841Z"
+      "updatedAt": "2026-09-28T15:19:46.584Z"
     },
     "touying-author": {
       "source": "apcamargo/typst-skills",
