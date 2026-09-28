@@ -18,7 +18,8 @@
     "npm:@dietrichgebert/ponytail",
     "npm:pi-context-view",
     "npm:pi-herdr-agents",
-    "npm:pi-markdown-preview"
+    "npm:pi-markdown-preview",
+    "npm:pi-claude-bridge"
   ],
   "theme": "light/dark",
   "tuiMode": "fullscreen",
