@@ -5,7 +5,7 @@
   "defaultTools": ["+codemode"],
   "extensions": ["-builtin:mcp"],
   "codemode": {
-    "mode": "only"
+    "mode": "on"
   },
   "enableInstallTelemetry": false,
   "enabledModels": [
