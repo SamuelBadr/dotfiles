@@ -2,8 +2,12 @@
   "defaultModel": "claude-opus-5-5",
   "defaultProvider": "claude-bridge",
   "defaultThinkingLevel": "high",
-  "defaultTools": ["+codemode"],
-  "extensions": ["-builtin:mcp"],
+  "defaultTools": [
+    "+codemode"
+  ],
+  "extensions": [
+    "-builtin:mcp"
+  ],
   "codemode": {
     "mode": "on"
   },
