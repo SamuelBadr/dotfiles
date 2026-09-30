@@ -13,7 +13,6 @@ else
 fi
 export VISUAL="$EDITOR"
 export GITHUB_USERNAME="SamuelBadr"
-export BUN_INSTALL="$HOME/.bun"
 
 # Point Homebrew at the manifest in the chezmoi source repo, so the native
 # `brew bundle add/remove` commands edit the tracked file instead of a copy.
@@ -24,16 +23,21 @@ fi
 # ---------------------------------------------------------------------------
 # PATH
 # Prepend user-local tool dirs once each. Order (highest first) matches the
-# original zsh array: bun, cargo, juliaup, julia, ~/bin, ~/.local/bin.
+# original zsh array: cargo, juliaup, julia, ~/bin, ~/.local/bin.
 # Prepend in reverse so the desired first entry ends up at the front.
+# Node (newest nvm install, without sourcing the slow nvm.sh) has the lowest
+# priority of these, so ~/bin wrappers still shadow npm-global binaries like pi.
 # ---------------------------------------------------------------------------
+export NVM_DIR="$HOME/.nvm"
+_node_dir=$(printf '%s\n' "$NVM_DIR"/versions/node/v*/bin 2>/dev/null | sort -V | tail -1)
+[ -x "$_node_dir/node" ] || _node_dir=
 for _shell_path_dir in \
+  ${_node_dir:+"$_node_dir"} \
   "$HOME/.local/bin" \
   "$HOME/bin" \
   "$HOME/.julia/bin" \
   "$HOME/.juliaup/bin" \
-  "$HOME/.cargo/bin" \
-  "$BUN_INSTALL/bin"
+  "$HOME/.cargo/bin"
 do
   case ":$PATH:" in
     *":$_shell_path_dir:"*) ;;
@@ -41,7 +45,7 @@ do
   esac
 done
 export PATH
-unset _shell_path_dir
+unset _shell_path_dir _node_dir
 
 # ---------------------------------------------------------------------------
 # The only userland shortcuts that survive cleanup: update the system, and

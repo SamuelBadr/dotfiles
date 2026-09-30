@@ -6,10 +6,15 @@ set -u
 : "${REAL_PI:="/opt/homebrew/bin/pi"}"
 [ -x "$REAL_PI" ] || REAL_PI="/usr/local/bin/pi"
 [ -x "$REAL_PI" ] || REAL_PI="$HOME/.local/bin/pi"
+# npm-global install under the newest nvm Node.
+[ -x "$REAL_PI" ] || REAL_PI=$(printf '%s\n' "$HOME"/.nvm/versions/node/v*/bin/pi | sort -V | tail -1)
 if [ ! -x "$REAL_PI" ]; then
   echo "pi: guard cannot find real pi (set REAL_PI=/path/to/pi to override)" >&2
   exit 127
 fi
+# npm pi is a `#!/usr/bin/env node` script; make its Node findable even when
+# the calling shell (e.g. a long-lived herdr pane) has a stale PATH.
+PATH="$(dirname "$REAL_PI"):$PATH"
 
 # Thread caps (inherited by all children) for the libs this stack actually reads.
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 JULIA_NUM_THREADS=8
