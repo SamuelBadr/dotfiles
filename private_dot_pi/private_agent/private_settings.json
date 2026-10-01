@@ -18,7 +18,7 @@
     "openai/gpt-6.1-sol",
     "openai/gpt-6-luna"
   ],
-  "lastChangelogVersion": "0.99.1",
+  "lastChangelogVersion": "1.0.0",
   "outputPad": 1,
   "packages": [
     "npm:pi-web-access",
@@ -63,7 +63,7 @@
   },
   "showCacheMissNotices": true,
   "collapseChangelog": true,
-  "quietStartup": true,
+  "quietStartup": "header",
   "defaultProjectTrust": "ask",
   "doubleEscapeAction": "tree",
   "treeFilterMode": "no-tools",
