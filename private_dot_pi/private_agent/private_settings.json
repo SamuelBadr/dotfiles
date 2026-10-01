@@ -23,7 +23,6 @@
   "packages": [
     "npm:pi-web-access",
     "npm:@dietrichgebert/ponytail",
-    "npm:pi-context-view",
     "npm:pi-herdr-agents",
     "npm:pi-claude-bridge"
   ],
