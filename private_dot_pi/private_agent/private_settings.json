@@ -5,12 +5,6 @@
   "defaultTools": [
     "+codemode"
   ],
-  "extensions": [
-    "-builtin:mcp"
-  ],
-  "codemode": {
-    "mode": "on"
-  },
   "enableInstallTelemetry": false,
   "enabledModels": [
     "claude-bridge/claude-opus-5-5",
@@ -21,16 +15,12 @@
     "aqueduct/deepseek-v4-vision-exp-284b"
   ],
   "lastChangelogVersion": "1.0.0",
-  "outputPad": 1,
   "packages": [
     "npm:pi-web-access",
     "npm:@dietrichgebert/ponytail",
     "npm:pi-herdr-agents",
     "npm:pi-claude-bridge"
   ],
-  "theme": "system",
-  "tuiMode": "fullscreen",
-  "hideThinkingBlock": false,
   "cacheWarming": "idle",
   "modelThinkingLevels": {
     "openai/gpt-6-luna": "max",
@@ -41,34 +31,12 @@
     "aqueduct/deepseek-v4-vision-exp-284b": "max",
     "aqueduct/glm-5.3-744b-experimental": "max"
   },
-  "compaction": {
-    "enabled": true,
-    "modelOverrides": {
-      "claude-bridge/claude-opus-5-5": {
-        "reserveTokens": 100000
-      },
-      "claude-bridge/claude-opus-5": {
-        "reserveTokens": 100000
-      },
-      "claude-bridge/claude-fable-5-1": {
-        "reserveTokens": 100000
-      }
-    }
-  },
   "branchSummary": {
     "skipPrompt": true
   },
-  "markdown": {
-    "mermaid": "streaming"
-  },
-  "showCacheMissNotices": true,
   "collapseChangelog": true,
   "quietStartup": "header",
-  "defaultProjectTrust": "ask",
-  "doubleEscapeAction": "tree",
   "treeFilterMode": "no-tools",
   "fullscreenExitOutput": "resume-hint",
-  "fullscreenScrollbar": "auto",
-  "fullscreenCopyOnSelect": true,
   "deviceId": "5661b36f-050a-4575-be0c-6da0a5508989"
 }
