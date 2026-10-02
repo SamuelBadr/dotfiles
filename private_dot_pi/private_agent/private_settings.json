@@ -2,10 +2,6 @@
   "defaultModel": "claude-opus-5-5",
   "defaultProvider": "claude-bridge",
   "defaultThinkingLevel": "high",
-  "defaultTools": [
-    "+codemode"
-  ],
-  "enableInstallTelemetry": false,
   "enabledModels": [
     "claude-bridge/claude-opus-5-5",
     "claude-bridge/claude-sonnet-5-5",
@@ -14,14 +10,6 @@
     "aqueduct/glm-5.3-744b-experimental",
     "aqueduct/deepseek-v4-vision-exp-284b"
   ],
-  "lastChangelogVersion": "1.0.0",
-  "packages": [
-    "npm:pi-web-access",
-    "npm:@dietrichgebert/ponytail",
-    "npm:pi-herdr-agents",
-    "npm:pi-claude-bridge"
-  ],
-  "cacheWarming": "idle",
   "modelThinkingLevels": {
     "openai/gpt-6-luna": "max",
     "openai/gpt-6.1-sol": "high",
@@ -31,12 +19,24 @@
     "aqueduct/deepseek-v4-vision-exp-284b": "max",
     "aqueduct/glm-5.3-744b-experimental": "max"
   },
+  "defaultTools": [
+    "+codemode"
+  ],
+  "cacheWarming": "idle",
   "branchSummary": {
     "skipPrompt": true
   },
-  "collapseChangelog": true,
   "quietStartup": "header",
   "treeFilterMode": "no-tools",
   "fullscreenExitOutput": "resume-hint",
+  "collapseChangelog": true,
+  "enableInstallTelemetry": false,
+  "packages": [
+    "npm:pi-web-access",
+    "npm:@dietrichgebert/ponytail",
+    "npm:pi-herdr-agents",
+    "npm:pi-claude-bridge"
+  ],
+  "lastChangelogVersion": "1.0.0",
   "deviceId": "5661b36f-050a-4575-be0c-6da0a5508989"
 }
