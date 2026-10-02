@@ -16,7 +16,9 @@
     "claude-bridge/claude-opus-5-5",
     "claude-bridge/claude-sonnet-5-5",
     "openai/gpt-6.1-sol",
-    "openai/gpt-6-luna"
+    "openai/gpt-6-luna",
+    "aqueduct/glm-5.3-744b-experimental",
+    "aqueduct/deepseek-v4-vision-exp-284b"
   ],
   "lastChangelogVersion": "1.0.0",
   "outputPad": 1,
@@ -33,11 +35,11 @@
   "modelThinkingLevels": {
     "openai/gpt-6-luna": "max",
     "openai/gpt-6.1-sol": "high",
-    "openai-codex/gpt-6-astra": "high",
     "claude-bridge/claude-opus-5-5": "high",
     "claude-bridge/claude-sonnet-5-5": "high",
     "claude-bridge/claude-fable-5-1": "high",
-    "aqueduct/deepseek-v4-vision-exp-284b": "max"
+    "aqueduct/deepseek-v4-vision-exp-284b": "max",
+    "aqueduct/glm-5.3-744b-experimental": "max"
   },
   "compaction": {
     "enabled": true,
