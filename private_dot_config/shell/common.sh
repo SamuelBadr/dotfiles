@@ -29,7 +29,8 @@ fi
 # priority of these, so ~/bin wrappers still shadow npm-global binaries like pi.
 # ---------------------------------------------------------------------------
 export NVM_DIR="$HOME/.nvm"
-_node_dir=$(printf '%s\n' "$NVM_DIR"/versions/node/v*/bin 2>/dev/null | sort -V | tail -1)
+# find, not a glob: zsh's nomatch aborts on an unmatched glob when nvm is absent.
+_node_dir=$(find "$NVM_DIR/versions/node" -mindepth 2 -maxdepth 2 -path '*/v*/bin' 2>/dev/null | sort -V | tail -1)
 [ -x "$_node_dir/node" ] || _node_dir=
 for _shell_path_dir in \
   ${_node_dir:+"$_node_dir"} \
