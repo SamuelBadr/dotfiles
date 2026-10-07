@@ -6,9 +6,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/lucifer1004/claude-skill-typst.git",
       "skillPath": "skills/typst/SKILL.md",
-      "skillFolderHash": "768d4ea9e1da315d33112ecec5a29c91cd8e528b",
+      "skillFolderHash": "c44f87bf0e4f03d33971922f3e8054ae0934c1a7",
       "installedAt": "2026-03-17T11:01:08.484Z",
-      "updatedAt": "2026-09-28T15:19:46.584Z"
+      "updatedAt": "2026-10-06T04:29:29.847Z"
     },
     "touying-author": {
       "source": "apcamargo/typst-skills",
@@ -115,10 +115,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/productivity/handoff/SKILL.md",
-      "skillFolderHash": "2242e8f05424b8c2ae94194a90d97b88d16108ec",
-      "pluginName": "mattpocock-skills",
+      "skillFolderHash": "ce24892bd2d4b9e7fd5ac9b95c03175e18bef388",
       "installedAt": "2026-09-14T09:10:41.330Z",
-      "updatedAt": "2026-09-14T09:10:41.330Z"
+      "updatedAt": "2026-10-06T14:25:21.727Z"
     },
     "improve-codebase-architecture": {
       "source": "mattpocock/skills",

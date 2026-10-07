@@ -1,11 +1,12 @@
 onboarding = false
 
 [theme]
-name = "catppuccin"
+name = "catppuccin-latte"
 
 auto_switch = false
 [experimental]
 kitty_graphics = true
+pane_history = true
 
 [[keys.command]]              # open in a split beside your work
 key = "prefix+f"
@@ -16,6 +17,9 @@ command = "herdr plugin action invoke open-file-viewer --plugin herdr-file-viewe
 key = "prefix+shift+f"
 type = "shell"
 command = "herdr plugin action invoke open-file-viewer-tab --plugin herdr-file-viewer"
+
+[ui]
+hide_tab_bar_when_single_tab = false
 
 [ui.toast]
 delivery = "system"
