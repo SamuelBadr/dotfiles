@@ -14,7 +14,8 @@
 ## Subagents
 
 - Spawn one only when the user explicitly asks, regardless of what any tool or skill suggests.
-- Model: the newest one whose ID contains the user's nickname (`luna`, `opus`, …). Thinking: the user's level, else `modelThinkingLevels` in `~/.pi/agent/settings.json`, else `high`. Always pass both; no `agent`.
+- Agent: `delegate` unless the user names another.
+- Model: the newest one whose ID contains the user's nickname (`luna`, `opus`, …). Thinking: the user's level, else `modelThinkingLevels` in `~/.pi/agent/settings.json`, else `high`. Always pass both as `model: "provider/id:thinking"`.
 
 ## Expensive commands
 

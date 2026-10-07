@@ -34,9 +34,13 @@
   "packages": [
     "npm:pi-web-access",
     "npm:@dietrichgebert/ponytail",
-    "npm:pi-herdr-agents",
-    "npm:pi-claude-bridge"
+    "npm:pi-claude-bridge",
+    {
+      "source": "npm:pi-subagents",
+      "skills": []
+    }
   ],
-  "lastChangelogVersion": "1.0.0",
-  "deviceId": "5661b36f-050a-4575-be0c-6da0a5508989"
+  "lastChangelogVersion": "1.0.4",
+  "deviceId": "5661b36f-050a-4575-be0c-6da0a5508989",
+  "theme": "system"
 }
