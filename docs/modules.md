@@ -102,7 +102,15 @@ workstation = true
 
 ### Cluster/Login Node (Minimal)
 
-No local config needed — `workstation = false` is the default.
+`workstation = false` is the default. On a shared HPC login node, opt into the
+pi guard (`~/bin/pi` wrapper, shared `pi.slice` memory cap, Slurm rules in
+`~/.pi/agent/AGENTS.md`):
+
+```toml
+# ~/.config/chezmoi/chezmoi.toml
+[data]
+hpcLoginNode = true
+```
 
 ### Workstation (Full)
 

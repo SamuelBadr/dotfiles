@@ -1,0 +1,8 @@
+# Shared cgroup for every pi launched through ~/bin/pi (HPC login node only).
+# Limits apply to the sum of all pi instances, subagents, and their children.
+# CPU is not delegated to the user manager here, so ~/bin/pi uses nice 19
+# instead of a CPU cap. After editing: systemctl --user daemon-reload
+[Slice]
+MemoryMax=64G
+MemorySwapMax=0
+TasksMax=4096

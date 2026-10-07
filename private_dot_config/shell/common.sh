@@ -22,11 +22,13 @@ fi
 
 # ---------------------------------------------------------------------------
 # PATH
-# Prepend user-local tool dirs once each. Order (highest first) matches the
-# original zsh array: cargo, juliaup, julia, ~/bin, ~/.local/bin.
+# Move user-local tool dirs to the front, once each. Order (highest first)
+# matches the original zsh array: cargo, juliaup, julia, ~/bin, ~/.local/bin.
 # Prepend in reverse so the desired first entry ends up at the front.
 # Node (newest nvm install, without sourcing the slow nvm.sh) has the lowest
 # priority of these, so ~/bin wrappers still shadow npm-global binaries like pi.
+# Existing entries are moved, not skipped: an inherited PATH (e.g. herdr panes)
+# that already holds ~/bin but not node would otherwise put node in front.
 # ---------------------------------------------------------------------------
 export NVM_DIR="$HOME/.nvm"
 # find, not a glob: zsh's nomatch aborts on an unmatched glob when nvm is absent.
@@ -41,12 +43,14 @@ for _shell_path_dir in \
   "$HOME/.cargo/bin"
 do
   case ":$PATH:" in
-    *":$_shell_path_dir:"*) ;;
-    *) PATH="$_shell_path_dir:$PATH" ;;
+    *":$_shell_path_dir:"*)
+      _p=":$PATH:"; _p="${_p%%":$_shell_path_dir:"*}:${_p#*":$_shell_path_dir:"}"
+      _p="${_p#:}"; PATH="${_p%:}" ;;
   esac
+  PATH="$_shell_path_dir${PATH:+:$PATH}"
 done
 export PATH
-unset _shell_path_dir _node_dir
+unset _shell_path_dir _node_dir _p
 
 # ---------------------------------------------------------------------------
 # The only userland shortcuts that survive cleanup: update the system, and

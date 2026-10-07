@@ -2,12 +2,8 @@
 # HPC login-node guard for pi.
 set -u
 
-# Real pi: env override, else brew layout, else local layout.
-: "${REAL_PI:="/opt/homebrew/bin/pi"}"
-[ -x "$REAL_PI" ] || REAL_PI="/usr/local/bin/pi"
-[ -x "$REAL_PI" ] || REAL_PI="$HOME/.local/bin/pi"
-# npm-global install under the newest nvm Node.
-[ -x "$REAL_PI" ] || REAL_PI=$(printf '%s\n' "$HOME"/.nvm/versions/node/v*/bin/pi | sort -V | tail -1)
+# Real pi: env override, else the npm-global install under the newest nvm Node.
+: "${REAL_PI:=$(printf '%s\n' "$HOME"/.nvm/versions/node/v*/bin/pi | sort -V | tail -1)}"
 if [ ! -x "$REAL_PI" ]; then
   echo "pi: guard cannot find real pi (set REAL_PI=/path/to/pi to override)" >&2
   exit 127
@@ -16,21 +12,15 @@ fi
 # the calling shell (e.g. a long-lived herdr pane) has a stale PATH.
 PATH="$(dirname "$REAL_PI"):$PATH"
 
-# Thread caps (inherited by all children) for the libs this stack actually reads.
-export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 JULIA_NUM_THREADS=8
+# Default parallelism hint for the whole tree: read by OpenMP and GNU nproc.
+export OMP_NUM_THREADS=8
 
-# Gentle CPU/I/O priority for the whole tree.
-renice -n 5 -p $$ >/dev/null 2>&1 || true
-ionice -c 2 -n 4 -p $$ >/dev/null 2>&1 || true
+# No hard CPU cap is possible (the cpu controller is not delegated to user
+# cgroups here), so yield instead: lowest CPU priority for the whole tree, so
+# other users win any contention and agents only soak up idle cores.
+renice -n 19 -p $$ >/dev/null
 
-# Primary: cgroup scope via the systemd user manager (hard memory/swap/task caps).
-if [ -S "/run/user/$(id -u)/systemd/private" ]; then
-  exec systemd-run --user --scope --quiet \
-    --property=MemoryMax=64G --property=MemorySwapMax=0 \
-    --property=TasksMax=1024 --property=CPUQuota=800% \
-    "$REAL_PI" "$@"
-fi
-
-# Degraded: no systemd --user -> threads + priority only (no hard caps here).
-echo "pi: no systemd --user; degraded guards (threads/nice/ionice, no hard caps)" >&2
-exec "$REAL_PI" "$@"
+# Memory/swap/task caps: a scope in the shared pi.slice (limits in
+# ~/.config/systemd/user/pi.slice apply to all pi instances combined).
+# Fails closed: without a systemd user manager, pi does not start.
+exec systemd-run --user --scope --quiet --slice=pi.slice "$REAL_PI" "$@"
