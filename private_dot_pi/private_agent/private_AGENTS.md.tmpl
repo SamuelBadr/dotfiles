@@ -13,15 +13,20 @@
 - After a failure, inspect the existing output (including Pi's saved full output when truncated) before rerunning. Rerun only when new execution is actually needed.
 {{- if .hpcLoginNode }}
 
-## Shared login node — computing rules
+## Shared login node: hard resource budget
 
-- This is a shared login node, not a compute node.
-- Computation on the login node is fine as long as it doesn't hog the node.
-- All agents together share a hard 64 GB memory cap (no swap); exceeding it
-  kills processes. CPU is not capped, so keep parallelism to ~8 cores yourself.
-- Use Slurm for anything plausibly exceeding ~8 CPU cores, ~64 GB RAM, or
-  ~2 hours of compute.
-- Always ask before submitting Slurm jobs, unless explicitly instructed to
-  submit them.
-- Do not disable or bypass the resource safeguards on this host.
+This is a shared HPC login node; other users work interactively on the same
+machine. The budget below is a hard limit for this agent, its subagents, and
+everything they start, combined:
+
+- **8 cores.** Nothing enforces this, so you do: give every parallel command an
+  explicit count of at most 8 (`make -j8`, `julia -t 8`, `cargo build -j 8`,
+  `pytest -n 8`, …). `auto` defaults see all cores of the node.
+- **64 GB RAM, no swap.** Enforced by the kernel: past it, processes die,
+  possibly this agent. Estimate memory before loading large data.
+- **~2 hours** of compute per task.
+
+Work that plausibly exceeds the budget goes to Slurm. Ask before submitting a
+job, unless the user explicitly told you to submit it. Launch work only
+through this session's tools (shell, subagents) so the safeguards apply.
 {{- end }}
