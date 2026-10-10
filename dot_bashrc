@@ -69,4 +69,17 @@ bind '"\C-p": history-search-backward'
 bind '"\C-n": history-search-forward'
 
 # Prompt
-command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+else
+  # Fallback (e.g. HPC nodes): starship's layout minus git flags and timing.
+  # Must run first in PROMPT_COMMAND to see $?; stripping keeps re-sourcing idempotent.
+  __ps1_update() {
+    local rc=$?
+    __ps1_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    __ps1_exit='' __ps1_color=35
+    if (( rc )); then __ps1_exit="exit $rc" __ps1_color=31; fi
+  }
+  PROMPT_COMMAND="__ps1_update; ${PROMPT_COMMAND#__ps1_update; }"
+  PS1='\n\[\e[32m\]\h\[\e[0m\]:\[\e[36m\]\w\[\e[0m\]${__ps1_branch:+ \[\e[35m\]$__ps1_branch\[\e[0m\]}${__ps1_exit:+  \[\e[31m\]$__ps1_exit\[\e[0m\]}\n\[\e[${__ps1_color}m\]>\[\e[0m\] '
+fi
