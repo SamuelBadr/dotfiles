@@ -1,40 +1,57 @@
-# Minimal starship prompt
-
-format = '\[$hostname$directory$git_branch$git_status\] $character'
+# Two-line prompt: context line, then input at a fixed column.
+# Glyphs are ASCII apart from the ahead/behind arrows, so any font renders it.
+# Colors are ANSI names only, so they follow light/dark themes; yellow, grays
+# and most bright-* colors drop below 3:1 on at least one theme in use.
+format = '$hostname$directory$git_branch$git_status$git_state$cmd_duration$status$line_break$character'
+continuation_prompt = '[>](purple dimmed) '
 add_newline = true
 scan_timeout = 10
 command_timeout = 200
 
 [hostname]
-format = '$hostname '
-ssh_only = true
+format = '[$hostname]($style):'
+style = 'green'
 trim_at = '.'
 
 [directory]
-format = '$path'
+format = '[$path]($style)[$read_only]($read_only_style)'
 style = 'cyan'
-truncation_length = 3
-truncate_to_repo = true
+read_only = ' ro'
+truncation_length = 0  # never cut: the path has its own line, and the repo name stays visible
 
 [git_branch]
-format = ' $branch'
-style = 'green'
+format = ' [$branch]($style)'
+style = 'purple'
 
+# * unstaged  + staged  - deleted  ~ renamed  ? untracked  ! conflict
 [git_status]
-format = '([ $ahead_behind](yellow))([*](red))'
-style = 'yellow'
+format = '([$conflicted](red))([$modified$deleted$renamed$staged$untracked]($style))( [$ahead_behind]($style))'
+style = 'purple'
 ignore_submodules = true
+conflicted = '!'
+modified = '*'
+deleted = '-'
+renamed = '~'
+staged = '+'
+untracked = '?'
+stashed = ''
 ahead = '↑${count}'
 behind = '↓${count}'
 diverged = '↑${ahead_count}↓${behind_count}'
-conflicted = '*'
-untracked = '*'
-stashed = ''
-modified = '*'
-staged = '*'
-renamed = '*'
-deleted = '*'
+
+[git_state]
+format = ' [$state( $progress_current/$progress_total)]($style)'
+style = 'red'
+
+[cmd_duration]
+format = '  [took $duration]($style)'
+style = 'dimmed'
+
+[status]
+disabled = false
+format = '  [exit $status( SIG$signal_name)]($style)'
+style = 'red'
 
 [character]
-success_symbol = ''
-error_symbol = '[!](red)'
+success_symbol = '[>](purple)'
+error_symbol = '[>](red)'
