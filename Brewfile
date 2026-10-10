@@ -75,7 +75,7 @@ cask "element"
 cask "epic-games"
 # Web browser
 cask "firefox"
-cask "font-maple-mono"
+cask "font-monaspace-nf"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty@tip"
 # Web browser

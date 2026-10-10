@@ -1,5 +1,5 @@
 auto-update = off
-font-family = Berkeley Mono
+font-family = Monaspace Neon NF
 theme = dark:Atom One Dark,light:Atom One Light
 macos-titlebar-style = tabs
 custom-shader = shaders/cursor_sweep.glsl
