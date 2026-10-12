@@ -11,6 +11,25 @@
 - Prefer the smallest focused check; run full test suites, builds, benchmarks, etc. only when necessary.
 - Don't pipe expensive commands through `head`, `tail`, `grep`, etc. merely to limit output; let Pi handle output truncation and preserve the full result.
 - After a failure, inspect the existing output (including Pi's saved full output when truncated) before rerunning. Rerun only when new execution is actually needed.
+
+## Compute fleet
+
+Always-on machines, reachable from each other with `ssh <name>` (separate filesystems):
+
+- `hclm` (login node `master.cluster`): Slurm cluster, 10 nodes × 192 cores, 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER` (`/home` and `/mnt/scratch` are nearly full).
+- `kauch` (`kauch01`): 24 threads, 122 GB RAM, GTX 1050 Ti. Shared with other people and a CI runner.
+- `frank` (`ftuw`): 32 threads, 60 GB RAM. A desktop with a local user.
+- The Mac laptop sleeps: never leave long-running work on it.
+
+`fleet` shows free threads and RAM on the desktops and idle cores on hclm. Use it to place work:
+
+- Small (a few cores, minutes): where you are.
+- Medium (fits a desktop's free threads): the desktop with the most free threads. CPU is shared fairly between users there, so idle threads are yours; RAM is not, so check it first.
+- Large (more cores, long runs, sweeps): Slurm on hclm. Always pass `-c`, `--mem` and `--time`; a job without `--mem` claims the whole node's memory. Ask before submitting, unless the user told you to.
+- Give every parallel command an explicit thread count, never `auto`, and count BLAS threads too (set `OPENBLAS_NUM_THREADS` alongside `julia -t N`).
+- Work runs where its files are: move code with git (push here, pull there) or `rsync`, and fetch results with `rsync`.
+- Start remote runs detached (`nohup … > log 2>&1 &` or `sbatch`) and report host, path, and PID or job ID.
+- On `kauch`, herdr has `hclm` and `frank` saved: `herdr --machine <name> …` reaches the agents there.
 {{- if .hpcLoginNode }}
 
 ## Shared login node: hard resource budget
