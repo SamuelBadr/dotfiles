@@ -78,9 +78,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/tensor4all/tensor4all-rs.git",
       "skillPath": "skills/use-tensor4all-rs/SKILL.md",
-      "skillFolderHash": "b559e7efba8d207f55501216711d4a54c92ffa8c",
+      "skillFolderHash": "1380ab09462c06566a7062bc5bdd68fc20427676",
       "installedAt": "2026-09-14T08:36:39.444Z",
-      "updatedAt": "2026-09-17T04:19:54.846Z"
+      "updatedAt": "2026-10-12T07:54:29.084Z"
     },
     "codebase-design": {
       "source": "mattpocock/skills",
@@ -96,9 +96,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/engineering/diagnosing-bugs/SKILL.md",
-      "skillFolderHash": "de4236cf34757c4e9ea7afe78d46c023213ff254",
+      "skillFolderHash": "5fdd6cc53385395441910b026c72d71768e993d4",
       "installedAt": "2026-09-14T09:10:41.329Z",
-      "updatedAt": "2026-09-29T19:03:27.650Z"
+      "updatedAt": "2026-10-12T07:54:30.828Z"
     },
     "grill-me": {
       "source": "mattpocock/skills",
@@ -143,10 +143,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/productivity/teach/SKILL.md",
-      "skillFolderHash": "2ab11f2f51f3c29771edb5d4258d807a49462491",
-      "pluginName": "mattpocock-skills",
+      "skillFolderHash": "3fd617b610e59acbb99644de1ef37e394ff53cd1",
       "installedAt": "2026-09-14T09:10:41.330Z",
-      "updatedAt": "2026-09-14T09:10:41.330Z"
+      "updatedAt": "2026-10-12T07:54:32.465Z"
     },
     "wait-what": {
       "source": "mattpocock/skills",

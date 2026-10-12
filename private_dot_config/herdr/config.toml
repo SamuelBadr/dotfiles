@@ -20,6 +20,12 @@ command = "herdr plugin action invoke open-file-viewer-tab --plugin herdr-file-v
 
 [ui]
 hide_tab_bar_when_single_tab = false
+tab_bar_position = "top"
 
 [ui.toast]
 delivery = "system"
+
+[ui.sidebar]
+
+[ui.sidebar.agents]
+rows = [["state_icon", "machine", "workspace", "tab"], ["agent"]]
