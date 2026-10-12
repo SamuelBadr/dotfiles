@@ -86,8 +86,11 @@ up() {
     _replay_if 'HEAD is now at|Cloning into|Updated pi |Update note' pi update --all
   fi
 
+  # Global skills: match ~/.agents/skills.txt across machines, then update.
+  if command -v skills-sync >/dev/null 2>&1; then
+    _replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
+  fi
   if command -v skills >/dev/null 2>&1; then
-    _replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -g -y
     _replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
   fi
 }

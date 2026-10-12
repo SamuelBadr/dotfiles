@@ -16,14 +16,16 @@ Brewfile
 # Python bytecode caches
 **/__pycache__/**
 
-# Skill bodies are managed by the `skills` CLI and re-fetched from upstream.
-# The lock file (.agents/.skill-lock.json) is tracked, so the installed set is
-# reproducible on a new machine.
+# Skill bodies are installed by the `skills` CLI from upstream. Only the wanted
+# list (.agents/skills.txt) is tracked; ~/bin/skills-sync installs it on every
+# machine. The CLI's lock describes what one machine has installed, so syncing
+# it makes `skills update` skip skills that are missing or stale locally.
 .agents/skills/**
+.agents/.skill-lock.json
 
-# ~/.pi/agent/skills/ is a runtime dir for symlinks created by the `skills` CLI.
-# Pi discovers skills natively from ~/.agents/skills/, which the lock file above
-# restores, so this dir must never be managed by chezmoi.
+# ~/.pi/agent/skills/ is a runtime dir (older `skills` versions symlinked there).
+# Pi discovers skills natively from ~/.agents/skills/, so this dir must never be
+# managed by chezmoi.
 .pi/agent/skills/**
 
 # Temporary files
@@ -65,6 +67,11 @@ Library
 # machine; .hpcLoginNode appends the Slurm rules to the global instructions.
 {{- if not .hpcLoginNode }}
 bin/pi
+.config/systemd/user/pi.slice
+{{- end }}
+
+# systemd user units (the daily skills-sync timer) only on Linux.
+{{- if ne .chezmoi.os "linux" }}
 .config/systemd
 .config/systemd/**
 {{- end }}

@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Keep the global agent skills identical on every machine.
+# ~/.agents/skills.txt (synced by chezmoi) lists the wanted skills, one
+# "<source> <name>" per line. Each run:
+#   1. pulls the latest list from the dotfiles repo,
+#   2. folds in skills added or removed on this machine since the last run
+#      (however they were installed) and pushes the list,
+#   3. installs/removes skills here to match the list, then updates them all.
+# The skills CLI's lock only describes this machine, so it is never synced.
+# Runs from `up`, and daily from a systemd user timer on the Linux machines.
+set -uo pipefail
+export LC_ALL=C
+
+list=$HOME/.agents/skills.txt
+base=${XDG_STATE_HOME:-$HOME/.local/state}/skills-sync/installed  # installed set after the last run
+lock=$HOME/.agents/.skill-lock.json
+[ -n "${XDG_STATE_HOME:-}" ] && lock=$XDG_STATE_HOME/skills/.skill-lock.json  # where the CLI keeps it
+
+cli() { # the skills CLI: the installed copy, else the latest from npm
+  local p
+  if p=$(type -P skills); then "$p" "$@"; else npx -y skills@latest "$@"; fi
+}
+
+# "<source> <name>" for each skill in the lock that is actually on disk.
+# shortcut: assumes the install dir is named like the skill (true for slug names).
+installed() {
+  [ -f "$lock" ] || return 0
+  node -e '
+    const fs = require("fs"); const [lock, dir] = process.argv.slice(1);
+    for (const [name, e] of Object.entries(JSON.parse(fs.readFileSync(lock, "utf8")).skills || {}))
+      if (fs.existsSync(`${dir}/${name}/SKILL.md`)) console.log(`${e.source} ${name}`);
+  ' "$lock" "$HOME/.agents/skills" | sort
+}
+wanted() { grep -v '^#' "$list" | sed '/^[[:space:]]*$/d' | sort -u; }
+minus() { comm -23 <(printf '%s\n' "$1" | sed '/^$/d') <(printf '%s\n' "$2" | sed '/^$/d'); }
+say() { printf '%s\n' "$2" | sed "/^$/d; s/^/skills-sync: $1 /"; }
+
+chezmoi git -- pull -q --ff-only || echo "skills-sync: dotfiles pull failed, using the local list" >&2
+chezmoi apply --no-tty "$list" || {
+  echo "skills-sync: $list differs from the dotfiles; resolve with chezmoi diff/re-add first" >&2
+  exit 1
+}
+
+now=$(installed)
+prev=$(cat "$base" 2>/dev/null)  # no base yet: everything installed here counts as added
+added=$(minus "$now" "$prev")
+removed=$(minus "$prev" "$now")
+want=$(wanted)
+new=$(printf '%s\n%s\n' "$(minus "$want" "$removed")" "$added" | sed '/^$/d' | sort -u)
+if [ "$new" != "$want" ]; then
+  { grep '^#' "$list"; printf '%s\n' "$new"; } > "$list.tmp" && mv "$list.tmp" "$list"
+  chezmoi re-add "$list"
+  say "recorded +" "$(minus "$new" "$want")"
+  say "recorded -" "$(minus "$want" "$new")"
+  want=$new
+fi
+
+rc=0
+extra=$(minus "$now" "$want" | cut -d' ' -f2)
+if [ -n "$extra" ]; then
+  say removing "$extra"
+  cli remove -g -y $extra </dev/null || rc=1
+fi
+minus "$want" "$now" | awk '{ s[$1] = s[$1] " -s " $2 } END { for (k in s) print k s[k] }' | {
+  f=0
+  while read -r src args; do
+    say installing "$src ${args//-s /}"
+    cli add "$src" -g -y $args </dev/null || f=1
+  done
+  exit "$f"
+} || rc=1
+cli update -g -y </dev/null || rc=1
+
+mkdir -p "$(dirname "$base")" && installed > "$base"
+exit "$rc"

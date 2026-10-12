@@ -1,0 +1,8 @@
+# Run ~/bin/skills-sync (see there); started daily by skills-sync.timer.
+# A login shell supplies the user's PATH (chezmoi, node, npx).
+[Unit]
+Description=Sync global agent skills with ~/.agents/skills.txt
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -lc skills-sync

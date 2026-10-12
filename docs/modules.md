@@ -80,8 +80,18 @@ pass; see `~/.config/restic-hclm/README.md` before reenabling it.
 
 ## Skills
 
-Install and update skills separately with `npx skills add ... -g` and
-`npx skills update -g`. `chezmoi apply` does not install or update them.
+Global skills are installed by the `skills` CLI; chezmoi tracks only the wanted
+list, `~/.agents/skills.txt` (one `<source> <skill>` per line). `skills-sync`
+keeps every machine on that list: it pulls the list, records skills added or
+removed on this machine since its last run (`skills add/remove -g`,
+`npx skills ...`, or an agent), pushes the list, installs/removes skills to
+match, and updates them all. It runs from `up` and, on Linux, from a daily
+systemd user timer (`systemctl --user list-timers skills-sync.timer`).
+
+The CLI's lock (`~/.agents/.skill-lock.json`) records what one machine has
+installed, so it is not tracked: `skills update` only compares upstream with
+the lock, never with the disk, so a lock synced from another machine makes it
+skip skills that are missing or stale here.
 
 ## Configuration
 

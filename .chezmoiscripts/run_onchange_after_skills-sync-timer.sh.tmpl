@@ -1,0 +1,7 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/sh
+# Enable the daily skills-sync timer; the unit hashes re-run this after edits.
+# service {{ include "private_dot_config/systemd/user/skills-sync.service" | sha256sum }}
+# timer {{ include "private_dot_config/systemd/user/skills-sync.timer" | sha256sum }}
+systemctl --user daemon-reload && systemctl --user enable --now skills-sync.timer
+{{ end -}}
