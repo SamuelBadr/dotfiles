@@ -16,19 +16,20 @@
 
 Always-on machines, reachable from each other with `ssh <name>` (separate filesystems):
 
-- `kauch` (`kauch01`): 24 threads, 122 GB RAM, GTX 1050 Ti. Shared with other people and a CI runner.
-- `frank` (`ftuw`): 32 threads, 60 GB RAM. A desktop with a local user; also runs the user's GitHub Actions runners.
-- `hclm` (login node `master.cluster`): Slurm cluster, 10 nodes × 192 cores, 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER` (`/home` and `/mnt/scratch` are nearly full).
+- `kauch` (`kauch01`): 12 cores, 122 GB RAM, GTX 1050 Ti. Shared with other people and a CI runner.
+- `frank` (`ftuw`): 16 cores, 60 GB RAM. A desktop with a local user; also runs the user's GitHub Actions runners.
+- `hclm` (login node `master.cluster`): Slurm cluster, 8 usable nodes with 96 cores and 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER`.
 - The Mac laptop sleeps: never leave long-running work on it.
 
-`fleet` shows free threads and RAM on kauch and frank and idle cores on hclm. Place work like this:
+`fleet` shows free cores and RAM on kauch and frank and idle cores per hclm partition. Place work like this:
 
 - Small (a few cores, minutes): where you are.
-- Anything bigger: kauch and frank, split across both if one isn't enough. CPU is shared fairly between users there, so idle threads are yours; RAM is not, so check it first.
-- Slurm queues (hclm, VSC) only when unavoidable: the work doesn't fit the desktops' RAM, or would take far too long even on both. Ask first and say why the desktops won't do, unless the user told you to submit.
+- Anything bigger: wherever it finishes soonest without queueing (kauch, frank, or a Slurm job on hclm that starts immediately). Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.
+- Avoid queue time: before submitting, run the same `sbatch` command with `--test-only`, which prints the expected start time. If the job wouldn't start right away, shrink it to fit the idle nodes or use the desktops. Ask the user before submitting anything that would wait in the queue.
 - Before submitting any job on hclm, check free space there (`df -h /home /mnt/storage /mnt/scratch`) and make sure the job's output fits with room to spare.
-- In Slurm jobs, always pass `-c`, `--mem` and `--time`; on hclm a job without `--mem` claims the whole node's memory.
-- Give every parallel command an explicit thread count, never `auto`, and count BLAS threads too (set `OPENBLAS_NUM_THREADS` alongside `julia -t N`).
+- In Slurm jobs, always pass `-c`, `--mem`, `--time` and `--hint=nomultithread`; on hclm a job without `--mem` claims the whole node's memory.
+- Never use hyperthreads: at most one thread per physical core, BLAS threads included (set `OPENBLAS_NUM_THREADS` alongside `julia -t N`). Give every parallel command an explicit count, never `auto`.
+- Before running on a machine, check its software environment: toolchains up to date and at the same version as where the code was developed (e.g. `juliaup update`, `julia --version`), the code at the same commit, and the project environment instantiated from the same lockfile (e.g. `Pkg.instantiate()`). Fix what you can; tell the user what you can't.
 - Work runs where its files are: move code with git (push here, pull there) or `rsync`, and fetch results with `rsync`.
 - Start remote runs detached (`nohup … > log 2>&1 &`) and report host, path, and PID or job ID.
 - On `kauch`, herdr has `hclm` and `frank` saved: `herdr --machine <name> …` reaches the agents there.
@@ -37,7 +38,7 @@ Always-on machines, reachable from each other with `ssh <name>` (separate filesy
 
 The user also has accounts on the Austrian Scientific Computing clusters: VSC-5 (`ssh VSC5B` as `samuelb`, `ssh VSC5` as `samuel`; Slurm, 128 cores and 512 GB–2 TB RAM per node, A40/A100 GPU nodes, 72 h job limit), VSC-4 (`VSC4B`/`VSC4`) and MUSICA (`ssh MUSICA`).
 
-- Use them only when neither the desktops nor hclm can do the work (GPUs, or more than hclm can give). Jobs are billed to the user's project.
+- Use them only when the desktops and hclm can't run the work without waiting (GPUs, more than hclm can give, or a long queue on hclm). Jobs are billed to the user's project.
 - Logging in needs the user's password and 2FA, so you can't connect on your own. When you need access, ask the user to run `ssh -fN VSC5B` (or the host you need) in a terminal on this machine; `ssh -O check VSC5B` tells you when the connection is up.
 {{- if .hpcLoginNode }}
 
@@ -54,7 +55,7 @@ everything they start, combined:
   possibly this agent. Estimate memory before loading large data.
 - **~2 hours** of compute per task.
 
-Work that plausibly exceeds the budget goes to kauch or frank (see Compute
-fleet), to Slurm only if unavoidable. Launch work only through this session's
-tools (shell, subagents) so the safeguards apply.
+Work that plausibly exceeds the budget goes elsewhere (see Compute fleet): a
+desktop, or a Slurm job that starts immediately. Launch work only through this
+session's tools (shell, subagents) so the safeguards apply.
 {{- end }}

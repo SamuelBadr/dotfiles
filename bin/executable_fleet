@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Free compute across the fleet (read-only): free threads and RAM on the
-# desktops, idle cores per partition on the hclm Slurm cluster.
+# Free compute across the fleet (read-only): free cores and RAM on the
+# desktops, idle cores per partition on the hclm Slurm cluster. Physical
+# cores only: hyperthreads are not counted.
 set -u
 
 # Run <script> on <ssh-alias>, locally if this machine is <nodename>.
@@ -12,16 +13,17 @@ on() { # <ssh-alias> <nodename> <script>
 
 IFS= read -r -d '' desktop <<'EOF'
 read -r load _ < /proc/loadavg
-awk -v h="$1" -v n="$(nproc)" -v l="$load" '/^MemAvailable:/ {
+cores=$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l)
+awk -v h="$1" -v n="$cores" -v l="$load" '/^MemAvailable:/ {
   f = n - l; if (f < 0) f = 0
-  printf "%-6s %2d threads, load %4.1f: ~%d free; %d GB RAM available\n", h, n, l, f, $2 / 1048576 }' /proc/meminfo
+  printf "%-6s %2d cores, load %4.1f: ~%d free; %d GB RAM available\n", h, n, l, f, $2 / 1048576 }' /proc/meminfo
 EOF
 
 IFS= read -r -d '' cluster <<'EOF'
-sinfo -h -N -p short,medium,long -O 'Partition:12,CPUsState:20,AllocMem:12,Memory:12' | awk '
-  { p = $1; sub(/\*$/, "", p); split($2, c, "/")
+sinfo -h -N -p short,medium,long -O 'Partition:12,CPUsState:20,AllocMem:12,Memory:12,Threads:6' | awk '
+  { p = $1; sub(/\*$/, "", p); split($2, c, "/"); i = c[2] / $5
     if (!(p in idle)) order[++k] = p
-    idle[p] += c[2]; if (c[2] > big[p]) { big[p] = c[2]; mem[p] = ($4 - $3) / 1024 } }
+    idle[p] += i; if (i > big[p]) { big[p] = i; mem[p] = ($4 - $3) / 1024 } }
   END { for (i = 1; i <= k; i++) { p = order[i]
     printf "hclm   %-6s %4d idle cores; best node: %d cores, %d GB unallocated\n", p, idle[p], big[p], mem[p] } }'
 squeue -u "$USER" -h -o %T | sort | uniq -c |
