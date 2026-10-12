@@ -65,7 +65,9 @@ minus "$want" "$now" | awk '{ s[$1] = s[$1] " -s " $2 } END { for (k in s) print
   f=0
   while read -r src args; do
     say installing "$src ${args//-s /}"
-    cli add "$src" -g -y $args </dev/null || f=1
+    # Explicit agents: by default global installs also target project-only
+    # agents (PromptScript) and report failures for them.
+    cli add "$src" -g -y -a pi -a claude-code $args </dev/null || f=1
   done
   exit "$f"
 } || rc=1
