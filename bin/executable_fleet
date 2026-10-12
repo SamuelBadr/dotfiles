@@ -3,22 +3,21 @@
 # desktops, idle cores per partition on the hclm Slurm cluster.
 set -u
 
-# Run the script on stdin on <ssh-alias>, locally if this machine is <nodename>.
-on() { # <ssh-alias> <nodename>
-  if [ "$(uname -n)" = "$2" ]; then bash -s -- "$1"
-  else ssh -o BatchMode=yes -o ConnectTimeout=5 "$1" bash -s -- "$1"; fi
+# Run <script> on <ssh-alias>, locally if this machine is <nodename>.
+on() { # <ssh-alias> <nodename> <script>
+  if [ "$(uname -n)" = "$2" ]; then bash -s -- "$1" <<<"$3"
+  else ssh -o BatchMode=yes -o ConnectTimeout=5 "$1" bash -s -- "$1" <<<"$3"; fi ||
+    echo "$1: unreachable"
 }
 
-for m in kauch:kauch01 frank:ftuw; do
-  on "${m%%:*}" "${m#*:}" <<'EOF' || echo "${m%%:*}: unreachable"
+IFS= read -r -d '' desktop <<'EOF'
 read -r load _ < /proc/loadavg
 awk -v h="$1" -v n="$(nproc)" -v l="$load" '/^MemAvailable:/ {
   f = n - l; if (f < 0) f = 0
   printf "%-6s %2d threads, load %4.1f: ~%d free; %d GB RAM available\n", h, n, l, f, $2 / 1048576 }' /proc/meminfo
 EOF
-done
 
-on hclm master.cluster <<'EOF' || echo "hclm: unreachable"
+IFS= read -r -d '' cluster <<'EOF'
 sinfo -h -N -p short,medium,long -O 'Partition:12,CPUsState:20,AllocMem:12,Memory:12' | awk '
   { p = $1; sub(/\*$/, "", p); split($2, c, "/")
     if (!(p in idle)) order[++k] = p
@@ -28,3 +27,7 @@ sinfo -h -N -p short,medium,long -O 'Partition:12,CPUsState:20,AllocMem:12,Memor
 squeue -u "$USER" -h -o %T | sort | uniq -c |
   awk '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { print "hclm   your jobs: " (s ? s : "none") }'
 EOF
+
+# Query all hosts at once (SSH round trips add up from far away), print in order.
+exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$cluster")
+cat <&3; cat <&4; cat <&5
