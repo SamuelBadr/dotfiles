@@ -16,20 +16,29 @@
 
 Always-on machines, reachable from each other with `ssh <name>` (separate filesystems):
 
-- `hclm` (login node `master.cluster`): Slurm cluster, 10 nodes × 192 cores, 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER` (`/home` and `/mnt/scratch` are nearly full).
 - `kauch` (`kauch01`): 24 threads, 122 GB RAM, GTX 1050 Ti. Shared with other people and a CI runner.
-- `frank` (`ftuw`): 32 threads, 60 GB RAM. A desktop with a local user.
+- `frank` (`ftuw`): 32 threads, 60 GB RAM. A desktop with a local user; also runs the user's GitHub Actions runners.
+- `hclm` (login node `master.cluster`): Slurm cluster, 10 nodes × 192 cores, 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER` (`/home` and `/mnt/scratch` are nearly full).
 - The Mac laptop sleeps: never leave long-running work on it.
 
-`fleet` shows free threads and RAM on the desktops and idle cores on hclm. Use it to place work:
+`fleet` shows free threads and RAM on kauch and frank and idle cores on hclm. Place work like this:
 
 - Small (a few cores, minutes): where you are.
-- Medium (fits a desktop's free threads): the desktop with the most free threads. CPU is shared fairly between users there, so idle threads are yours; RAM is not, so check it first.
-- Large (more cores, long runs, sweeps): Slurm on hclm. Always pass `-c`, `--mem` and `--time`; a job without `--mem` claims the whole node's memory. Ask before submitting, unless the user told you to.
+- Anything bigger: kauch and frank, split across both if one isn't enough. CPU is shared fairly between users there, so idle threads are yours; RAM is not, so check it first.
+- Slurm queues (hclm, VSC) only when unavoidable: the work doesn't fit the desktops' RAM, or would take far too long even on both. Ask first and say why the desktops won't do, unless the user told you to submit.
+- Before submitting any job on hclm, check free space there (`df -h /home /mnt/storage /mnt/scratch`) and make sure the job's output fits with room to spare.
+- In Slurm jobs, always pass `-c`, `--mem` and `--time`; on hclm a job without `--mem` claims the whole node's memory.
 - Give every parallel command an explicit thread count, never `auto`, and count BLAS threads too (set `OPENBLAS_NUM_THREADS` alongside `julia -t N`).
 - Work runs where its files are: move code with git (push here, pull there) or `rsync`, and fetch results with `rsync`.
-- Start remote runs detached (`nohup … > log 2>&1 &` or `sbatch`) and report host, path, and PID or job ID.
+- Start remote runs detached (`nohup … > log 2>&1 &`) and report host, path, and PID or job ID.
 - On `kauch`, herdr has `hclm` and `frank` saved: `herdr --machine <name> …` reaches the agents there.
+
+### VSC: ask first
+
+The user also has accounts on the Austrian Scientific Computing clusters: VSC-5 (`ssh VSC5B` as `samuelb`, `ssh VSC5` as `samuel`; Slurm, 128 cores and 512 GB–2 TB RAM per node, A40/A100 GPU nodes, 72 h job limit), VSC-4 (`VSC4B`/`VSC4`) and MUSICA (`ssh MUSICA`).
+
+- Use them only when neither the desktops nor hclm can do the work (GPUs, or more than hclm can give). Jobs are billed to the user's project.
+- Logging in needs the user's password and 2FA, so you can't connect on your own. When you need access, ask the user to run `ssh -fN VSC5B` (or the host you need) in a terminal on this machine; `ssh -O check VSC5B` tells you when the connection is up.
 {{- if .hpcLoginNode }}
 
 ## Shared login node: hard resource budget
@@ -45,7 +54,7 @@ everything they start, combined:
   possibly this agent. Estimate memory before loading large data.
 - **~2 hours** of compute per task.
 
-Work that plausibly exceeds the budget goes to Slurm. Ask before submitting a
-job, unless the user explicitly told you to submit it. Launch work only
-through this session's tools (shell, subagents) so the safeguards apply.
+Work that plausibly exceeds the budget goes to kauch or frank (see Compute
+fleet), to Slurm only if unavoidable. Launch work only through this session's
+tools (shell, subagents) so the safeguards apply.
 {{- end }}
