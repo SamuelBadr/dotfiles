@@ -3,19 +3,13 @@
 # here on its next skills-sync run; editing this list works too.
 Krastanov/JuliaLLMAgentSkills build-julia-interfaces
 Krastanov/JuliaLLMAgentSkills develop-julia-packages
-Krastanov/JuliaLLMAgentSkills handle-julia-data
 Krastanov/JuliaLLMAgentSkills optimize-julia-code
-Krastanov/JuliaLLMAgentSkills orchestrate-julia-workloads
 apcamargo/typst-skills touying-author
 leonardomso/rust-skills rust-skills
 lucifer1004/claude-skill-typst typst
-mattpocock/skills codebase-design
 mattpocock/skills diagnosing-bugs
-mattpocock/skills grill-me
 mattpocock/skills handoff
 mattpocock/skills improve-codebase-architecture
 mattpocock/skills research
 mattpocock/skills teach
-mattpocock/skills wait-what
-mattpocock/skills writing-for-agents
 tensor4all/tensor4all-rs use-tensor4all-rs
