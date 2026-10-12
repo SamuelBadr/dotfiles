@@ -21,7 +21,7 @@ Always-on machines, reachable from each other with `ssh <name>` (separate filesy
 - `hclm` (login node `master.cluster`): Slurm cluster, 8 usable nodes with 96 cores and 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER`.
 - The Mac laptop sleeps: never leave long-running work on it.
 
-`fleet` shows free cores and RAM on kauch and frank and idle cores per hclm partition. Place work like this:
+`fleet` shows free cores and RAM on kauch and frank, the user's jobs already running there, and idle cores per hclm partition. Place work like this:
 
 - Small (a few cores, minutes): where you are.
 - Anything bigger: wherever it finishes soonest without queueing (kauch, frank, or a Slurm job on hclm that starts immediately). Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.

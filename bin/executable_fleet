@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Free compute across the fleet (read-only): free cores and RAM on the
-# desktops, idle cores per partition on the hclm Slurm cluster. Physical
-# cores only: hyperthreads are not counted.
+# desktops plus your running jobs there, idle cores per partition on the hclm
+# Slurm cluster. Physical cores only: hyperthreads are not counted.
 set -u
 
 # Run <script> on <ssh-alias>, locally if this machine is <nodename>.
@@ -17,6 +17,17 @@ cores=$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l)
 awk -v h="$1" -v n="$cores" -v l="$load" '/^MemAvailable:/ {
   f = n - l; if (f < 0) f = 0
   printf "%-6s %2d cores, load %4.1f: ~%d free; %d GB RAM available\n", h, n, l, f, $2 / 1048576 }' /proc/meminfo
+# Your jobs: processes using >= half a core for >= 10 s, grouped by working directory.
+ps -u "$USER" -o pid=,pcpu=,etimes=,args= | awk '$2 >= 50 && $3 >= 10' |
+  while read -r pid cpu secs args; do
+    printf '%s\t%s\t%s\t%s\n' "$(readlink "/proc/$pid/cwd" || echo '?')" "$cpu" "$secs" "$args"
+  done | awk -F'\t' -v home="$HOME" '
+  function dur(s) { return s >= 86400 ? int(s / 86400) "d" : s >= 3600 ? int(s / 3600) "h" sprintf("%02d", int(s % 3600 / 60)) : int(s / 60) "m" }
+  { d = $1; if (index(d, home) == 1) d = "~" substr(d, length(home) + 1)
+    c[d] += $2; n[d]++; if ($3 > t[d]) t[d] = $3
+    if ($2 > top[d]) { top[d] = $2; cmd[d] = $4; sub(/^[^ ]*\//, "", cmd[d]) } }
+  END { for (d in c) printf "%9.1f cores %5s  %.60s%s  (%s)\n", c[d] / 100, dur(t[d]), cmd[d], (n[d] > 1 ? " +" (n[d] - 1) " more" : ""), d }' |
+  sort -rn
 EOF
 
 IFS= read -r -d '' cluster <<'EOF'
