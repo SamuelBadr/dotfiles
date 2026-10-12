@@ -11,6 +11,7 @@
 - Prefer the smallest focused check; run full test suites, builds, benchmarks, etc. only when necessary.
 - Don't pipe expensive commands through `head`, `tail`, `grep`, etc. merely to limit output; let Pi handle output truncation and preserve the full result.
 - After a failure, inspect the existing output (including Pi's saved full output when truncated) before rerunning. Rerun only when new execution is actually needed.
+- To wait for running work (background jobs, CI, Slurm, remote runs), poll in a loop: check every 15–30 s, exit as soon as it finishes or fails, and cap the loop at the expected remaining time.
 
 ## Compute fleet
 
