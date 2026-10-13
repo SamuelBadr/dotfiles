@@ -1,1 +1,6 @@
-{}
+{
+  "forceTopLevelAsync": true,
+  "maxSubagentSpawnsPerSession": 40,
+  "worktreeBaseDir": "~/.cache/pi-subagents/worktrees",
+  "scheduledRuns": { "storeRoot": "~/.local/share/pi-subagents/schedules" }
+}

@@ -37,6 +37,15 @@
     "npm:pi-claude-bridge",
     "npm:pi-subagents"
   ],
+  "subagents": {
+    "agentOverrides": {
+      "delegate": { "inheritGlobalContext": true },
+      "worker": { "inheritGlobalContext": true },
+      "scout": { "inheritGlobalContext": true, "model": "claude-bridge/claude-sonnet-5-5:low" },
+      "oracle": { "inheritGlobalContext": true, "model": "openai/gpt-6.1-sol:high" },
+      "reviewer": { "model": "openai/gpt-6.1-sol:high" }
+    }
+  },
   "lastChangelogVersion": "1.2.0",
   "deviceId": "5661b36f-050a-4575-be0c-6da0a5508989",
   "theme": "system"
