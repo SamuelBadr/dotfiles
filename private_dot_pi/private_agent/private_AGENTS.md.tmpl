@@ -3,13 +3,14 @@
 ## Subagents
 
 - You may spawn subagents on your own judgment with any model, except Astra or Fable models (model ID contains `astra` or `fable`): spawn those only when the user asks.
+- Omit `model` when launching unless there's a specific reason; per-role models are configured in settings.
 
 ## Expensive commands
 
 - Prefer the smallest focused check; run full test suites, builds, benchmarks, etc. only when necessary.
 - Don't pipe expensive commands through `head`, `tail`, `grep`, etc. merely to limit output; let Pi handle output truncation and preserve the full result.
 - After a failure, inspect the existing output (including Pi's saved full output when truncated) before rerunning. Rerun only when new execution is actually needed.
-- To wait for running work (background jobs, CI, Slurm, remote runs), poll in a loop: check every 15–30 s, exit as soon as it finishes or fails, and cap the loop at the expected remaining time.
+- To wait for running work (background jobs, CI, Slurm, remote runs, but not subagent runs, which wake you when they finish), poll in a loop: check every 15–30 s, exit as soon as it finishes or fails, and cap the loop at the expected remaining time.
 
 ## Compute fleet
 
