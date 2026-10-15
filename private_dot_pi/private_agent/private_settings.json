@@ -36,17 +36,35 @@
     "npm:pi-web-access",
     "npm:@dietrichgebert/ponytail",
     "npm:pi-claude-bridge",
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:remote-pi"
   ],
   "subagents": {
     "agentOverrides": {
-      "delegate": { "inheritGlobalContext": true },
-      "worker": { "inheritGlobalContext": true, "model": "claude-bridge/claude-opus-5-5:high" },
-      "scout": { "inheritGlobalContext": true, "model": "claude-bridge/claude-haiku-5-5:xhigh" },
-      "oracle": { "inheritGlobalContext": true, "model": "openai/gpt-6.1-sol:xhigh" },
-      "reviewer": { "model": "openai/gpt-6.1-sol:high" },
-      "researcher": { "model": "openai/gpt-6.1-sol:medium" },
-      "evidence-auditor": { "model": "claude-bridge/claude-opus-5-5:high" }
+      "delegate": {
+        "inheritGlobalContext": true
+      },
+      "worker": {
+        "inheritGlobalContext": true,
+        "model": "claude-bridge/claude-opus-5-5:high"
+      },
+      "scout": {
+        "inheritGlobalContext": true,
+        "model": "claude-bridge/claude-haiku-5-5:xhigh"
+      },
+      "oracle": {
+        "inheritGlobalContext": true,
+        "model": "openai/gpt-6.1-sol:xhigh"
+      },
+      "reviewer": {
+        "model": "openai/gpt-6.1-sol:high"
+      },
+      "researcher": {
+        "model": "openai/gpt-6.1-sol:medium"
+      },
+      "evidence-auditor": {
+        "model": "claude-bridge/claude-opus-5-5:high"
+      }
     }
   },
   "lastChangelogVersion": "1.2.0",
