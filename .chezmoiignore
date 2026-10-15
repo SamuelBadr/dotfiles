@@ -63,8 +63,7 @@ Library
 {{- end }}
 
 # HPC login-node guard: `bin/pi` wrapper and its pi.slice only where
-# [data] hpcLoginNode = true. ~/.pi/agent/AGENTS.md is managed on every
-# machine; .hpcLoginNode appends the Slurm rules to the global instructions.
+# [data] hpcLoginNode = true.
 {{- if not .hpcLoginNode }}
 bin/pi
 .config/systemd/user/pi.slice

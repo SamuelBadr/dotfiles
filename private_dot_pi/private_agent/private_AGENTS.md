@@ -17,13 +17,14 @@
 Always-on machines, reachable from each other with `ssh <name>` (separate filesystems):
 
 - `kauch` (`kauch01`): 12 cores, 122 GB RAM, GTX 1050 Ti. Shared with other people and a CI runner.
-- `frank` (`ftuw`): 16 cores, 60 GB RAM. A desktop with a local user; also runs the user's GitHub Actions runners.
-- `hclm` (login node `master.cluster`): Slurm cluster, 8 usable nodes with 96 cores and 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER`.
+- `frank` (`ftuw`): 16 cores, 60 GB RAM. A desktop with a local user; also runs the user's GitHub Actions runners. Never use more than 8 cores there in total, counting everything of yours already running (the runners included), whatever `fleet` shows as free.
+- `hclm` (login node `master.cluster`): Slurm cluster, 8 usable nodes with 96 cores and 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER`. The login node itself (24 cores, 188 GB RAM) is shared by all cluster users: never use more than 8 cores and 64 GB RAM there in total, counting everything of yours already running. The 64 GB is also enforced for agents there (started via `~/bin/pi`, all combined): past it, processes die, possibly the agent itself.
 - The Mac laptop sleeps: never leave long-running work on it.
 
-`fleet` shows free cores and RAM on kauch and frank, the user's jobs already running there, and idle cores per hclm partition. Place work like this:
+`fleet` shows free cores and RAM on kauch, frank and the hclm login node, the user's jobs already running there, what is left of the caps on frank and the hclm login node, and idle cores per hclm partition. Place work like this:
 
-- Small (a few cores, minutes): where you are.
+- Before starting anything that may use more than 2 cores, 4 GB RAM or 10 minutes, run `fleet`, even to run it where you are, and stay within what it shows as free and left for you.
+- Smaller work: where you are.
 - Anything bigger: wherever it finishes soonest without queueing (kauch, frank, or a Slurm job on hclm that starts immediately). Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.
 - Avoid queue time: before submitting, run the same `sbatch` command with `--test-only`, which prints the expected start time. If the job wouldn't start right away, shrink it to fit the idle nodes or use the desktops. Ask the user before submitting anything that would wait in the queue.
 - Before submitting any job on hclm, check free space there (`df -h /home /mnt/storage /mnt/scratch`) and make sure the job's output fits with room to spare.
@@ -40,22 +41,3 @@ The user also has accounts on the Austrian Scientific Computing clusters: VSC-5 
 
 - Use them only when the desktops and hclm can't run the work without waiting (GPUs, more than hclm can give, or a long queue on hclm). Jobs are billed to the user's project.
 - Logging in needs the user's password and 2FA, so you can't connect on your own. When you need access, ask the user to run `ssh -fN VSC5B` (or the host you need) in a terminal on this machine; `ssh -O check VSC5B` tells you when the connection is up.
-{{- if .hpcLoginNode }}
-
-## Shared login node: hard resource budget
-
-This is a shared HPC login node; other users work interactively on the same
-machine. The budget below is a hard limit for this agent, its subagents, and
-everything they start, combined:
-
-- **8 cores.** Nothing enforces this, so you do: give every parallel command an
-  explicit count of at most 8 (`make -j8`, `julia -t 8`, `cargo build -j 8`,
-  `pytest -n 8`, …). `auto` defaults see all cores of the node.
-- **64 GB RAM, no swap.** Enforced by the kernel: past it, processes die,
-  possibly this agent. Estimate memory before loading large data.
-- **~2 hours** of compute per task.
-
-Work that plausibly exceeds the budget goes elsewhere (see Compute fleet): a
-desktop, or a Slurm job that starts immediately. Launch work only through this
-session's tools (shell, subagents) so the safeguards apply.
-{{- end }}

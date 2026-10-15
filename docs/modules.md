@@ -113,8 +113,7 @@ workstation = true
 ### Cluster/Login Node (Minimal)
 
 `workstation = false` is the default. On a shared HPC login node, opt into the
-pi guard (`~/bin/pi` wrapper, shared `pi.slice` memory cap, Slurm rules in
-`~/.pi/agent/AGENTS.md`):
+pi guard (`~/bin/pi` wrapper, shared `pi.slice` memory cap):
 
 ```toml
 # ~/.config/chezmoi/chezmoi.toml
