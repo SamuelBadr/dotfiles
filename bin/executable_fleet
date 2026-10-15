@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Free compute across the fleet (read-only): free cores and RAM on the
-# desktops plus your running jobs there, idle cores per partition on the hclm
-# Slurm cluster. Physical cores only: hyperthreads are not counted.
+# desktops and the hclm login node plus your running jobs there, what is left
+# of your cap where one applies, idle cores per partition on the hclm Slurm
+# cluster. Physical cores only: hyperthreads are not counted.
 set -u
 
 # Run <script> on <ssh-alias>, locally if this machine is <nodename>.
@@ -13,10 +14,19 @@ on() { # <ssh-alias> <nodename> <script>
 
 IFS= read -r -d '' desktop <<'EOF'
 read -r load _ < /proc/loadavg
+# Agreed caps on everything of yours on the host combined (cores, GB; 0 = none).
+case $1 in frank) cap=8 capmem=0 ;; hclm) cap=8 capmem=64 label="hclm login node" ;; *) cap=0 ;; esac
 cores=$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l)
-awk -v h="$1" -v n="$cores" -v l="$load" '/^MemAvailable:/ {
+awk -v h="${label:-$1}" -v n="$cores" -v l="$load" '/^MemAvailable:/ {
   f = n - l; if (f < 0) f = 0
   printf "%-6s %2d cores, load %4.1f: ~%d free; %d GB RAM available\n", h, n, l, f, $2 / 1048576 }' /proc/meminfo
+# shortcut: %CPU is each process's lifetime average, so bursty work reads low; sample /proc/stat if that misleads.
+[ "$cap" -gt 0 ] && ps -u "$USER" -o pcpu=,rss= | awk -v c="$cap" -v m="$capmem" '
+  { cpu += $1; rss += $2 }
+  END { cpu /= 100; rss /= 1048576; left = c - cpu; if (left < 0) left = 0
+    printf "       your cap %d cores%s; you use %.1f cores, %d GB: ~%.0f cores", c, (m ? sprintf(", %d GB", m) : ""), cpu, rss, left
+    if (m) printf ", %d GB", (m > rss ? m - rss : 0)
+    print " left for you" }'
 # Your jobs: processes using >= half a core for >= 10 s, grouped by working directory.
 ps -u "$USER" -o pid=,pcpu=,etimes=,args= | awk '$2 >= 50 && $3 >= 10' |
   while read -r pid cpu secs args; do
@@ -42,5 +52,5 @@ squeue -u "$USER" -h -o %T | sort | uniq -c |
 EOF
 
 # Query all hosts at once (SSH round trips add up from far away), print in order.
-exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$cluster")
+exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$desktop$cluster")
 cat <&3; cat <&4; cat <&5
