@@ -53,48 +53,10 @@ export PATH
 unset _shell_path_dir _node_dir _p
 
 # ---------------------------------------------------------------------------
-# The only userland shortcuts that survive cleanup: update the system, and
-# launch Pluto. Everything else was unmeasured dead weight and removed.
+# The only userland shortcut that survives cleanup: launch Pluto. (Updating
+# lives in ~/bin/up, a script so `up --all` can run it over ssh.)
 # ---------------------------------------------------------------------------
 unalias up 2>/dev/null || true
-# Run a tool and print its output only when it fails or when a line matches
-# $1 (ANSI codes stripped for matching). Silent when nothing changed.
-_replay_if() {
-  local keep="$1"; shift
-  local out rc
-  out=$("$@" 2>&1); rc=$?
-  if [ "$rc" -ne 0 ]; then
-    printf '%s\n' "$out"
-    return "$rc"
-  fi
-  printf '%s\n' "$out" | sed "s/$(printf '\033')\[[0-9;]*m//g" | grep -qE "$keep" && printf '%s\n' "$out"
-  return 0
-}
-
-up() {
-  if command -v brew >/dev/null 2>&1; then
-    _replay_if '==> (New|Updated|Renamed|Deleted) (Formulae|Casks)|==> New Versions' brew update --quiet
-    brew upgrade --greedy --overwrite -y
-    brew cleanup
-  fi
-
-  if command -v pi >/dev/null 2>&1; then
-    # Real changes: an extension checkout reset ("HEAD is now at"), a fresh
-    # clone, or a self update. The bare "git fetch ... -> FETCH_HEAD" lines
-    # print EVERY run for pinned @main repos even when upstream is unchanged,
-    # so they are noise, not a signal.
-    _replay_if 'HEAD is now at|Cloning into|Updated pi |Update note' pi update --all
-  fi
-
-  # Global skills: match ~/.agents/skills.txt across machines, then update.
-  if command -v skills-sync >/dev/null 2>&1; then
-    _replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
-  fi
-  if command -v skills >/dev/null 2>&1; then
-    _replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
-  fi
-}
-
 alias pluto='julia -e "using Pluto; Pluto.run()"'
 
 # ---------------------------------------------------------------------------

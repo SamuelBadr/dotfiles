@@ -35,8 +35,8 @@ are listed unconditionally even though only the `backupMac` machine runs them.
 ## Tool ownership
 
 - **Shell shortcuts:** shared, shell-neutral setup lives in `~/.config/shell/common.sh`
-  (sourced by both zsh and the bash fallback). By design it defines only `up` and
-  `pluto`; treat additions as deliberate. zsh-specific config stays in `~/.zshrc`.
+  (sourced by both zsh and the bash fallback). By design it defines only
+  `pluto`; updating is `~/bin/up`; treat additions as deliberate. zsh-specific config stays in `~/.zshrc`.
 - **Editor:** Zed with `--wait`; nano fallback when Zed is unavailable.
 - **Node:** Homebrew `node` and npm. NVM is a separate per-user Node version
   manager; no NVM installation or version file exists here, so its old shell

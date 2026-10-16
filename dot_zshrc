@@ -23,7 +23,7 @@ elif command -v brew >/dev/null 2>&1; then
 fi
 
 # ============================================================================
-# Shared Environment (EDITOR, PATH, GITHUB_USERNAME, up, pluto)
+# Shared Environment (EDITOR, PATH, GITHUB_USERNAME, pluto)
 # ============================================================================
 # Shell-neutral configuration lives here so zsh and the bash fallback stay in
 # sync. Load after Homebrew so brew-installed tool dirs are on PATH already.

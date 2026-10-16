@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# Update the user-level software on this machine: Homebrew, Julia (juliaup,
+# the global and shared environments, Pkg apps), pi and its extensions, agent
+# skills, Rust (rustup, cargo-installed tools) and uv tools. Tools that are
+# missing here are skipped. Package/project environments are left alone:
+# update those by hand.
+#   up        this machine
+#   up --all  this machine, then hclm, frank and kauch in parallel (each pulls
+#             the dotfiles first, so they run the same version of this script)
+set -u
+. "$HOME/.config/shell/common.sh"  # PATH; ssh and systemd shells lack it
+jobs=4  # parallel compile jobs: stays under the 8-core caps on frank and hclm
+
+# Run a tool and print its output only when it fails or when a line matches
+# $1 (ANSI codes stripped for matching). Silent when nothing changed.
+replay_if() {
+  local keep="$1" out rc; shift
+  out=$("$@" 2>&1); rc=$?
+  if [ "$rc" -ne 0 ]; then printf '%s\n' "$out"; return "$rc"; fi
+  printf '%s\n' "$out" | sed "s/$(printf '\033')\[[0-9;]*m//g" | grep -qE "$keep" && printf '%s\n' "$out"
+  return 0
+}
+has() { command -v "$1" >/dev/null 2>&1; }
+failed=()
+step() { # <name> <command...>: run, remember failures, keep going
+  local name=$1; shift
+  "$@" || { echo "up: $name failed" >&2; failed+=("$name"); }
+}
+
+# --all: fan out. Remote output is buffered per host and shown after the local run.
+if [ "${1:-}" = --all ]; then
+  logs=$(mktemp -d); pids=() hosts=()
+  for pair in hclm:master.cluster frank:ftuw kauch:kauch01; do
+    h=${pair%%:*}; [ "$(uname -n)" = "${pair#*:}" ] && continue
+    ssh -o BatchMode=yes -o ConnectTimeout=10 "$h" \
+      'bash -lc "chezmoi git -- pull -q --ff-only; chezmoi apply --no-tty ~/bin/up; chezmoi apply --no-tty || echo up: chezmoi apply failed >&2; ~/bin/up"' \
+      >"$logs/$h" 2>&1 </dev/null &
+    pids+=($!); hosts+=("$h")
+  done
+  step chezmoi chezmoi update --no-tty
+  "$0"; rc=$?
+  summary=("$(uname -n): $([ $rc = 0 ] && echo ok || echo FAILED)")
+  for i in "${!hosts[@]}"; do
+    wait "${pids[$i]}"; rc=$?; h=${hosts[$i]}
+    printf '\n===== %s =====\n' "$h"; cat "$logs/$h"
+    summary+=("$h: $([ $rc = 0 ] && echo ok || echo FAILED)$(grep -h '^versions:' "$logs/$h" | sed 's/^versions:/ /')")
+  done
+  rm -rf "$logs"
+  printf '\n'; printf '%s\n' "${summary[@]}"
+  [ ${#failed[@]} = 0 ] && ! printf '%s\n' "${summary[@]}" | grep -q FAILED
+  exit
+fi
+
+if has brew; then
+  step brew replay_if '==> (New|Updated|Renamed|Deleted) (Formulae|Casks)|==> New Versions' brew update --quiet
+  step brew brew upgrade --greedy --overwrite -y
+  brew cleanup
+fi
+
+if has juliaup; then
+  # juliaup deletes the julia it replaces, which breaks running julias that
+  # later start workers or load files, so wait until none is running.
+  if pids=$(pgrep -u "$USER" -x julia); then
+    echo "up: julia is running (pids $(echo $pids)), skipping juliaup update" >&2
+    failed+=(juliaup)
+  else
+    step juliaup juliaup update
+  fi
+  # Global env of the current version (seeded from the newest older one when
+  # new), shared envs used in the last 30 days, then Pkg apps, which also
+  # repoints their shims at the current julia.
+  step julia env JULIA_NUM_PRECOMPILE_TASKS=$jobs julia --startup-file=no -e '
+    using Pkg, TOML, Dates
+    envs = joinpath(DEPOT_PATH[1], "environments")
+    cur = "v$(VERSION.major).$(VERSION.minor)"
+    isver(d) = occursin(r"^v\d+\.\d+$", d)
+    if !isfile(joinpath(envs, cur, "Project.toml"))
+        old = sort(filter(d -> isver(d) && isfile(joinpath(envs, d, "Project.toml")) &&
+                               VersionNumber(d[2:end]) < VERSION, readdir(envs)); by = d -> VersionNumber(d[2:end]))
+        isempty(old) || (mkpath(joinpath(envs, cur)); cp(joinpath(envs, last(old), "Project.toml"), joinpath(envs, cur, "Project.toml")))
+    end
+    log = joinpath(DEPOT_PATH[1], "logs", "manifest_usage.toml")
+    recent = isfile(log) ? [dirname(m) for (m, v) in TOML.parsefile(log)
+                            if maximum(e["time"] for e in v) > now(UTC) - Day(30)] : String[]
+    shared = filter(readdir(envs)) do d
+        p = joinpath(envs, d)
+        isfile(joinpath(p, "Project.toml")) && (d == cur || p in recent && !isver(d) && !startswith(d, "__"))
+    end
+    bad = String[]
+    for d in shared
+        println("julia: updating @", d)
+        try Pkg.activate(joinpath(envs, d); io = devnull); Pkg.update() catch e
+            showerror(stderr, e); println(stderr); push!(bad, "@" * d) end
+    end
+    if isfile(joinpath(envs, "apps", "AppManifest.toml"))
+        println("julia: updating apps")
+        try Pkg.Apps.update() catch e showerror(stderr, e); println(stderr); push!(bad, "apps") end
+    end
+    isempty(bad) || (println(stderr, "julia: failed: ", join(bad, ", ")); exit(1))'
+fi
+
+if has pi; then
+  # Real changes: an extension checkout reset ("HEAD is now at"), a fresh
+  # clone, or a self update. The bare "git fetch ... -> FETCH_HEAD" lines
+  # print EVERY run for pinned @main repos even when upstream is unchanged,
+  # so they are noise, not a signal.
+  step pi replay_if 'HEAD is now at|Cloning into|Updated pi |Update note' pi update --all
+  step pi-models replay_if '[Ee]rror|[Ff]ail' pi update --models
+fi
+
+# Global skills: match ~/.agents/skills.txt across machines, then update.
+has skills-sync && step skills-sync replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
+has skills && step skills replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
+
+if has rustup; then
+  step rustup replay_if ' updated |installed|[Ee]rror' rustup update
+  # Reinstall crates.io tools; cargo skips those already at the latest version.
+  # Git and path installs (a "(" after the version) are left alone.
+  crates=$(cargo install --list | awk '/^[^ ].*:$/ && !/\(/ {print $1}')
+  [ -n "$crates" ] && step cargo replay_if 'Replac|Installed|[Ee]rror' cargo install --locked -j $jobs $crates
+fi
+
+has uv && step uv replay_if 'Updated|[Ee]rror' uv tool upgrade --all
+
+v() { has "$1" && "$@" 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^ ]*' | head -1; }
+echo "versions: julia $(v julia --version) | rustc $(v rustc --version) | pi $(v pi --version)"
+[ ${#failed[@]} = 0 ] || { echo "up: failed: ${failed[*]}" >&2; exit 1; }
