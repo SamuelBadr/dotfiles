@@ -26,6 +26,10 @@ step() { # <name> <command...>: run, remember failures, keep going
   local name=$1; shift
   "$@" || { echo "up: $name failed" >&2; failed+=("$name"); }
 }
+note() { # print a line for the --all summary (and to $UP_NOTES when set)
+  echo "$*"; [ -n "${UP_NOTES:-}" ] && echo "$*" >>"$UP_NOTES"; return 0
+}
+notes() { grep -h '^versions:\|^up: skipped' "$@" | sed 's/^versions: //; s/^up: /  /' | tr '\n' ' '; }
 
 # --all: fan out. Remote output is buffered per host and shown after the local run.
 if [ "${1:-}" = --all ]; then
@@ -38,12 +42,12 @@ if [ "${1:-}" = --all ]; then
     pids+=($!); hosts+=("$h")
   done
   step chezmoi chezmoi update --no-tty
-  "$0"; rc=$?
-  summary=("$(uname -n): $([ $rc = 0 ] && echo ok || echo FAILED)")
+  UP_NOTES=$logs/local.notes "$0"; rc=$?
+  summary=("$(printf '%-6s %-7s' local "$([ $rc = 0 ] && echo ok || echo FAILED)") $(notes "$logs/local.notes")")
   for i in "${!hosts[@]}"; do
     wait "${pids[$i]}"; rc=$?; h=${hosts[$i]}
     printf '\n===== %s =====\n' "$h"; cat "$logs/$h"
-    summary+=("$h: $([ $rc = 0 ] && echo ok || echo FAILED)$(grep -h '^versions:' "$logs/$h" | sed 's/^versions:/ /')")
+    summary+=("$(printf '%-6s %-7s' "$h" "$([ $rc = 0 ] && echo ok || echo FAILED)") $(notes "$logs/$h")")
   done
   rm -rf "$logs"
   printf '\n'; printf '%s\n' "${summary[@]}"
@@ -58,19 +62,20 @@ if has brew; then
 fi
 
 if has juliaup; then
-  # juliaup deletes the julia it replaces, which breaks running julias that
-  # later start workers or load files, so wait until none is running.
-  if pids=$(pgrep -u "$USER" -x julia); then
-    echo "up: julia is running (pids $(echo $pids)), skipping juliaup update" >&2
-    failed+=(juliaup)
+  # juliaup deletes the julia it replaces, which breaks running julias (here
+  # or in Slurm jobs sharing this home) that later start workers or load files.
+  busy=$(pgrep -u "$USER" -x julia | tr '\n' ' ')
+  has squeue && [ -n "$(squeue -h -u "$USER" -t R,CG)" ] && busy+="Slurm jobs"
+  if [ -n "$busy" ]; then
+    note "up: skipped juliaup update (running: ${busy% })"
   else
-    step juliaup juliaup update
+    step juliaup replay_if 'Installing|Updating channel|[Ee]rror' juliaup update
   fi
   # Global env of the current version (seeded from the newest older one when
   # new), shared envs used in the last 30 days, then Pkg apps, which also
-  # repoints their shims at the current julia.
+  # repoints their shims at the current julia. Pkg output is shown on failure only.
   step julia env JULIA_NUM_PRECOMPILE_TASKS=$jobs julia --startup-file=no -e '
-    using Pkg, TOML, Dates
+    using Pkg, TOML, Dates, Logging
     envs = joinpath(DEPOT_PATH[1], "environments")
     cur = "v$(VERSION.major).$(VERSION.minor)"
     isver(d) = occursin(r"^v\d+\.\d+$", d)
@@ -86,17 +91,39 @@ if has juliaup; then
         p = joinpath(envs, d)
         isfile(joinpath(p, "Project.toml")) && (d == cur || p in recent && !isver(d) && !startswith(d, "__"))
     end
+    function quiet(f) # run f with all output captured; returns (succeeded, output)
+        path = tempname()
+        ok = open(path, "w") do io
+            redirect_stdio(stdout = io, stderr = io) do
+                with_logger(ConsoleLogger(io)) do
+                    try f(); true catch e showerror(io, e); println(io); false end
+                end
+            end
+        end
+        out = read(path, String); rm(path); ok, out
+    end
     bad = String[]
-    Pkg.Registry.update()
+    fail(what, out) = (print(stderr, out); push!(bad, what))
+    ok, out = quiet(Pkg.Registry.update); ok || fail("registry", out)
+    deps() = Dict(p.name => (string(p.version), p.is_direct_dep) for p in values(Pkg.dependencies()))
     for d in shared
-        println("julia: updating @", d)
-        try Pkg.activate(joinpath(envs, d); io = devnull); Pkg.update(; update_registry = false) catch e
-            showerror(stderr, e); println(stderr); push!(bad, "@" * d) end
+        Pkg.activate(joinpath(envs, d); io = devnull)
+        old = deps()
+        local ok, out = quiet(() -> Pkg.update(; update_registry = false))
+        new = deps()
+        ch = [n for (n, v) in new if get(old, n, nothing) != v]
+        direct = [string(n, " ", first(get(old, n, ("new",))), " ⇒ ", first(new[n])) for n in sort(ch) if last(new[n])]
+        println("julia: @", d, ": ", isempty(ch) ? "up to date" : "$(length(ch)) packages updated",
+                isempty(direct) ? "" : " (" * join(direct, ", ") * ")")
+        ok || fail("@" * d, out)
+        ok && foreach(l -> occursin(r"✗|ERROR", l) && println(stderr, l), eachline(IOBuffer(out)))
     end
     apps = joinpath(envs, "apps", "AppManifest.toml")
-    for name in (isfile(apps) ? keys(TOML.parsefile(apps)["deps"]) : String[])
-        println("julia: updating app ", name)  # one by one: a broken app must not block the rest
-        try Pkg.Apps.update(name) catch e showerror(stderr, e); println(stderr); push!(bad, "app " * name) end
+    appdeps() = isfile(apps) ? TOML.parsefile(apps)["deps"] : Dict{String, Any}()
+    for (name, old) in appdeps()  # one by one: a broken app must not block the rest
+        local ok, out = quiet(() -> Pkg.Apps.update(name))
+        ok || fail("app " * name, out)
+        ok && get(appdeps(), name, nothing) != old && println("julia: app ", name, " updated")
     end
     isempty(bad) || (println(stderr, "julia: failed: ", join(bad, ", ")); exit(1))'
 fi
@@ -114,7 +141,8 @@ fi
 has skills-sync && step skills-sync replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
 has skills && step skills replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
 
-if has rustup; then
+# Only where a toolchain is set up (frank has rustup but no default toolchain).
+if has rustup && rustc --version >/dev/null 2>&1; then
   step rustup replay_if ' updated |installed|[Ee]rror' rustup update
   # Reinstall crates.io tools; cargo skips those already at the latest version.
   # Git and path installs (a "(" after the version) are left alone.
@@ -124,6 +152,6 @@ fi
 
 has uv && step uv replay_if 'Updated|[Ee]rror' uv tool upgrade --all
 
-v() { has "$1" && "$@" 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^ ]*' | head -1; }
-echo "versions: julia $(v julia --version) | rustc $(v rustc --version) | pi $(v pi --version)"
+v() { has "$1" && "$@" 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^ ]*' | head -1 || echo -; }
+note "versions: julia $(v julia --version) | rustc $(v rustc --version) | pi $(v pi --version)"
 [ ${#failed[@]} = 0 ] || { echo "up: failed: ${failed[*]}" >&2; exit 1; }
