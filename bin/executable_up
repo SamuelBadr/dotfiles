@@ -87,14 +87,16 @@ if has juliaup; then
         isfile(joinpath(p, "Project.toml")) && (d == cur || p in recent && !isver(d) && !startswith(d, "__"))
     end
     bad = String[]
+    Pkg.Registry.update()
     for d in shared
         println("julia: updating @", d)
-        try Pkg.activate(joinpath(envs, d); io = devnull); Pkg.update() catch e
+        try Pkg.activate(joinpath(envs, d); io = devnull); Pkg.update(; update_registry = false) catch e
             showerror(stderr, e); println(stderr); push!(bad, "@" * d) end
     end
-    if isfile(joinpath(envs, "apps", "AppManifest.toml"))
-        println("julia: updating apps")
-        try Pkg.Apps.update() catch e showerror(stderr, e); println(stderr); push!(bad, "apps") end
+    apps = joinpath(envs, "apps", "AppManifest.toml")
+    for name in (isfile(apps) ? keys(TOML.parsefile(apps)["deps"]) : String[])
+        println("julia: updating app ", name)  # one by one: a broken app must not block the rest
+        try Pkg.Apps.update(name) catch e showerror(stderr, e); println(stderr); push!(bad, "app " * name) end
     end
     isempty(bad) || (println(stderr, "julia: failed: ", join(bad, ", ")); exit(1))'
 fi
