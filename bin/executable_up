@@ -37,11 +37,12 @@ if [ "${1:-}" = --all ]; then
   for pair in hclm:master.cluster frank:ftuw kauch:kauch01; do
     h=${pair%%:*}; [ "$(uname -n)" = "${pair#*:}" ] && continue
     ssh -o BatchMode=yes -o ConnectTimeout=10 "$h" \
-      'bash -lc "chezmoi git -- pull -q --ff-only; chezmoi apply --no-tty ~/bin/up; chezmoi apply --no-tty || echo up: chezmoi apply failed >&2; ~/bin/up"' \
+      'bash -lc "chezmoi git -- pull -q --ff-only; chezmoi apply --no-tty ~/bin/up; chezmoi apply --no-tty || echo up: skipped chezmoi apply, see chezmoi diff; ~/bin/up"' \
       >"$logs/$h" 2>&1 </dev/null &
     pids+=($!); hosts+=("$h")
   done
-  step chezmoi chezmoi update --no-tty
+  # Refuses (with --no-tty) to overwrite files changed here since the last apply.
+  chezmoi update --no-tty || echo "up: skipped chezmoi apply, see chezmoi diff" | tee "$logs/local.notes"
   UP_NOTES=$logs/local.notes "$0"; rc=$?
   summary=("$(printf '%-6s %-7s' local "$([ $rc = 0 ] && echo ok || echo FAILED)") $(notes "$logs/local.notes")")
   for i in "${!hosts[@]}"; do
@@ -51,7 +52,7 @@ if [ "${1:-}" = --all ]; then
   done
   rm -rf "$logs"
   printf '\n'; printf '%s\n' "${summary[@]}"
-  [ ${#failed[@]} = 0 ] && ! printf '%s\n' "${summary[@]}" | grep -q FAILED
+  ! printf '%s\n' "${summary[@]}" | grep -q FAILED
   exit
 fi
 
