@@ -61,12 +61,34 @@ if has brew; then
   brew cleanup
 fi
 
+# pi, skills and uv don't touch Julia or Rust: run them alongside, after brew
+# (which may upgrade the tools themselves). Their output is printed afterwards.
+side=$(mktemp)
+(
+  failed=()
+  if has pi; then
+    # Real changes: an extension checkout reset ("HEAD is now at"), a fresh
+    # clone, or a self update. The bare "git fetch ... -> FETCH_HEAD" lines
+    # print EVERY run for pinned @main repos even when upstream is unchanged,
+    # so they are noise, not a signal.
+    step pi replay_if 'HEAD is now at|Cloning into|Updated pi |Update note' pi update --all
+    step pi-models replay_if '[Ee]rror|[Ff]ail' pi update --models
+  fi
+  # Global skills: match ~/.agents/skills.txt across machines, then update.
+  has skills-sync && step skills-sync replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
+  has skills && step skills replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
+  has uv && step uv replay_if 'Updated|[Ee]rror' uv tool upgrade --all
+  [ ${#failed[@]} = 0 ]
+) >"$side" 2>&1 &
+side_pid=$!
+
 if has juliaup; then
   # juliaup deletes the julia it replaces, which breaks running julias (here
   # or in Slurm jobs sharing this home) that later start workers or load files.
   busy=$(pgrep -u "$USER" -x julia | tr '\n' ' ')
   [ -n "$busy" ] && busy="julia pids ${busy% }"
   has squeue && [ -n "$(squeue -h -u "$USER" -t R,CG)" ] && busy="${busy:+$busy, }Slurm jobs"
+  old_julia=$(julia --version 2>/dev/null)
   if [ -n "$busy" ]; then
     note "up: skipped juliaup update (running: $busy)"
   else
@@ -75,8 +97,9 @@ if has juliaup; then
   # Global env of the current version (seeded from the newest older one when
   # new), shared envs used in the last 30 days, then Pkg apps, which also
   # repoints their shims at the current julia. Pkg output is shown on failure only.
-  step julia env JULIA_NUM_PRECOMPILE_TASKS=$jobs julia --startup-file=no -e '
-    using Pkg, TOML, Dates, Logging
+  [ "$(julia --version 2>/dev/null)" != "$old_julia" ] && new_julia=1 || new_julia=
+  step julia env JULIA_NUM_PRECOMPILE_TASKS=$jobs UP_NEW_JULIA=$new_julia UP_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/up" julia --startup-file=no -e '
+    using Pkg, TOML, Dates, Logging, FileWatching
     envs = joinpath(DEPOT_PATH[1], "environments")
     cur = "v$(VERSION.major).$(VERSION.minor)"
     isver(d) = occursin(r"^v\d+\.\d+$", d)
@@ -86,8 +109,8 @@ if has juliaup; then
         isempty(old) || (mkpath(joinpath(envs, cur)); cp(joinpath(envs, last(old), "Project.toml"), joinpath(envs, cur, "Project.toml")))
     end
     log = joinpath(DEPOT_PATH[1], "logs", "manifest_usage.toml")
-    recent = isfile(log) ? [dirname(m) for (m, v) in TOML.parsefile(log)
-                            if maximum(e["time"] for e in v) > now(UTC) - Day(30)] : String[]
+    usage = isfile(log) ? TOML.parsefile(log) : Dict{String, Any}()
+    recent = [dirname(m) for (m, v) in usage if maximum(e["time"] for e in v) > now(UTC) - Day(30)]
     shared = filter(readdir(envs)) do d
         p = joinpath(envs, d)
         isfile(joinpath(p, "Project.toml")) && (d == cur || p in recent && !isver(d) && !startswith(d, "__"))
@@ -107,12 +130,14 @@ if has juliaup; then
     fail(what, out) = (print(stderr, out); push!(bad, what))
     ok, out = quiet(Pkg.Registry.update); ok || fail("registry", out)
     deps() = Dict(p.name => (string(p.version), p.is_direct_dep) for p in values(Pkg.dependencies()))
+    Pkg.autoprecompilation_enabled(false)  # precompile below only where something changed
     for d in shared
         Pkg.activate(joinpath(envs, d); io = devnull)
         old = deps()
         local ok, out = quiet(() -> Pkg.update(; update_registry = false))
         new = deps()
         ch = [n for (n, v) in new if get(old, n, nothing) != v]
+        ok && (!isempty(ch) || !isempty(ENV["UP_NEW_JULIA"])) && ((ok, out) = quiet(Pkg.precompile))
         list = length(ch) <= 5 ? sort(ch) : [n for n in sort(ch) if last(new[n])]  # all if few, else direct deps
         desc = [string(n, " ", first(get(old, n, ("new",))), " ⇒ ", first(new[n])) for n in list]
         println("julia: @", d, ": ", isempty(ch) ? "up to date" : "$(length(ch)) package(s) updated",
@@ -120,28 +145,49 @@ if has juliaup; then
         ok || fail("@" * d, out)
         ok && foreach(l -> occursin(r"✗|ERROR", l) && println(stderr, l), eachline(IOBuffer(out)))
     end
-    apps = joinpath(envs, "apps", "AppManifest.toml")
-    appdeps() = isfile(apps) ? TOML.parsefile(apps)["deps"] : Dict{String, Any}()
-    for (name, old) in appdeps()  # one by one: a broken app must not block the rest
-        local ok, out = quiet(() -> Pkg.Apps.update(name))
-        ok || fail("app " * name, out)
-        ok && get(appdeps(), name, nothing) != old && println("julia: app ", name, " updated")
+    Pkg.autoprecompilation_enabled(true)
+    # Updating marked these envs as used; restore their real last use so the
+    # 30-day filter above still sees only use by you.
+    isfile(log) && mkpidlock(log * ".pid"; stale_age = 3) do
+        u = TOML.parsefile(log)
+        for d in shared, (k, v) in usage
+            dirname(k) == joinpath(envs, d) && (u[k] = v)
+        end
+        open(io -> TOML.print(io, u; sorted = true), log * ".up", "w"); mv(log * ".up", log; force = true)
     end
+    # Apps: reinstalling one takes seconds, so skip it while its upstream (the
+    # branch head, or the latest registered version) and this julia are unchanged.
+    # shortcut: the app'"'"'s own dependencies only update along with it.
+    function upstream(info)
+        if haskey(info, "repo-url")
+            rev = get(info, "repo-rev", "HEAD")
+            r = try split(readchomp(`git ls-remote $(info["repo-url"]) $rev`))[1] catch; rev end
+            return isempty(r) ? rev : r
+        end
+        haskey(info, "path") && return nothing  # developed app: always update
+        vs = VersionNumber[]
+        for reg in Pkg.Registry.reachable_registries()
+            e = get(reg, Base.UUID(info["uuid"]), nothing)
+            e === nothing || append!(vs, [v for (v, i) in Pkg.Registry.registry_info(reg, e).version_info if !i.yanked])
+        end
+        isempty(vs) ? nothing : string(maximum(vs))
+    end
+    apps = joinpath(envs, "apps", "AppManifest.toml")
+    seenfile = joinpath(ENV["UP_STATE"], "julia-apps.toml")
+    seen = isfile(seenfile) ? TOML.parsefile(seenfile) : Dict{String, Any}()
+    for (name, entry) in (isfile(apps) ? TOML.parsefile(apps)["deps"] : Dict{String, Any}())
+        info = only(entry)
+        id = upstream(info)
+        key = id === nothing ? nothing : string(id, " ", Sys.BINDIR)
+        key !== nothing && get(seen, name, nothing) == key && continue
+        local ok, out = quiet(() -> Pkg.Apps.update(name))  # one by one: a broken app must not block the rest
+        ok || (fail("app " * name, out); continue)
+        println("julia: app ", name, ": updated")
+        key === nothing || (seen[name] = key)
+    end
+    mkpath(ENV["UP_STATE"]); open(io -> TOML.print(io, seen; sorted = true), seenfile, "w")
     isempty(bad) || (println(stderr, "julia: failed: ", join(bad, ", ")); exit(1))'
 fi
-
-if has pi; then
-  # Real changes: an extension checkout reset ("HEAD is now at"), a fresh
-  # clone, or a self update. The bare "git fetch ... -> FETCH_HEAD" lines
-  # print EVERY run for pinned @main repos even when upstream is unchanged,
-  # so they are noise, not a signal.
-  step pi replay_if 'HEAD is now at|Cloning into|Updated pi |Update note' pi update --all
-  step pi-models replay_if '[Ee]rror|[Ff]ail' pi update --models
-fi
-
-# Global skills: match ~/.agents/skills.txt across machines, then update.
-has skills-sync && step skills-sync replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
-has skills && step skills replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
 
 # Only where a toolchain is set up (frank has rustup but no default toolchain).
 if has rustup && rustc --version >/dev/null 2>&1; then
@@ -152,7 +198,8 @@ if has rustup && rustc --version >/dev/null 2>&1; then
   [ -n "$crates" ] && step cargo replay_if 'Replac|Installed|[Ee]rror' cargo install --locked -j $jobs $crates
 fi
 
-has uv && step uv replay_if 'Updated|[Ee]rror' uv tool upgrade --all
+wait $side_pid || failed+=($(sed -n 's/^up: \(.*\) failed$/\1/p' "$side"))
+cat "$side"; rm -f "$side"
 
 v() { local out; has "$1" && out=$("$@" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^ ]*' | head -1); echo "${out:--}"; }
 note "versions: julia $(v julia --version) | rustc $(v rustc --version) | pi $(v pi --version)"
