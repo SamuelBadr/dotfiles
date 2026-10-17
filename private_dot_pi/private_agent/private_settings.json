@@ -34,9 +34,21 @@
   "enableInstallTelemetry": false,
   "packages": [
     "npm:pi-web-access",
-    "npm:@dietrichgebert/ponytail",
+    {
+      "source": "npm:@dietrichgebert/ponytail",
+      "skills": [
+        "!ponytail-gain",
+        "!ponytail-help",
+        "!ponytail-debt"
+      ]
+    },
     "npm:pi-claude-bridge",
-    "npm:pi-subagents",
+    {
+      "source": "npm:pi-subagents",
+      "skills": [
+        "!council-mode"
+      ]
+    },
     "npm:remote-pi"
   ],
   "subagents": {

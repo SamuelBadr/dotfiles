@@ -1,15 +1,8 @@
 # Global agent skills, kept identical on every machine by skills-sync.
 # One "<source> <skill>" per line. `skills add/remove -g` on any machine lands
 # here on its next skills-sync run; editing this list works too.
-Krastanov/JuliaLLMAgentSkills build-julia-interfaces
 Krastanov/JuliaLLMAgentSkills develop-julia-packages
 Krastanov/JuliaLLMAgentSkills optimize-julia-code
 apcamargo/typst-skills touying-author
-leonardomso/rust-skills rust-skills
 lucifer1004/claude-skill-typst typst
-mattpocock/skills diagnosing-bugs
-mattpocock/skills handoff
-mattpocock/skills improve-codebase-architecture
-mattpocock/skills research
-mattpocock/skills teach
-tensor4all/tensor4all-rs use-tensor4all-rs
+trailofbits/skills writing-lean-proofs
