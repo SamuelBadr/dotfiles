@@ -24,7 +24,8 @@ Active jobs: `~/Library/LaunchAgents/at.samuel.restic-hclm.{backup,check,prune}.
 - Both use `run-on-ac` before monitoring or sleep prevention: skip on battery or unavailable SSH. No polling, forced wake, or automatic retry. launchd may deliver a missed calendar event after wake.
 - AC is checked at start only. Unplugging mid-run does not cancel it. caffeinate prevents idle sleep, not lid-close sleep.
 - SSH preflight is bounded to 15 seconds; connections have a 10-second timeout and running SSH uses 15-second keepalives/two missed responses. These are not total job runtime limits.
-- Repository lock contention fails promptly; no six-hour wait.
+- Repository lock contention fails promptly; no six-hour wait. Failed backups leave stale locks, so check and prune first run `restic unlock`, which removes only stale ones.
+- Backup picks its parent snapshot by host and tags (`--group-by=host,tags`): the `~/.*` glob changes the path list whenever a dot-directory appears, which would otherwise force a full re-read.
 
 ## Retention
 

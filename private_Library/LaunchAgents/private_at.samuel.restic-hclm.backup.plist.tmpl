@@ -33,6 +33,8 @@
 		<string>backup</string>
 		<string>--files-from={{ .chezmoi.homeDir }}/.config/restic-hclm/sources</string>
 		<string>--host=samuel-mac</string>
+		<!-- Parent by host and tags, not paths: the ~/.* glob changes the path list whenever a dot-dir appears, forcing full re-reads. -->
+		<string>--group-by=host,tags</string>
 		<string>--tag=automatic</string>
 		<string>--one-file-system</string>
 		<string>--exclude-cloud-files</string>
