@@ -46,7 +46,8 @@
     {
       "source": "npm:pi-subagents",
       "skills": [
-        "!council-mode"
+        "!council-mode",
+        "!pi-subagents"
       ]
     }
   ],
