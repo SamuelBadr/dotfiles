@@ -67,7 +67,7 @@ minus "$want" "$now" | awk '{ s[$1] = s[$1] " -s " $2 } END { for (k in s) print
     say installing "$src ${args//-s /}"
     # Explicit agents: by default global installs also target project-only
     # agents (PromptScript) and report failures for them.
-    cli add "$src" -g -y -a pi -a claude-code $args </dev/null || f=1
+    cli add "$src" -g -y -a pi $args </dev/null || f=1
   done
   exit "$f"
 } || rc=1
