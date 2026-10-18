@@ -57,14 +57,8 @@ brew "skills"
 brew "sudo-touchid"
 # Agent multiplexer that lives in your terminal
 brew "herdr"
-# AI agent toolkit
-brew "pi-coding-agent"
-# Terminal-based AI coding assistant
-cask "claude-code"
 # View, print, and comment on PDF documents
 cask "adobe-acrobat-reader"
-# OpenAI's official ChatGPT desktop app
-cask "chatgpt"
 # Menu bar usage monitor for Codex and Claude
 cask "codexbar"
 # API documentation browser and code snippet manager
@@ -113,7 +107,7 @@ cask "whatsapp"
 # Video communication and virtual meeting platform
 cask "zoom"
 # Collect, organize, cite, and share research sources
-cask "zotero@beta"
+cask "zotero"
 # Review-first terminal diff viewer for agent-authored changesets
 brew "hunk"
 # OpenAI's coding agent that runs in your terminal
