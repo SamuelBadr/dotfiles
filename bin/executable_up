@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Update the user-level software on this machine: Homebrew, Julia (juliaup,
 # the global and shared environments, Pkg apps), pi and its extensions, agent
-# skills, Rust (rustup, cargo-installed tools) and uv tools. Tools that are
+# skills, Claude Code (for pi-claude-bridge), Rust (rustup, cargo-installed
+# tools) and uv tools. Tools that are
 # missing here are skipped. Package/project environments are left alone:
 # update those by hand.
 #   up        this machine
@@ -75,6 +76,8 @@ side=$(mktemp)
     step pi replay_if 'HEAD is now at|Cloning into|Updated pi |Update note' pi update --all
     step pi-models replay_if '[Ee]rror|[Ff]ail' pi update --models
   fi
+  # Claude Code runs pi-claude-bridge; it only updates itself in interactive sessions.
+  has claude && step claude replay_if 'Successfully updated|[Ee]rror' claude update
   # Global skills: match ~/.agents/skills.txt across machines, then update.
   has skills-sync && step skills-sync replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
   has skills && step skills replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
@@ -203,5 +206,5 @@ wait $side_pid || failed+=($(sed -n 's/^up: \(.*\) failed$/\1/p' "$side"))
 cat "$side"; rm -f "$side"
 
 v() { local out; has "$1" && out=$("$@" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^ ]*' | head -1); echo "${out:--}"; }
-note "versions: julia $(v julia --version) | rustc $(v rustc --version) | pi $(v pi --version)"
+note "versions: julia $(v julia --version) | rustc $(v rustc --version) | pi $(v pi --version) | claude $(v claude --version)"
 [ ${#failed[@]} = 0 ] || { echo "up: failed: ${failed[*]}" >&2; exit 1; }
