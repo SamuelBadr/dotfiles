@@ -117,5 +117,4 @@ cask "zotero@beta"
 # Review-first terminal diff viewer for agent-authored changesets
 brew "hunk"
 # OpenAI's coding agent that runs in your terminal
-# Codex CLI; CodexBar reads Codex limits through it
 cask "codex"
