@@ -2,9 +2,8 @@
 # Update the user-level software on this machine: Homebrew, Julia (juliaup,
 # the global and shared environments, Pkg apps), pi and its extensions, agent
 # skills, Claude Code (for pi-claude-bridge), Rust (rustup, cargo-installed
-# tools) and uv tools. Tools that are
-# missing here are skipped. Package/project environments are left alone:
-# update those by hand.
+# tools) and uv tools. Tools that are missing here are skipped.
+# Package/project environments are left alone: update those by hand.
 #   up        this machine
 #   up --all  this machine, then hclm, frank and kauch in parallel (each pulls
 #             the dotfiles first, so they run the same version of this script)
