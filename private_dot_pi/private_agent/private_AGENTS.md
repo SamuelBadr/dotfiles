@@ -25,8 +25,8 @@ Always-on machines, reachable from each other with `ssh <name>` (separate filesy
 
 - Before starting anything that may use more than 2 cores, 4 GB RAM or 10 minutes, run `fleet`, even to run it where you are, and stay within what it shows as free and left for you.
 - Smaller work: where you are.
-- Anything bigger: wherever it finishes soonest without queueing (kauch, frank, or a Slurm job on hclm, VSC or MUSICA that starts immediately). Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.
-- Avoid queue time: before submitting, run the same `sbatch` command with `--test-only`, which prints the expected start time. If the job wouldn't start right away, shrink it to fit the idle nodes or use the desktops. Ask the user before submitting anything that would wait in the queue.
+- Anything bigger: wherever it finishes soonest, queue wait included (kauch, frank, or a Slurm job on hclm, VSC or MUSICA). Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.
+- Estimate queue wait: run the same `sbatch` command with `--test-only`, which prints the expected start time. Slurm assumes every running job uses its full time limit, so trust that time on VSC, MUSICA and hclm's `short` and `medium`. In hclm's `long`, many running jobs have no real limit (365 days or unlimited), so a start that isn't immediate often shows years away: treat it as an unknown wait, and prefer anywhere with a known finish. Shrinking a job to fit idle nodes often beats waiting.
 - Before submitting any job on hclm, check free space there (`df -h /home /mnt/storage /mnt/scratch`) and make sure the job's output fits with room to spare.
 - In Slurm jobs, always pass `-c`, `--mem`, `--time` and `--hint=nomultithread`; on hclm a job without `--mem` claims the whole node's memory.
 - Never use hyperthreads: at most one thread per physical core, BLAS threads included (set `OPENBLAS_NUM_THREADS` alongside `julia -t N`). Give every parallel command an explicit count, never `auto`.
