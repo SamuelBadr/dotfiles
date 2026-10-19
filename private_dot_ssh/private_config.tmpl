@@ -12,11 +12,15 @@ Host VSC4 VSC5 VSC4B VSC5B
 	Port 27
 	IdentitiesOnly yes
 
-Host VSC4B VSC5B
-	User samuelb
-	ControlPersist 8h       # VSC 2FA: auth once per work session; herdr reuses this master
+# 2FA clusters: the user logs in once on hclm (`ssh -fN <host>`) and agents reuse
+# that master until the connection drops (days); auth is only checked at login.
+Host VSC4 VSC5 VSC4B VSC5B MUSICA MUSICA-LNZ MUSICA-INN
+	ControlPersist yes
 	ServerAliveInterval 60   # keep the idle master alive so the HPC doesn't drop it
 	ServerAliveCountMax 4
+
+Host VSC4B VSC5B
+	User samuelb
 
 Host VSC4 VSC5
 	User samuel
@@ -31,6 +35,20 @@ Host MUSICA
 	User sb69466
 	HostName 193.170.79.22
 	HostKeyAlias musica-193.170.79.22
+
+Host MUSICA-LNZ MUSICA-INN
+	User sb69466
+
+# Daily step certificate (see ~/bin/fleet); missing files are skipped.
+Host MUSICA MUSICA-LNZ MUSICA-INN
+	IdentityFile ~/.ssh/asc
+	CertificateFile ~/.ssh/asc-cert.pub
+
+Host MUSICA-LNZ
+	HostName musica.lnz.asc.ac.at
+
+Host MUSICA-INN
+	HostName musica.inn.asc.ac.at
 
 Host kauch
 	User samuel

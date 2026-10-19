@@ -21,11 +21,11 @@ Always-on machines, reachable from each other with `ssh <name>` (separate filesy
 - `hclm` (login node `master.cluster`): Slurm cluster, 8 usable nodes with 96 cores and 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER`. The login node itself (24 cores, 188 GB RAM) is shared by all cluster users: never use more than 8 cores and 64 GB RAM there in total, counting everything of yours already running. The 64 GB is also enforced for agents there (started via `~/bin/pi`, all combined): past it, processes die, possibly the agent itself.
 - The Mac laptop sleeps: never leave long-running work on it.
 
-`fleet` shows free cores and RAM on kauch, frank and the hclm login node, the user's jobs already running there, what is left of the caps on frank and the hclm login node, and idle cores per hclm partition. Place work like this:
+`fleet` shows free cores and RAM on kauch, frank and the hclm login node, the user's jobs already running there, what is left of the caps on frank and the hclm login node, idle cores per hclm partition, and idle nodes, your jobs and connection state on VSC and MUSICA (below). Place work like this:
 
 - Before starting anything that may use more than 2 cores, 4 GB RAM or 10 minutes, run `fleet`, even to run it where you are, and stay within what it shows as free and left for you.
 - Smaller work: where you are.
-- Anything bigger: wherever it finishes soonest without queueing (kauch, frank, or a Slurm job on hclm that starts immediately). Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.
+- Anything bigger: wherever it finishes soonest without queueing (kauch, frank, or a Slurm job on hclm, VSC or MUSICA that starts immediately). Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.
 - Avoid queue time: before submitting, run the same `sbatch` command with `--test-only`, which prints the expected start time. If the job wouldn't start right away, shrink it to fit the idle nodes or use the desktops. Ask the user before submitting anything that would wait in the queue.
 - Before submitting any job on hclm, check free space there (`df -h /home /mnt/storage /mnt/scratch`) and make sure the job's output fits with room to spare.
 - In Slurm jobs, always pass `-c`, `--mem`, `--time` and `--hint=nomultithread`; on hclm a job without `--mem` claims the whole node's memory.
@@ -35,9 +35,13 @@ Always-on machines, reachable from each other with `ssh <name>` (separate filesy
 - Start remote runs detached (`nohup … > log 2>&1 &`) and report host, path, and PID or job ID.
 - On `kauch`, herdr has `hclm` and `frank` saved: `herdr --machine <name> …` reaches the agents there.
 
-### VSC: ask first
+### VSC and MUSICA
 
-The user also has accounts on the Austrian Scientific Computing clusters: VSC-5 (`ssh VSC5B` as `samuelb`, `ssh VSC5` as `samuel`; Slurm, 128 cores and 512 GB–2 TB RAM per node, A40/A100 GPU nodes, 72 h job limit), VSC-4 (`VSC4B`/`VSC4`) and MUSICA (`ssh MUSICA`).
+The user also has accounts on the Austrian Scientific Computing (ASC) Slurm clusters, part of the fleet like hclm. Jobs are billed to the user's projects; that's fine, use whatever finishes first.
 
-- Use them only when the desktops and hclm can't run the work without waiting (GPUs, more than hclm can give, or a long queue on hclm). Jobs are billed to the user's project.
-- Logging in needs the user's password and 2FA, so you can't connect on your own. When you need access, ask the user to run `ssh -fN VSC5B` (or the host you need) in a terminal on this machine; `ssh -O check VSC5B` tells you when the connection is up.
+- VSC-5 (`VSC5B` as `samuelb`, project p72144; `VSC5` as `samuel`, project p71998): 128 cores and 512 GB–2 TB RAM per node; A40 (16 cores) and A100 (128 cores) nodes with 2 GPUs each; 72 h job limit.
+- VSC-4 (`VSC4B`, `VSC4`, same accounts): 48 cores and 96–768 GB RAM per node. VSC-4 and VSC-5 share `/home` per account; big data goes in `/gpfs/data/fs72144/samuelb`.
+- MUSICA (`MUSICA` Vienna, `MUSICA-LNZ` Linz, `MUSICA-INN` Innsbruck; user `sb69466`; a separate Slurm cluster per site): 192-core nodes with 768 GB, 4×H100 nodes, and in Vienna 8×B200 nodes with 2.3 TB. Slurm is on `PATH` only in login shells: `ssh MUSICA bash -lc '…'`.
+- Login needs the user's 2FA, so connections exist only as SSH masters the user opened on hclm; they last for days. On hclm run `ssh VSC5B …` directly; elsewhere run `ssh hclm ssh VSC5B …`, or work from an agent on hclm.
+- Never try to log in yourself: failed logins can get hclm blocked. Use only hosts `fleet` shows as connected, or check with `ssh -O check <host>` first. `fleet` (also run every 10 minutes by cron on hclm) reconnects dropped hosts whenever it can without 2FA. When a cluster you need is still unreachable, tell the user and give them the exact command `fleet` prints for it, to run in a terminal on hclm.
+- Their login nodes are shared like hclm's: compile and copy files there, but run real work as Slurm jobs.

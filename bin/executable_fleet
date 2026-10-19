@@ -51,6 +51,56 @@ squeue -u "$USER" -h -o %T | sort | uniq -c |
   awk '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { print "hclm   your jobs: " (s ? s : "none") }'
 EOF
 
+# Runs on hclm (also every 10 min from cron there, to heal dropped connections).
+# The ASC clusters need 2FA, so only the user can log in: go through their SSH
+# masters there. Reconnect only without prompting: MUSICA with the user's daily
+# step certificate, VSC with the OTP VSC caches for ~12 h after the user's last
+# 2FA, and stop after one refusal (failed logins could get hclm blocked).
+IFS= read -r -d '' asc <<'EOF'
+IFS= read -r -d '' remote <<'R'
+[ "$1" = 1 ] && sinfo -h -o '%R|%F|%c|%Z|%m|%G' | grep -vE '_jupyter|musica_login' | awk -F'|' '
+  { split($2, n, "/"); p = $1; if (!(p in tot)) order[++k] = p
+    idle[p] += n[2]; tot[p] += n[4]; cores[p] = $3 / $4; mem[p] = int($5 / 1000)
+    if (match($6, /gpu:[^:]+:[0-9]+/)) gpu[p] = ", " substr($6, RSTART + 4, RLENGTH - 4) }
+  END { for (i = 1; i <= k; i++) { p = order[i]
+    printf "%-6s %-18s %4d/%-4d nodes idle (%d cores, %d GB%s)\n", c, p, idle[p], tot[p], cores[p], mem[p], gpu[p] } }' c="$2"
+squeue -u "$USER" -h -o %T | sort | uniq -c |
+  awk -v h="$3" '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { printf "%-6s your jobs: %s\n", h, (s ? s : "none") }'
+R
+step_login='step ssh certificate sb69466 ~/.ssh/asc --context asc --console --no-password --insecure --no-agent --force'
+cert_valid() { # the user's daily MUSICA step certificate, ~/.ssh/asc-cert.pub, has not expired
+  ssh-keygen -L -f ~/.ssh/asc-cert.pub 2>/dev/null | awk -v now="$(date +%FT%T)" '/Valid: from/ { ok = now < $5 } END { exit !ok }'
+}
+mkdir -p ~/.cache/fleet
+query() { # <cluster label> <host>...: partitions from the first connected host, jobs from each
+  local first=1 h out
+  for h in "${@:2}"; do
+    if ! ssh -O check "$h" </dev/null 2>/dev/null; then
+      if [[ $h = MUSICA* ]]; then
+        # publickey only: the certificate logs in without 2FA, and no 2FA prompt is ever tried.
+        cert_valid && ssh -o BatchMode=yes -o PreferredAuthentications=publickey -o ConnectTimeout=10 -fN "$h" </dev/null >/dev/null 2>&1
+      elif [ ! -e ~/.cache/fleet/"$h".denied ]; then
+        # setsid: no terminal, so this succeeds only if VSC asks for nothing (cached OTP).
+        setsid -w ssh -o PreferredAuthentications=publickey,keyboard-interactive -o ConnectTimeout=10 -fN "$h" </dev/null >/dev/null 2>~/.cache/fleet/"$h".err
+        grep -q 'Permission denied' ~/.cache/fleet/"$h".err && touch ~/.cache/fleet/"$h".denied
+      fi
+    fi
+    if ssh -O check "$h" </dev/null 2>/dev/null; then rm -f ~/.cache/fleet/"$h".denied
+    else
+      if [[ $h = MUSICA* ]]; then echo "$1: $h not connected (user, on hclm: $step_login)"
+      else echo "$1: $h not connected (user: ssh -fN $h on hclm)"; fi
+      continue
+    fi
+    # ProxyCommand=false: if the master refuses, fail instead of falling back to a login.
+    if out=$(timeout 30 ssh -o BatchMode=yes -o ProxyCommand=false "$h" bash -l -s -- "$first" "$1" "$h" <<<"$remote" 2>/dev/null); then
+      printf '%s\n' "$out"; first=0
+    else echo "$1: $h connection broken (user: ssh -O exit $h; ssh -fN $h on hclm)"; fi
+  done
+}
+exec 3< <(query VSC5 VSC5B VSC5) 4< <(query VSC4 VSC4B VSC4) 5< <(query MUS-V MUSICA) 6< <(query MUS-L MUSICA-LNZ) 7< <(query MUS-I MUSICA-INN)
+cat <&3; cat <&4; cat <&5; cat <&6; cat <&7
+EOF
+
 # Query all hosts at once (SSH round trips add up from far away), print in order.
-exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$desktop$cluster")
-cat <&3; cat <&4; cat <&5
+exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$desktop$cluster") 6< <(on hclm master.cluster "$asc")
+cat <&3; cat <&4; cat <&5; cat <&6
