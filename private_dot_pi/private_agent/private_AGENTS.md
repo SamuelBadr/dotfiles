@@ -1,5 +1,9 @@
 # Global instructions
 
+## Next steps
+
+- End every reply with a numbered list of the next steps I'm most likely to want, best first, so I can pick one by replying with just its number.
+
 ## Subagents
 
 - You may spawn subagents on your own judgment with any model, except Astra or Fable models (model ID contains `astra` or `fable`): spawn those only when the user asks.
@@ -18,14 +22,14 @@ Always-on machines, reachable from each other with `ssh <name>` (separate filesy
 
 - `kauch` (`kauch01`): 12 cores, 122 GB RAM, GTX 1050 Ti. Shared with other people and a CI runner.
 - `frank` (`ftuw`): 16 cores, 60 GB RAM. A desktop with a local user; also runs the user's GitHub Actions runners. Never use more than 8 cores there in total, counting everything of yours already running (the runners included), whatever `fleet` shows as free.
-- `hclm` (login node `master.cluster`): Slurm cluster, 8 usable nodes with 96 cores and 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit). `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER`. The login node itself (24 cores, 188 GB RAM) is shared by all cluster users: never use more than 8 cores and 64 GB RAM there in total, counting everything of yours already running. The 64 GB is also enforced for agents there (started via `~/bin/pi`, all combined): past it, processes die, possibly the agent itself.
+- `hclm` (login node `master.cluster`): Slurm cluster, 8 usable nodes with 96 cores and 1.1 TB RAM each. Partitions `short` (3 h), `medium` (1 day, default), `long` (no limit); never use `cqs`. `/home` and `/mnt/storage` are shared with the nodes; put big data in `/mnt/storage/$USER`. The login node itself (24 cores, 188 GB RAM) is shared by all cluster users: never use more than 8 cores and 64 GB RAM there in total, counting everything of yours already running. The 64 GB is also enforced for agents there (started via `~/bin/pi`, all combined): past it, processes die, possibly the agent itself.
 - The Mac laptop sleeps: never leave long-running work on it.
 
 `fleet` shows free cores and RAM on kauch, frank and the hclm login node, the user's jobs already running there, what is left of the caps on frank and the hclm login node, idle cores per hclm partition, and idle nodes, your jobs and connection state on VSC and MUSICA (below). Place work like this:
 
-- Before starting anything that may use more than 2 cores, 4 GB RAM or 10 minutes, run `fleet`, even to run it where you are, and stay within what it shows as free and left for you.
+- Before starting anything that may use more than 2 cores, 4 GB RAM or 10 minutes, run `fleet`, even to run it where you are, and stay within what it shows as free and left for you on the shared machines.
 - Smaller work: where you are.
-- Anything bigger: wherever it finishes soonest, queue wait included (kauch, frank, or a Slurm job on hclm, VSC or MUSICA). Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.
+- Anything bigger: wherever it finishes soonest, queue wait included (kauch, frank, or a Slurm job on hclm, VSC or MUSICA). Joining a queue is fine: a job never has to start immediately; submit into a busy partition when that still gives the earliest finish. Split it across them if that helps. CPU is shared fairly between users on the desktops, so idle cores are yours; RAM is not, so check it first.
 - Estimate queue wait: run the same `sbatch` command with `--test-only`, which prints the expected start time. Slurm assumes every running job uses its full time limit, so trust that time on VSC, MUSICA and hclm's `short` and `medium`. In hclm's `long`, many running jobs have no real limit (365 days or unlimited), so a start that isn't immediate often shows years away: treat it as an unknown wait, and prefer anywhere with a known finish. Shrinking a job to fit idle nodes often beats waiting.
 - Before submitting any job on hclm, check free space there (`df -h /home /mnt/storage /mnt/scratch`) and make sure the job's output fits with room to spare.
 - In Slurm jobs, always pass `-c`, `--mem`, `--time` and `--hint=nomultithread`; on hclm a job without `--mem` claims the whole node's memory.
