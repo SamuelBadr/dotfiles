@@ -1,7 +1,10 @@
 # Brewfile - the package manifest for this repo.
 # HOMEBREW_BUNDLE_FILE (set in ~/.config/shell/common.sh) points brew here, so
-# `brew bundle add <pkg>` / `brew bundle remove <pkg>` edit this file directly.
+# `brew bundle list` / `brew bundle remove <pkg>` work on this file directly;
+# add new entries by editing it.
 # Install everything listed: brew bundle install
+
+tap "artginzburg/tap"  # sudo-touchid is not in homebrew-core
 
 # CLI Tools - Modern Replacements
 brew "ripgrep"       # Better grep
@@ -12,6 +15,7 @@ brew "bottom"        # System monitor
 # CLI Tools - Utilities
 brew "tealdeer"      # tldr - simplified man pages
 brew "chezmoi"       # Dotfiles manager
+brew "tmux"          # Terminal multiplexer (config in ~/.tmux.conf)
 
 # Development Tools
 brew "git"
@@ -57,10 +61,34 @@ brew "skills"
 brew "sudo-touchid"
 # Agent multiplexer that lives in your terminal
 brew "herdr"
+# Simple, modern, secure file encryption
+brew "age"
+# Cross-platform make
+brew "cmake"
+# Quickly rewrite git repository history
+brew "git-filter-repo"
+# Open-source GitLab command-line tool
+brew "glab"
+# CLI email client written in Rust
+brew "himalaya"
+# Remote terminal application
+brew "mosh"
+# Convert bitmaps to vector graphics
+brew "potrace"
+# Fast Git hook manager written in Rust, drop-in alternative to pre-commit
+brew "prek"
+# Rsync for cloud storage
+brew "rclone"
+# Programming language designed for robustness, optimality, and clarity
+brew "zig@0.15"
+# Android SDK component
+cask "android-platform-tools"
 # View, print, and comment on PDF documents
 cask "adobe-acrobat-reader"
 # Menu bar usage monitor for Codex and Claude
 cask "codexbar"
+# Server and cloud storage browser
+cask "cyberduck"
 # API documentation browser and code snippet manager
 cask "dash"
 # Matrix collaboration client
@@ -70,10 +98,10 @@ cask "epic-games"
 # Web browser
 cask "firefox"
 cask "font-monaspace-nf"
-# Terminal emulator that uses platform-native UI and GPU acceleration
-cask "ghostty@tip"
 # Web browser
 cask "google-chrome"
+# Native GUI client for an existing local Herdr daemon
+cask "herdr-gpui"
 # Game launcher
 cask "heroic"
 # Free and open-source media player
@@ -86,6 +114,8 @@ cask "keka"
 cask "mactex-no-gui"
 # Window dimming utility
 cask "monocle-app"
+# Dual-pane file manager
+cask "nimble-commander"
 # Knowledge base that works on top of a local folder of plain text Markdown files
 cask "obsidian"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
