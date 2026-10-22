@@ -45,6 +45,23 @@ are listed unconditionally even though only the `backupMac` machine runs them.
   toolchain in `~/.rustup` and the active Rust binaries in `~/.cargo/bin`.
   Do not install the Homebrew `rust` formula alongside it.
 
+## Updates
+
+`up --all` updates this machine, hclm, frank and kauch concurrently. On each
+machine, Julia, Rust, Pi, skills and uv run in independent lanes. Homebrew
+refreshes metadata alongside them, but replaces binaries only after they exit.
+`skills-sync` already updates global skills; it is not followed by a second
+`skills update`. Homebrew cleans upgraded packages automatically; run
+`brew cleanup` separately for a full cache cleanup.
+
+Julia updates the current global environment, recently used shared environments
+(excluding CI `*tempenv` and `__*` environments), and Pkg apps. Project environments
+are left alone. On frank, Pi uses npm's user-local prefix `~/.local`, ahead of the
+Arch package in PATH, so `pi update --all` can self-update without sudo. The two
+GitHub runner `safe.directory` entries are managed only on frank (`ftuw`).
+
+Offline updater regression checks: `python3 -m unittest discover -s tests -v`.
+
 ## Pi settings ownership
 
 `~/.pi/agent/settings.json` is tracked **directly** as a plain dotfile

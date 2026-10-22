@@ -5,11 +5,11 @@
 # missing here are skipped.
 # Package/project environments are left alone: update those by hand.
 #   up        this machine
-#   up --all  this machine, then hclm, frank and kauch in parallel (each pulls
+#   up --all  this machine, hclm, frank and kauch in parallel (each pulls
 #             the dotfiles first, so they run the same version of this script)
 set -u
 . "$HOME/.config/shell/common.sh"  # PATH; ssh and systemd shells lack it
-jobs=4  # parallel compile jobs: stays under the 8-core caps on frank and hclm
+jobs=2  # Julia + Cargo can compile together; leave room for the other lanes
 
 # Run a tool and print its output only when it fails or when a line matches
 # $1 (ANSI codes stripped for matching). Silent when nothing changed.
@@ -56,17 +56,18 @@ if [ "${1:-}" = --all ]; then
   exit
 fi
 
-if has brew; then
-  step brew replay_if '==> (New|Updated|Renamed|Deleted) (Formulae|Casks)|==> New Versions' brew update --quiet
-  step brew brew upgrade --greedy --overwrite -y
-  brew cleanup
-fi
+# Independent lanes, with buffered output and failures collected in the parent.
+logs=$(mktemp -d); pids=() lanes=()
+background() {
+  local name=$1; shift
+  ( failed=(); "$@" || exit $?; [ ${#failed[@]} = 0 ] ) >"$logs/$name" 2>&1 &
+  pids+=($!); lanes+=("$name")
+}
+# Refresh only metadata alongside the tools; defer upgrades until they exit,
+# so Homebrew cannot replace Node, Juliaup, etc. underneath a running update.
+has brew && background brew replay_if '==> (New|Updated|Renamed|Deleted) (Formulae|Casks)|==> New Versions' brew update --quiet
 
-# pi, skills and uv don't touch Julia or Rust: run them alongside, after brew
-# (which may upgrade the tools themselves). Their output is printed afterwards.
-side=$(mktemp)
-(
-  failed=()
+update_pi() {
   if has pi; then
     # Real changes: an extension checkout reset ("HEAD is now at"), a fresh
     # clone, or a self update. The bare "git fetch ... -> FETCH_HEAD" lines
@@ -75,13 +76,28 @@ side=$(mktemp)
     step pi replay_if 'HEAD is now at|Cloning into|Updated pi |Update note' pi update --all
     step pi-models replay_if '[Ee]rror|[Ff]ail' pi update --models
   fi
-  # Global skills: match ~/.agents/skills.txt across machines, then update.
-  has skills-sync && step skills-sync replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
-  has skills && step skills replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -p -y
-  has uv && step uv replay_if 'Updated|[Ee]rror' uv tool upgrade --all
-  [ ${#failed[@]} = 0 ]
-) >"$side" 2>&1 &
-side_pid=$!
+}
+update_skills() {
+  # skills-sync already updates skills; do not run the CLI a second time.
+  if has skills-sync; then
+    step skills-sync replay_if 'skills-sync:|Updated |[Ee]rror|[Ff]ail' skills-sync
+  elif has skills; then
+    step skills replay_if 'Updated |[Ee]rror|[Ff]ail' skills update -g -y
+  fi
+}
+update_rust() {
+  if has rustup && rustc --version >/dev/null 2>&1; then
+    step rustup replay_if ' updated |^  [^ ]+ installed|[Ee]rror' rustup update
+    # Git and path installs (a "(" after the version) are left alone.
+    crates=$(cargo install --list | awk '/^[^ ].*:$/ && !/\(/ {print $1}')
+    [ -n "$crates" ] && step cargo replay_if 'Replac|Installed|[Ee]rror' cargo install --locked -j $jobs $crates
+  fi
+  return 0
+}
+background pi update_pi
+background skills update_skills
+background rust update_rust
+has uv && background uv replay_if 'Updated|[Ee]rror' uv tool upgrade --all
 
 if has juliaup; then
   # juliaup deletes the julia it replaces, which breaks running julias (here
@@ -99,7 +115,7 @@ if has juliaup; then
   # new), shared envs used in the last 30 days, then Pkg apps, which also
   # repoints their shims at the current julia. Pkg output is shown on failure only.
   [ "$(julia --version 2>/dev/null)" != "$old_julia" ] && new_julia=1 || new_julia=
-  step julia env JULIA_NUM_PRECOMPILE_TASKS=$jobs UP_NEW_JULIA=$new_julia UP_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/up" julia --startup-file=no -e '
+  step julia env JULIA_NUM_PRECOMPILE_TASKS=$jobs UP_NEW_JULIA=$new_julia UP_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/up" OPENBLAS_NUM_THREADS=1 JULIA_NUM_THREADS=1 julia --startup-file=no -e '
     using Pkg, TOML, Dates, Logging, FileWatching
     envs = joinpath(DEPOT_PATH[1], "environments")
     cur = "v$(VERSION.major).$(VERSION.minor)"
@@ -114,7 +130,7 @@ if has juliaup; then
     recent = [dirname(m) for (m, v) in usage if maximum(e["time"] for e in v) > now(UTC) - Day(30)]
     shared = filter(readdir(envs)) do d
         p = joinpath(envs, d)
-        isfile(joinpath(p, "Project.toml")) && (d == cur || p in recent && !isver(d) && !startswith(d, "__"))
+        isfile(joinpath(p, "Project.toml")) && (d == cur || p in recent && !isver(d) && !startswith(d, "__") && !endswith(d, "tempenv"))
     end
     function quiet(f) # run f with all output captured; returns (succeeded, output)
         path = tempname()
@@ -190,17 +206,15 @@ if has juliaup; then
     isempty(bad) || (println(stderr, "julia: failed: ", join(bad, ", ")); exit(1))'
 fi
 
-# Only where a toolchain is set up (frank has rustup but no default toolchain).
-if has rustup && rustc --version >/dev/null 2>&1; then
-  step rustup replay_if ' updated |installed|[Ee]rror' rustup update
-  # Reinstall crates.io tools; cargo skips those already at the latest version.
-  # Git and path installs (a "(" after the version) are left alone.
-  crates=$(cargo install --list | awk '/^[^ ].*:$/ && !/\(/ {print $1}')
-  [ -n "$crates" ] && step cargo replay_if 'Replac|Installed|[Ee]rror' cargo install --locked -j $jobs $crates
+for i in "${!lanes[@]}"; do
+  wait "${pids[$i]}" || failed+=("${lanes[$i]}")
+  cat "$logs/${lanes[$i]}"
+done
+rm -rf "$logs"
+if has brew; then
+  step brew env HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade --greedy --overwrite -y
+  # brew upgrade cleans upgraded packages; full cache cleanup is manual.
 fi
-
-wait $side_pid || failed+=($(sed -n 's/^up: \(.*\) failed$/\1/p' "$side"))
-cat "$side"; rm -f "$side"
 
 v() { local out; has "$1" && out=$("$@" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^ ]*' | head -1); echo "${out:--}"; }
 note "versions: julia $(v julia --version) | rustc $(v rustc --version) | pi $(v pi --version)"

@@ -25,4 +25,8 @@
 
 [init]
 	defaultBranch = main
-
+{{ if eq .chezmoi.hostname "ftuw" }}
+[safe]
+	directory = {{ .chezmoi.homeDir }}/actions-runners/1/_work/ParquetIR.jl/ParquetIR.jl
+	directory = {{ .chezmoi.homeDir }}/actions-runners/2/_work/ParquetIR.jl/ParquetIR.jl
+{{ end }}
