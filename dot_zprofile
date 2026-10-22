@@ -1,0 +1,23 @@
+# ~/.zprofile — login-shell setup (runs once per login, before ~/.zshrc).
+#
+# When zsh is the login shell, /etc/profile and /etc/profile.d are never read
+# (zsh sources /etc/zsh/*, which this cluster does not ship). Replay the parts
+# a bash login applies there: cluster mount points, Slurm defaults, and spack's
+# shell integration. Every path is guarded, so this is a no-op elsewhere.
+#
+# Also correct while bash is the login shell and ~/.bash_profile execs zsh:
+# bash has already sourced these, and the function checks below skip the
+# expensive ones instead of re-running them.
+if [[ $OSTYPE == linux* ]]; then
+  for _zprofile_site in scratch.sh storage.sh hclmbck.sh slurm_defaults.sh apps-bin-path.sh; do
+    [[ -r /etc/profile.d/$_zprofile_site ]] && source "/etc/profile.d/$_zprofile_site"
+  done
+  unset _zprofile_site
+
+  # Defines the `spack` function and registers the spack module trees (~0.6 s).
+  if (( ! $+functions[spack] )) && [[ -r /opt/spack/share/spack/setup-env.sh ]]; then
+    source /opt/spack/share/spack/setup-env.sh
+  fi
+
+  [[ -x /usr/bin/locale-check ]] && eval "$(/usr/bin/locale-check C.UTF-8 2>/dev/null)"
+fi
