@@ -34,16 +34,30 @@ notes() { { grep -h '^versions:' "$@"; grep -h '^up: skipped' "$@"; } | sed 's/^
 # --all: fan out. Remote output is buffered per host and shown after the local run.
 if [ "${1:-}" = --all ]; then
   logs=$(mktemp -d); pids=() hosts=()
+  # chezmoi apply refuses (with --no-tty) to overwrite a file changed since the
+  # last apply. That must fail the lane, but the machine still gets its software
+  # updates, so capture the status and fold it into the exit code afterwards.
+  # The leading newline matters: chezmoi's prompt writes no trailing newline, so
+  # without it this notice lands mid-line and notes() (grep '^up: skipped') drops it.
+  remote_cmd='chezmoi git -- pull -q --ff-only
+apply_rc=0
+chezmoi apply --no-tty --keep-going || { printf "\nup: skipped chezmoi apply, see chezmoi diff\n"; apply_rc=1; }
+~/bin/up; rc=$?
+[ "$apply_rc" = 1 ] && [ "$rc" = 0 ] && rc=1
+exit "$rc"'
   for pair in hclm:master.cluster frank:ftuw kauch:kauch01; do
     h=${pair%%:*}; [ "$(uname -n)" = "${pair#*:}" ] && continue
-    ssh -o BatchMode=yes -o ConnectTimeout=10 "$h" \
-      'bash -lc "chezmoi git -- pull -q --ff-only; chezmoi apply --no-tty --keep-going || echo up: skipped chezmoi apply, see chezmoi diff; ~/bin/up"' \
+    ssh -o BatchMode=yes -o ConnectTimeout=10 "$h" "bash -lc $(printf '%q' "$remote_cmd")" \
       >"$logs/$h" 2>&1 </dev/null &
     pids+=($!); hosts+=("$h")
   done
-  # Refuses (with --no-tty) to overwrite files changed here since the last apply.
-  chezmoi update --no-tty --keep-going || echo "up: skipped chezmoi apply, see chezmoi diff" | tee "$logs/local.notes"
+  apply_rc=0
+  chezmoi update --no-tty --keep-going || {
+    printf '\nup: skipped chezmoi apply, see chezmoi diff\n' | tee "$logs/local.notes"
+    apply_rc=1
+  }
   UP_NOTES=$logs/local.notes "$0"; rc=$?
+  [ "$apply_rc" = 1 ] && [ "$rc" = 0 ] && rc=1
   summary=("$(printf '%-6s %-7s' local "$([ $rc = 0 ] && echo ok || echo FAILED)") $(notes "$logs/local.notes")")
   for i in "${!hosts[@]}"; do
     wait "${pids[$i]}"; rc=$?; h=${hosts[$i]}
