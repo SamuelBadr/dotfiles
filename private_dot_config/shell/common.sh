@@ -56,7 +56,6 @@ unset _shell_path_dir _node_dir _p
 # The only userland shortcut that survives cleanup: launch Pluto. (Updating
 # lives in ~/bin/up, a script so `up --all` can run it over ssh.)
 # ---------------------------------------------------------------------------
-unalias up 2>/dev/null || true
 alias pluto='julia -e "using Pluto; Pluto.run()"'
 
 # ---------------------------------------------------------------------------
