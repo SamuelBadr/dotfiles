@@ -1,3 +1,13 @@
 # Make Homebrew binaries (e.g. mosh-server) available to non-interactive SSH sessions
 typeset -U path
-path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
+if [[ $OSTYPE == darwin* ]]; then
+  path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
+fi
+
+# Login bash hands off to zsh with exec(2) (~/.bash_profile), which cannot carry
+# shell functions across, so the module system /etc/profile.d defined for bash is
+# gone by the time zsh runs. Re-create it from the same file; MODULEPATH itself
+# is exported and already points at the spack module trees.
+if [[ $OSTYPE == linux* ]] && (( ! $+functions[module] )) && [[ -r /etc/profile.d/modules.sh ]]; then
+  source /etc/profile.d/modules.sh
+fi
