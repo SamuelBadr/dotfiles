@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Free compute across the fleet (read-only): free cores and RAM on the
+# Free compute across the fleet: free cores and RAM on the
 # desktops and the hclm login node plus your running jobs there, what is left
 # of your cap where one applies, idle cores per partition on the hclm Slurm
 # cluster. Physical cores only: hyperthreads are not counted.
+# fleet hold <host> <hours> <reason...> / fleet release <host>: reserve a
+# desktop or the hclm login node for quiet work such as benchmarks.
 set -u
 
 # Run <script> on <ssh-alias>, locally if this machine is <nodename>.
@@ -12,6 +14,32 @@ on() { # <ssh-alias> <nodename> <script>
     echo "$1: unreachable"
 }
 
+# Holds: an agent that needs a quiet machine (benchmarks) holds it, and fleet
+# shows the hold to every other agent until it is released or expires. The
+# hold lives on that machine in ~/.cache/fleet/hold; its owner is host:cwd.
+IFS= read -r -d '' hold <<'EOF'
+f=~/.cache/fleet/hold; mkdir -p ~/.cache/fleet
+now=$(date +%s); IFS='|' read -r exp owner reason 2>/dev/null < "$f" || exp=0
+if [ "$exp" -gt "$now" ] && [ "$owner" != "$2" ]; then
+  echo "fleet: $(uname -n) is held by $owner until $(date -d @"$exp" '+%a %H:%M'): $reason" >&2; exit 1; fi
+if [ "$1" = release ]; then rm -f "$f"; echo "$(uname -n) released"; exit; fi
+exp=$(awk -v n="$now" -v h="$3" 'BEGIN { if (!(h + 0 > 0)) exit 1; printf "%d", n + h * 3600 }') ||
+  { echo "fleet: hours must be a positive number" >&2; exit 2; }
+printf '%s|%s|%s\n' "$exp" "$2" "${*:4}" > "$f"
+echo "$(uname -n) held until $(date -d @"$exp" '+%a %H:%M')"
+EOF
+
+if [ "${1:-}" = hold ] || [ "${1:-}" = release ]; then
+  [ "$1" = release ] && [ $# = 2 ] || [ $# -ge 4 ] ||
+    { echo "usage: fleet hold <host> <hours> <reason...>   |   fleet release <host>" >&2; exit 2; }
+  case $2 in kauch) node=kauch01 ;; frank) node=ftuw ;; hclm) node=master.cluster ;;
+    *) echo "fleet: hold works on kauch, frank and hclm (its login node)" >&2; exit 2 ;; esac
+  args=("$1" "$(uname -n):${PWD/#$HOME/~}" "${@:3}")
+  if [ "$(uname -n)" = "$node" ]; then bash -s -- "${args[@]}" <<<"$hold"
+  else ssh -o BatchMode=yes -o ConnectTimeout=5 "$2" "bash -s -- $(printf '%q ' "${args[@]}")" <<<"$hold"; fi
+  exit
+fi
+
 IFS= read -r -d '' desktop <<'EOF'
 read -r load _ < /proc/loadavg
 # Agreed caps on everything of yours on the host combined (cores, GB; 0 = none).
@@ -20,6 +48,8 @@ cores=$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l)
 awk -v h="${label:-$1}" -v n="$cores" -v l="$load" '/^MemAvailable:/ {
   f = n - l; if (f < 0) f = 0
   printf "%-6s %2d cores, load %4.1f: ~%d free; %d GB RAM available\n", h, n, l, f, $2 / 1048576 }' /proc/meminfo
+IFS='|' read -r exp owner reason 2>/dev/null < ~/.cache/fleet/hold && [ "$exp" -gt "$(date +%s)" ] &&
+  echo "       HELD by $owner until $(date -d @"$exp" '+%a %H:%M'): $reason. Start nothing here unless you are its holder."
 # shortcut: %CPU is each process's lifetime average, so bursty work reads low; sample /proc/stat if that misleads.
 [ "$cap" -gt 0 ] && ps -u "$USER" -o pcpu=,rss= | awk -v c="$cap" -v m="$capmem" '
   { cpu += $1; rss += $2 }
