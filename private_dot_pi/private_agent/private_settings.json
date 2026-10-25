@@ -52,6 +52,7 @@
     }
   ],
   "subagents": {
+    "disableBuiltins": true,
     "agentOverrides": {
       "delegate": {
         "inheritGlobalContext": true

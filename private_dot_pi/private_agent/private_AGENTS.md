@@ -6,7 +6,7 @@
 
 ## Subagents
 
-- You may spawn subagents on your own judgment with any model, except Astra or Fable models (model ID contains `astra` or `fable`): spawn those only when the user asks.
+- Spawn subagents only when the user explicitly asks for them. Never on your own judgment, however large or risky the task: do the work yourself. This includes workflows, chains and scheduled runs.
 - Omit `model` when launching unless there's a specific reason; per-role models are configured in settings.
 
 ## Expensive commands
