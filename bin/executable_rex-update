@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Install or update the Rex binary in ~/bin/rex without sudo (the official
+# install script's --tarball mode needs sudo for /usr/local/bin). Tracks the
+# snapshot channel, like the apt repo on kauch. Reads the package token from
+# ~/.config/rex/token. Silent when already current.
+# A running server keeps the old binary until `systemctl --user restart rex`,
+# which ends every session, so that is left to you.
+set -euo pipefail
+token_file=${XDG_CONFIG_HOME:-$HOME/.config}/rex/token
+[ -r "$token_file" ] || { echo "rex-update: no token in $token_file" >&2; exit 1; }
+api=https://blob.superlogical.com
+case $(uname -m) in
+  x86_64) file=rex-linux-amd64.tar.gz ;;
+  aarch64) file=rex-linux-arm64.tar.gz ;;
+  *) echo "rex-update: no Rex build for $(uname -m)" >&2; exit 1 ;;
+esac
+# The token goes to curl on stdin, so it never shows up in ps on shared machines.
+get() { printf 'user = "rex:%s"\n' "$(cat "$token_file")" | curl -K - --proto '=https' --tlsv1.2 -fsSL "$@"; }
+
+release=$(get "$api/api/releases/rex/snapshot")
+commit=$(sed -n 's/.*"commit":"\([0-9a-f]\{40\}\)".*/\1/p' <<<"$release")
+want=$(tr '{' '\n' <<<"$release" | grep "\"filename\":\"$file\"" | sed -n 's/.*"sha256":"\([0-9a-f]\{64\}\)".*/\1/p' || true)
+[ -n "$commit" ] && [ -n "$want" ] || { echo "rex-update: no $file in the snapshot release" >&2; exit 1; }
+old=$("$HOME/bin/rex" version 2>/dev/null | sed -n 's/^commit: //p' || true)
+[ "$old" = "$commit" ] && exit 0
+
+dir=$(mktemp -d); trap 'rm -rf "$dir"' EXIT
+get "$api/download/rex/snapshot/$commit/$file" -o "$dir/$file"
+echo "$want  $dir/$file" | sha256sum -c --quiet -
+tar -xzf "$dir/$file" -C "$dir"
+mkdir -p "$HOME/bin"
+install -m 0755 "$dir/rex" "$HOME/bin/rex"
+echo "rex: updated to $("$HOME/bin/rex" version | head -1)${old:+ (systemctl --user restart rex to use it; ends all sessions)}"

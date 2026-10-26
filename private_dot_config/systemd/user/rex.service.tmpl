@@ -1,0 +1,17 @@
+{{- $name := get (dict "master" "hclm" "ftuw" "frank" "kauch01" "kauch") .chezmoi.hostname | default .chezmoi.hostname -}}
+# Personal Rex server, also on the tailnet as its own node rex-{{ $name }}
+# (https://rex-{{ $name }}.<tailnet>.ts.net); the first start prints a sign-in
+# link in `rex server status`. Enable by hand where rex is installed:
+#   systemctl --user enable --now rex
+# Stopping or restarting it ends every Rex session on this machine.
+# A login shell supplies PATH (~/bin/rex where rex is not a system package).
+[Unit]
+Description=Rex personal server
+
+[Service]
+ExecStart=/bin/bash -lc 'exec rex server run --tailscale --tailscale-hostname rex-{{ $name }}'
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

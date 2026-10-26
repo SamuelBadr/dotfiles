@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Update the user-level software on this machine: Homebrew, Julia (juliaup,
 # the global and shared environments, Pkg apps), pi and its extensions, agent
-# skills, Rust (rustup, cargo-installed tools) and uv tools. Tools that are
+# skills, Rust (rustup, cargo-installed tools), uv tools and a ~/bin/rex
+# (rex-update). Tools that are
 # missing here are skipped.
 # Package/project environments are left alone: update those by hand.
 #   up        this machine
@@ -112,6 +113,8 @@ background pi update_pi
 background skills update_skills
 background rust update_rust
 has uv && background uv replay_if 'Updated|[Ee]rror' uv tool upgrade --all
+# Only the sudo-free copy; a system rex package updates with the OS.
+[ -x "$HOME/bin/rex" ] && has rex-update && background rex rex-update
 
 if has juliaup; then
   # juliaup deletes the julia it replaces, which breaks running julias (here
