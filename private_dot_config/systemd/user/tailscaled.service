@@ -1,4 +1,5 @@
-# Tailscale without root, where there is no system Tailscale (hclm, frank):
+# Tailscale without root, where there is no system Tailscale (frank; not on
+# the shared hclm login node, by the user's choice):
 # userspace networking, so no tun device. Incoming tailnet connections reach
 # this machine's localhost ports (sshd); outgoing ones go through
 # `tailscale nc` (the SSH ProxyCommand), never a SOCKS/HTTP proxy, which other

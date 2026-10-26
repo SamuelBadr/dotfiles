@@ -50,24 +50,29 @@ Host MUSICA-LNZ
 Host MUSICA-INN
 	HostName musica.inn.asc.ac.at
 
-# kauch, hclm and frank over the tailnet. It holds only your devices, so their
-# host keys are accepted unprompted under these new names. hclm and frank run
-# Tailscale without root (tailscaled.service), so from there connections go
-# through `tailscale nc`. Direct addresses, should the tailnet be down:
-# kauch 128.131.127.236, hclm hclm.ifp.tuwien.ac.at, frank 128.131.126.112.
-Match originalhost kauch,hclm,frank exec "test -S /run/user/$(id -u)/tailscale.sock"
+# kauch and frank over the tailnet, except from hclm, which is not on it (the
+# user does not want a daemon on the shared login node), so everyone reaches
+# hclm directly. The tailnet holds only your devices, so host keys are accepted
+# unprompted under the new names. frank runs Tailscale without root
+# (tailscaled.service), so from there connections go through `tailscale nc`.
+# Direct addresses, should the tailnet be down: kauch 128.131.127.236,
+# frank 128.131.126.112.
+{{- $tailnet := ne .chezmoi.hostname "master" }}
+{{- if $tailnet }}
+Match originalhost kauch,frank exec "test -S /run/user/$(id -u)/tailscale.sock"
 	ProxyCommand ~/bin/tailscale --socket=/run/user/$(id -u)/tailscale.sock nc %h %p
 
-Host kauch hclm frank
+Host kauch frank
 	StrictHostKeyChecking accept-new
+{{- end }}
 
 Host kauch
 	User samuel
-	HostName kauch01.tailb493b.ts.net
+	HostName {{ if $tailnet }}kauch01.tailb493b.ts.net{{ else }}128.131.127.236{{ end }}
 
 Host hclm
 	User samuel
-	Hostname hclm.tailb493b.ts.net
+	Hostname hclm.ifp.tuwien.ac.at
 {{- if .modules.backupMac }}
 
 Host hclm-backup
@@ -82,7 +87,7 @@ Host hclm-backup
 
 Host frank
 	User samuel
-	Hostname frank.tailb493b.ts.net
+	Hostname {{ if $tailnet }}frank.tailb493b.ts.net{{ else }}128.131.126.112{{ end }}
 	Port 10492
 	IdentitiesOnly yes
 
