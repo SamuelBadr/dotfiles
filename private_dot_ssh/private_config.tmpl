@@ -50,13 +50,24 @@ Host MUSICA-LNZ
 Host MUSICA-INN
 	HostName musica.inn.asc.ac.at
 
+# kauch, hclm and frank over the tailnet. It holds only your devices, so their
+# host keys are accepted unprompted under these new names. hclm and frank run
+# Tailscale without root (tailscaled.service), so from there connections go
+# through `tailscale nc`. Direct addresses, should the tailnet be down:
+# kauch 128.131.127.236, hclm hclm.ifp.tuwien.ac.at, frank 128.131.126.112.
+Match originalhost kauch,hclm,frank exec "test -S /run/user/$(id -u)/tailscale.sock"
+	ProxyCommand ~/bin/tailscale --socket=/run/user/$(id -u)/tailscale.sock nc %h %p
+
+Host kauch hclm frank
+	StrictHostKeyChecking accept-new
+
 Host kauch
 	User samuel
-	HostName 128.131.127.236
+	HostName kauch01.tailb493b.ts.net
 
 Host hclm
 	User samuel
-	Hostname hclm.ifp.tuwien.ac.at
+	Hostname hclm.tailb493b.ts.net
 {{- if .modules.backupMac }}
 
 Host hclm-backup
@@ -71,7 +82,7 @@ Host hclm-backup
 
 Host frank
 	User samuel
-	Hostname 128.131.126.112
+	Hostname frank.tailb493b.ts.net
 	Port 10492
 	IdentitiesOnly yes
 

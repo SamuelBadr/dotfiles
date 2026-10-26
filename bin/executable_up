@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Update the user-level software on this machine: Homebrew, Julia (juliaup,
 # the global and shared environments, Pkg apps), pi and its extensions, agent
-# skills, Rust (rustup, cargo-installed tools), uv tools and a ~/bin/rex
-# (rex-update). Tools that are
+# skills, Rust (rustup, cargo-installed tools), uv tools, and a ~/bin/rex and
+# ~/bin/tailscale (rex-update, tailscale-update); also checks that the Rex
+# hosts answer. Tools that are
 # missing here are skipped.
 # Package/project environments are left alone: update those by hand.
 #   up        this machine
@@ -113,8 +114,19 @@ background pi update_pi
 background skills update_skills
 background rust update_rust
 has uv && background uv replay_if 'Updated|[Ee]rror' uv tool upgrade --all
-# Only the sudo-free copy; a system rex package updates with the OS.
+# Only the sudo-free copies; system packages update with the OS.
 [ -x "$HOME/bin/rex" ] && has rex-update && background rex rex-update
+[ -x "$HOME/bin/tailscaled" ] && has tailscale-update && background tailscale tailscale-update
+# Every Rex server in `rex hosts list` must answer (`rex hosts check` only
+# resolves names, which offline tailnet devices keep).
+check_rex_hosts() {
+  local h bad=0
+  for h in $(rex hosts list | awk 'NR > 1 { print $1 }'); do
+    rex --timeout 30s -S "$h" ls >/dev/null 2>&1 || { echo "rex: host $h does not answer"; bad=1; }
+  done
+  return $bad
+}
+has rex && background rex-hosts check_rex_hosts
 
 if has juliaup; then
   # juliaup deletes the julia it replaces, which breaks running julias (here
