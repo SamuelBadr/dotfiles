@@ -1,0 +1,18 @@
+# Tailscale without root, where there is no system Tailscale (hclm, frank):
+# userspace networking, so no tun device. Incoming tailnet connections reach
+# this machine's localhost ports (sshd); outgoing ones go through
+# `tailscale nc` (the SSH ProxyCommand), never a SOCKS/HTTP proxy, which other
+# local users could use to reach the tailnet as you. The LocalAPI socket is in
+# the 0700 runtime dir. Set up once (tailscale-update installs ~/bin/tailscale*):
+#   systemctl --user enable --now tailscaled
+#   tailscale --socket=/run/user/$(id -u)/tailscale.sock up --hostname=<name>
+[Unit]
+Description=Tailscale (userspace networking)
+
+[Service]
+ExecStart=%h/bin/tailscaled --tun=userspace-networking --port=0 --statedir=%h/.local/state/tailscale --socket=%t/tailscale.sock
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

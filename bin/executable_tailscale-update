@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Install or update tailscale and tailscaled in ~/bin without sudo, for
+# tailscaled.service (userspace networking) on machines without a system
+# Tailscale. Silent when already current.
+# A running tailscaled keeps the old binary until
+# `systemctl --user restart tailscaled`, which drops tailnet connections
+# (SSH sessions through it included), so that is left to you.
+set -euo pipefail
+case $(uname -m) in
+  x86_64) arch=amd64 ;;
+  aarch64) arch=arm64 ;;
+  *) echo "tailscale-update: no Tailscale build for $(uname -m)" >&2; exit 1 ;;
+esac
+pkgs=https://pkgs.tailscale.com/stable
+version=$(curl -fsSL "$pkgs/?mode=json" | sed -n 's/.*"TarballsVersion": *"\([^"]*\)".*/\1/p')
+[ -n "$version" ] || { echo "tailscale-update: no version in $pkgs/?mode=json" >&2; exit 1; }
+old=$("$HOME/bin/tailscale" version 2>/dev/null | head -1 || true)
+[ "$old" = "$version" ] && exit 0
+
+file=tailscale_${version}_$arch.tgz
+dir=$(mktemp -d); trap 'rm -rf "$dir"' EXIT
+curl -fsSL "$pkgs/$file" -o "$dir/$file"
+echo "$(curl -fsSL "$pkgs/$file.sha256")  $dir/$file" | sha256sum -c --quiet -
+tar -xzf "$dir/$file" -C "$dir"
+mkdir -p "$HOME/bin"
+install -m 0755 "$dir/${file%.tgz}/tailscale" "$dir/${file%.tgz}/tailscaled" "$HOME/bin/"
+echo "tailscale: updated to $version${old:+ (systemctl --user restart tailscaled to use it; drops tailnet connections)}"
