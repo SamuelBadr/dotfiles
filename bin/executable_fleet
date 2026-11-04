@@ -34,7 +34,8 @@ if [ "${1:-}" = hold ] || [ "${1:-}" = release ]; then
     { echo "usage: fleet hold <host> <hours> <reason...>   |   fleet release <host>" >&2; exit 2; }
   case $2 in kauch) node=kauch01 ;; frank) node=ftuw ;; hclm) node=master.cluster ;;
     *) echo "fleet: hold works on kauch, frank and hclm (its login node)" >&2; exit 2 ;; esac
-  args=("$1" "$(uname -n):${PWD/#$HOME/~}" "${@:3}")
+  tilde='~'  # a literal ~ in the replacement is expanded again by bash 5
+  args=("$1" "$(uname -n):${PWD/#$HOME/$tilde}" "${@:3}")
   if [ "$(uname -n)" = "$node" ]; then bash -s -- "${args[@]}" <<<"$hold"
   else ssh -o BatchMode=yes -o ConnectTimeout=5 "$2" "bash -s -- $(printf '%q ' "${args[@]}")" <<<"$hold"; fi
   exit
@@ -50,15 +51,30 @@ awk -v h="${label:-$1}" -v n="$cores" -v l="$load" '/^MemAvailable:/ {
   printf "%-6s %2d cores, load %4.1f: ~%d free; %d GB RAM available\n", h, n, l, f, $2 / 1048576 }' /proc/meminfo
 IFS='|' read -r exp owner reason 2>/dev/null < ~/.cache/fleet/hold && [ "$exp" -gt "$(date +%s)" ] &&
   echo "       HELD by $owner until $(date -d @"$exp" '+%a %H:%M'): $reason. Start nothing here unless you are its holder."
-# shortcut: %CPU is each process's lifetime average, so bursty work reads low; sample /proc/stat if that misleads.
-[ "$cap" -gt 0 ] && ps -u "$USER" -o pcpu=,rss= | awk -v c="$cap" -v m="$capmem" '
-  { cpu += $1; rss += $2 }
-  END { cpu /= 100; rss /= 1048576; left = c - cpu; if (left < 0) left = 0
+# CPU use of your processes over one second (ps %CPU is a lifetime average, so
+# a long-idle process that just got busy would read near zero).
+ticks() { # <pid> <utime+stime> per process; fields after the ")" ending comm
+  ps -u "$USER" -o pid= | sed 's|^ *|/proc/|; s|$|/stat|' | xargs cat 2>/dev/null |
+    awk '{ p = $1; sub(/.*\) /, ""); print p, $12 + $13 }'
+}
+T0=$(ticks) S0=$(date +%s%N); sleep 1; T1=$(ticks) S1=$(date +%s%N)
+# <pid> <cores> <rss KB> <elapsed s> <args>; processes born in the second count from zero.
+procs=$(ps -u "$USER" -o pid=,rss=,etimes=,args= | T0=$T0 T1=$T1 awk -v hz="$(getconf CLK_TCK)" -v dt="$(( (S1 - S0) / 1000000 ))" '
+  BEGIN { n = split(ENVIRON["T0"], a, "\n"); for (i = 1; i <= n; i++) { split(a[i], f, " "); t0[f[1]] = f[2] }
+    n = split(ENVIRON["T1"], a, "\n"); for (i = 1; i <= n; i++) { split(a[i], f, " "); c[f[1]] = (f[2] - t0[f[1]]) / hz / (dt / 1000) } }
+  { p = $1; r = $2; e = $3; sub(/^ *[0-9]+ +[0-9]+ +[0-9]+ +/, ""); printf "%s %.2f %s %s %s\n", p, c[p] + 0, r, e, $0 }')
+# Agents on the hclm login node share pi.slice, whose memory cap kills; count
+# its memory (less inactive page cache) if that exceeds the RSS sum.
+slice=/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/pi.slice
+slicemem=$(awk '$1 == "inactive_file" { print c - $2 }' c="$(cat "$slice/memory.current" 2>/dev/null)" "$slice/memory.stat" 2>/dev/null)
+[ "$cap" -gt 0 ] && awk -v c="$cap" -v m="$capmem" -v sm="${slicemem:-0}" '
+  { cpu += $2; rss += $3 }
+  END { rss /= 1048576; sm /= 1073741824; if (sm > rss) rss = sm; left = c - cpu; if (left < 0) left = 0
     printf "       your cap %d cores%s; you use %.1f cores, %d GB: ~%.0f cores", c, (m ? sprintf(", %d GB", m) : ""), cpu, rss, left
     if (m) printf ", %d GB", (m > rss ? m - rss : 0)
-    print " left for you" }'
+    print " left for you" }' <<<"$procs"
 # Your jobs: processes using >= half a core for >= 10 s, grouped by working directory.
-ps -u "$USER" -o pid=,pcpu=,etimes=,args= | awk '$2 >= 50 && $3 >= 10' |
+awk '$2 >= 0.5 && $4 >= 10 { $3 = ""; print }' <<<"$procs" |
   while read -r pid cpu secs args; do
     printf '%s\t%s\t%s\t%s\n' "$(readlink "/proc/$pid/cwd" || echo '?')" "$cpu" "$secs" "$args"
   done | awk -F'\t' -v home="$HOME" '
@@ -66,7 +82,7 @@ ps -u "$USER" -o pid=,pcpu=,etimes=,args= | awk '$2 >= 50 && $3 >= 10' |
   { d = $1; if (index(d, home) == 1) d = "~" substr(d, length(home) + 1)
     c[d] += $2; n[d]++; if ($3 > t[d]) t[d] = $3
     if ($2 > top[d]) { top[d] = $2; cmd[d] = $4; sub(/^[^ ]*\//, "", cmd[d]) } }
-  END { for (d in c) printf "%9.1f cores %5s  %.60s%s  (%s)\n", c[d] / 100, dur(t[d]), cmd[d], (n[d] > 1 ? " +" (n[d] - 1) " more" : ""), d }' |
+  END { for (d in c) printf "%9.1f cores %5s  %.60s%s  (%s)\n", c[d], dur(t[d]), cmd[d], (n[d] > 1 ? " +" (n[d] - 1) " more" : ""), d }' |
   sort -rn
 EOF
 
@@ -103,27 +119,37 @@ cert_valid() { # the user's daily MUSICA step certificate, ~/.ssh/asc-cert.pub, 
 }
 mkdir -p ~/.cache/fleet
 query() { # <cluster label> <host>...: partitions from the first connected host, jobs from each
-  local first=1 h out
+  local first=1 h out d e why
   for h in "${@:2}"; do
-    if ! ssh -O check "$h" </dev/null 2>/dev/null; then
+    d=~/.cache/fleet/$h.denied e=~/.cache/fleet/$h.err
+    # One login attempt at a time per host (cron and agents run fleet at once),
+    # rechecked under the lock so a waiting run does not log in again.
+    ssh -O check "$h" </dev/null 2>/dev/null || (
+      flock -w 30 9 || exit
+      ssh -O check "$h" </dev/null 2>/dev/null && exit
+      # 9>&-: the backgrounded master must not keep holding the lock.
+      try() { "$@" </dev/null >/dev/null 2>"$e" 9>&- || ! grep -q 'Permission denied' "$e" || touch "$d"; }
       if [[ $h = MUSICA* ]]; then
         # publickey only: the certificate logs in without 2FA, and no 2FA prompt is ever tried.
-        cert_valid && ssh -o BatchMode=yes -o PreferredAuthentications=publickey -o ConnectTimeout=10 -fN "$h" </dev/null >/dev/null 2>&1
-      elif [ ! -e ~/.cache/fleet/"$h".denied ]; then
+        # One try per certificate: after a refusal, wait for the user's next one.
+        cert_valid && [ ~/.ssh/asc-cert.pub -nt "$d" ] &&
+          try ssh -o BatchMode=yes -o PreferredAuthentications=publickey -o ConnectTimeout=10 -fN "$h"
+      elif [ ! -e "$d" ]; then
         # setsid: no terminal, so this succeeds only if VSC asks for nothing (cached OTP).
-        setsid -w ssh -o PreferredAuthentications=publickey,keyboard-interactive -o ConnectTimeout=10 -fN "$h" </dev/null >/dev/null 2>~/.cache/fleet/"$h".err
-        grep -q 'Permission denied' ~/.cache/fleet/"$h".err && touch ~/.cache/fleet/"$h".denied
+        try setsid -w ssh -o PreferredAuthentications=publickey,keyboard-interactive -o ConnectTimeout=10 -fN "$h"
       fi
-    fi
-    if ssh -O check "$h" </dev/null 2>/dev/null; then rm -f ~/.cache/fleet/"$h".denied
+    ) 9>~/.cache/fleet/"$h".lock
+    if ssh -O check "$h" </dev/null 2>/dev/null; then rm -f "$d"
     else
-      if [[ $h = MUSICA* ]]; then echo "$1: $h not connected (user, on hclm: $step_login)"
-      else echo "$1: $h not connected (user: ssh -fN $h on hclm)"; fi
+      [ -e "$d" ] && why="login refused, see $e; " || why=
+      if [[ $h = MUSICA* ]]; then echo "$1: $h not connected (${why}user, on hclm: $step_login)"
+      else echo "$1: $h not connected (${why}user: ssh -fN $h on hclm)"; fi
       continue
     fi
     # ProxyCommand=false: if the master refuses, fail instead of falling back to a login.
     if out=$(timeout 30 ssh -o BatchMode=yes -o ProxyCommand=false "$h" bash -l -s -- "$first" "$1" "$h" <<<"$remote" 2>/dev/null); then
       printf '%s\n' "$out"; first=0
+    elif [ $? = 124 ]; then echo "$1: $h timed out after 30 s (Slurm slow? the master is up)"
     else echo "$1: $h connection broken (user: ssh -O exit $h; ssh -fN $h on hclm)"; fi
   done
 }
