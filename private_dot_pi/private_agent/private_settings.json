@@ -80,8 +80,12 @@
       }
     }
   },
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.0",
   "deviceId": "5661b36f-050a-4575-be0c-6da0a5508989",
   "theme": "system",
-  "hideThinkingBlock": true
+  "hideThinkingBlock": true,
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.46.0",
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.84.0"
+  }
 }
