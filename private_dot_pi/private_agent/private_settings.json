@@ -50,7 +50,8 @@
         "!pi-subagents"
       ]
     },
-    "npm:pi-tool-duration"
+    "npm:pi-tool-duration",
+    "teach"
   ],
   "subagents": {
     "disableBuiltins": true,
