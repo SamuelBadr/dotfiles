@@ -51,7 +51,8 @@
       ]
     },
     "npm:pi-tool-duration",
-    "git:git@github.com:SamuelBadr/pi-teach"
+    "git:git@github.com:SamuelBadr/pi-teach",
+    "npm:pi-better-render"
   ],
   "subagents": {
     "disableBuiltins": true,
