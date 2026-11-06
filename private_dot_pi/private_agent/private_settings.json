@@ -51,7 +51,7 @@
       ]
     },
     "npm:pi-tool-duration",
-    "teach"
+    "git:git@github.com:SamuelBadr/pi-teach"
   ],
   "subagents": {
     "disableBuiltins": true,
