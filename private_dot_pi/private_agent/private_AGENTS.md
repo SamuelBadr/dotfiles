@@ -2,7 +2,8 @@
 
 ## Next steps
 
-- End every reply with a numbered list of the next steps I'm most likely to want, best first, so I can pick one by replying with just its number.
+- End every reply with a numbered list of options for how to proceed, ranked by your recommendation (best first), so I can pick one by replying with just its number.
+- Each item is an alternative to the others, complete on its own, not a step in a plan: picking 2 must not assume 1 was done.
 
 ## Math
 
