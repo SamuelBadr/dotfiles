@@ -147,3 +147,9 @@ fi
 if [[ $OSTYPE == linux* && -x /snap/chromium/current/usr/lib/chromium-browser/chrome ]]; then
   export PUPPETEER_EXECUTABLE_PATH=/snap/chromium/current/usr/lib/chromium-browser/chrome
 fi
+# oMLX: CLI shim path begin
+case ":$PATH:" in
+  *":$HOME/.omlx/bin:"*) ;;
+  *) export PATH="$HOME/.omlx/bin:$PATH" ;;
+esac
+# oMLX: CLI shim path end
