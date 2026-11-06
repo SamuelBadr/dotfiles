@@ -4,6 +4,10 @@
 
 - End every reply with a numbered list of the next steps I'm most likely to want, best first, so I can pick one by replying with just its number.
 
+## Math
+
+- Write math as LaTeX (`$…$` inline, `$$…$$` display); pi-better-render typesets it.
+
 ## Subagents
 
 - Spawn subagents only when the user explicitly asks for them. Never on your own judgment, however large or risky the task: do the work yourself. This includes workflows, chains and scheduled runs.
