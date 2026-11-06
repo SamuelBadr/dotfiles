@@ -4,5 +4,6 @@
 Krastanov/JuliaLLMAgentSkills develop-julia-packages
 Krastanov/JuliaLLMAgentSkills optimize-julia-code
 apcamargo/typst-skills touying-author
+blader/humanizer humanizer
 lucifer1004/claude-skill-typst typst
 trailofbits/skills writing-lean-proofs
