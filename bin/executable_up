@@ -33,17 +33,29 @@ note() { # print a line for the --all summary (and to $UP_NOTES when set)
 }
 notes() { { grep -h '^versions:' "$@"; grep -h '^up: skipped' "$@"; } | sed 's/^versions: //; s/^up: /  /' | tr '\n' ' '; }
 
+# chezmoi apply refuses (with --no-tty) to overwrite a file changed since the
+# last apply. pi does that routinely: it records package versions in its
+# settings.json. So first overwrite each file changed on both sides whose apply
+# removes no line, i.e. loses nothing local; the rest still fail the apply.
+apply_dotfiles() {
+  local f
+  while IFS= read -r f; do
+    chezmoi diff "$f" | grep -v '^--- a/' | grep -q '^-' || chezmoi apply --force "$f"
+  done < <(chezmoi status -i files -p absolute | sed -n 's/^MM //p')
+  chezmoi apply --no-tty --keep-going
+}
+
 # --all: fan out. Remote output is buffered per host and shown after the local run.
 if [ "${1:-}" = --all ]; then
   logs=$(mktemp -d); pids=() hosts=()
-  # chezmoi apply refuses (with --no-tty) to overwrite a file changed since the
-  # last apply. That must fail the lane, but the machine still gets its software
+  # A refused apply must fail the lane, but the machine still gets its software
   # updates, so capture the status and fold it into the exit code afterwards.
   # The leading newline matters: chezmoi's prompt writes no trailing newline, so
   # without it this notice lands mid-line and notes() (grep '^up: skipped') drops it.
-  remote_cmd='chezmoi git -- pull -q --ff-only
+  remote_cmd="$(declare -f apply_dotfiles)"'
+chezmoi git -- pull -q --ff-only
 apply_rc=0
-chezmoi apply --no-tty --keep-going || { printf "\nup: skipped chezmoi apply, see chezmoi diff\n"; apply_rc=1; }
+apply_dotfiles || { printf "\nup: skipped chezmoi apply, see chezmoi diff\n"; apply_rc=1; }
 ~/bin/up; rc=$?
 [ "$apply_rc" = 1 ] && [ "$rc" = 0 ] && rc=1
 exit "$rc"'
@@ -54,7 +66,7 @@ exit "$rc"'
     pids+=($!); hosts+=("$h")
   done
   apply_rc=0
-  chezmoi update --no-tty --keep-going || {
+  { chezmoi update --apply=false && apply_dotfiles; } || {
     printf '\nup: skipped chezmoi apply, see chezmoi diff\n' | tee "$logs/local.notes"
     apply_rc=1
   }
