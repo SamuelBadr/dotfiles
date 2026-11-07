@@ -25,8 +25,9 @@ fi
 # Move user-local tool dirs to the front, once each. Order (highest first)
 # matches the original zsh array: cargo, juliaup, julia, ~/bin, ~/.local/bin.
 # Prepend in reverse so the desired first entry ends up at the front.
-# Node (newest nvm install, without sourcing the slow nvm.sh) has the lowest
-# priority of these, so ~/bin wrappers still shadow npm-global binaries like pi.
+# Hunk and Node (newest nvm install, without sourcing the slow nvm.sh) have the
+# lowest priority of these, so ~/bin wrappers still shadow npm-global binaries
+# like pi.
 # Existing entries are moved, not skipped: an inherited PATH (e.g. herdr panes)
 # that already holds ~/bin but not node would otherwise put node in front.
 # ---------------------------------------------------------------------------
@@ -35,6 +36,7 @@ export NVM_DIR="$HOME/.nvm"
 _node_dir=$(find "$NVM_DIR/versions/node" -mindepth 2 -maxdepth 2 -path '*/v*/bin' 2>/dev/null | sort -V | tail -1)
 [ -x "$_node_dir/node" ] || _node_dir=
 for _shell_path_dir in \
+  "$HOME/.hunk/bin" \
   ${_node_dir:+"$_node_dir"} \
   "$HOME/.local/bin" \
   "$HOME/bin" \
@@ -51,6 +53,12 @@ do
 done
 export PATH
 unset _shell_path_dir _node_dir _p
+
+# Slurm: login shells on VSC and MUSICA get it from /etc/profile.d; non-login
+# shells (agents' commands) need it too.
+if ! command -v sinfo >/dev/null 2>&1 && [ -r /etc/profile.d/slurm.sh ]; then
+  . /etc/profile.d/slurm.sh
+fi
 
 # ---------------------------------------------------------------------------
 # The only userland shortcut that survives cleanup: launch Pluto. (Updating
