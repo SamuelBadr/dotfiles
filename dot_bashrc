@@ -5,6 +5,9 @@
 # shell-neutral setup lives in ~/.config/shell/common.sh.
 # ============================================================================
 
+# Read: lets .bash_profile skip this file when ~/.profile already sourced it.
+__bashrc_read=1
+
 # Shared environment; also needed for non-interactive bash.
 [ -r "$HOME/.config/shell/common.sh" ] && . "$HOME/.config/shell/common.sh"
 
@@ -83,3 +86,9 @@ else
   PROMPT_COMMAND="__ps1_update; ${PROMPT_COMMAND#__ps1_update; }"
   PS1='\n\[\e[32m\]\h\[\e[0m\]:\[\e[36m\]\w\[\e[0m\]${__ps1_branch:+ \[\e[35m\]$__ps1_branch\[\e[0m\]}${__ps1_exit:+  \[\e[31m\]$__ps1_exit\[\e[0m\]}\n\[\e[${__ps1_color}m\]>\[\e[0m\] '
 fi
+
+# Local additions, e.g. the module setup ASC puts in ~/.bashrc.d on MUSICA.
+for __rc in "$HOME"/.bashrc.d/*; do
+  [ -f "$__rc" ] && . "$__rc"
+done
+unset __rc

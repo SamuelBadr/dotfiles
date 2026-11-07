@@ -11,3 +11,9 @@ export PATH="$HOME/bin:$PATH"
 if [[ $- == *i* && -x "$HOME/.local/bin/zsh" ]]; then
   exec "$HOME/.local/bin/zsh" -l
 fi
+
+# Login bash reads only this file: read ~/.bashrc too (common.sh, then the
+# interactive setup), unless ~/.profile already did, as Ubuntu's default does.
+if [ -z "${__bashrc_read-}" ] && [ -f "$HOME/.bashrc" ]; then
+  . "$HOME/.bashrc"
+fi
