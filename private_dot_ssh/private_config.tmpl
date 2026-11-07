@@ -16,7 +16,9 @@ Host VSC4 VSC5 VSC4B VSC5B
 # that master until the connection drops (days); auth is only checked at login.
 Host VSC4 VSC5 VSC4B VSC5B MUSICA MUSICA-LNZ MUSICA-INN
 	ControlPersist yes
-	ServerAliveInterval 60   # keep the idle master alive so the HPC doesn't drop it
+	# Keep the idle master alive so the HPC doesn't drop it. (Comments go on their
+	# own lines: VSC's OpenSSH 8.0 rejects them after a setting.)
+	ServerAliveInterval 60
 	ServerAliveCountMax 4
 
 Host VSC4B VSC5B
