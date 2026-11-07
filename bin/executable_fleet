@@ -164,17 +164,11 @@ df -h --output=target,avail,pcent /home /mnt/storage /mnt/scratch |
 echo
 EOF
 
-# Runs on hclm (also every 10 min from cron there, to heal dropped connections).
-# The ASC clusters need 2FA, so only the user can log in: go through their SSH
-# masters there. Reconnect only without prompting: MUSICA with the user's daily
-# step certificate, VSC with the OTP VSC caches for ~12 h after the user's last
-# 2FA, and stop after one refusal (failed logins could get hclm blocked).
-IFS= read -r -d '' asc <<'EOF'
+# One ASC cluster, run there in a login shell (on some accounts Slurm is on
+# PATH only there): its partitions if $1 = 1, with the job time limit of the
+# QOS named like the partition, then your jobs.
+IFS= read -r -d '' remote <<'EOF'
 export LC_ALL=C
-IFS= read -r -d '' remote <<'R'
-export LC_ALL=C
-# Partitions (from the first connected host of a cluster only), with the job
-# time limit of the QOS named like the partition; then your jobs.
 [ "$1" = 1 ] && { sacctmgr -n -P show qos format=name,maxwall | sed 's/^/Q|/'; sinfo -h -o '%R|%F|%c|%Z|%m|%G'; } | awk -F'|' '
   function lim(t,  a, d, h) { if (t == "") return "-"
     d = 0; if (split(t, a, "-") == 2) { d = a[1]; t = a[2] }; split(t, a, ":"); h = a[1] + 0
@@ -188,15 +182,37 @@ export LC_ALL=C
     for (i = 1; i <= k; i++) { p = order[i]
       printf "  %-18s %-7s %4d / %-4d %d cores, %d GB%s\n", p, lim(q[p]), idle[p], tot[p], cores[p], mem[p], gpu[p] } }'
 squeue -u "$USER" -h -o %T | sort | uniq -c | awk '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { print s ? s : "none" }'
-R
+EOF
+
+# What cannot be measured about an ASC cluster.
+asc_header() { # <cluster>
+  local login="login nodes are shared: compile and copy there, run real work as Slurm jobs" o=VSC5
+  case $1 in
+    VSC[45]) [ "$1" = VSC5 ] && o=VSC4
+      printf '%-8s ssh %sB (user samuelb, project p72144) or ssh %s (user samuel, project p71998) on hclm; elsewhere ssh hclm ssh %sB\n' "$1" "$1" "$1" "$1"
+      printf '         /home shared with %s per account · big data in /gpfs/data/fs72144/samuelb · billing these projects is fine\n         %s\n' "$o" "$login" ;;
+    MUSICA) printf '%s\n' "MUSICA   ssh MUSICA (Vienna, user sb69466) on hclm; elsewhere ssh hclm ssh MUSICA · billing is fine" \
+      "         Slurm is on PATH only in login shells: ssh MUSICA bash -lc '…'" "         $login" ;;
+    MUSICA-LNZ) echo "MUSICA-LNZ  Linz: its own Slurm cluster; reach and use it like MUSICA" ;;
+    MUSICA-INN) echo "MUSICA-INN  Innsbruck: its own Slurm cluster; reach and use it like MUSICA" ;;
+  esac
+}
+
+# Runs on hclm (also every 10 min from cron there, to heal dropped connections).
+# The ASC clusters need 2FA, so only the user can log in: go through their SSH
+# masters there. Reconnect only without prompting: MUSICA with the user's daily
+# step certificate, VSC with the OTP VSC caches for ~12 h after the user's last
+# 2FA, and stop after one refusal (failed logins could get hclm blocked).
+IFS= read -r -d '' asc <<'EOF'
+export LC_ALL=C
 step_login='step ssh certificate sb69466 ~/.ssh/asc --context asc --console --no-password --insecure --no-agent --force'
 cert_valid() { # the user's daily MUSICA step certificate, ~/.ssh/asc-cert.pub, has not expired
   ssh-keygen -L -f ~/.ssh/asc-cert.pub 2>/dev/null | awk -v now="$(date +%FT%T)" '/Valid: from/ { ok = now < $5 } END { exit !ok }'
 }
 mkdir -p ~/.cache/fleet
-query() { # <header> <host>...: partitions from the first connected host, jobs from each
+query() { # <cluster> <host>...: partitions from the first connected host, jobs from each
   local first=1 h out d e why jobs='' errs=''
-  printf '%s\n' "$1"
+  asc_header "$1"
   for h in "${@:2}"; do
     d=~/.cache/fleet/$h.denied e=~/.cache/fleet/$h.err
     # One login attempt at a time per host (cron and agents run fleet at once),
@@ -233,23 +249,32 @@ query() { # <header> <host>...: partitions from the first connected host, jobs f
   [ -z "$jobs" ] || printf '  %-9s %s\n' "your jobs" "$jobs"
   printf '%s\n' "$errs"
 }
-login="login nodes are shared: compile and copy there, run real work as Slurm jobs"
-vsc() { # <cluster> <the other VSC>
-  printf '%-8s ssh %sB (user samuelb, project p72144) or ssh %s (user samuel, project p71998) on hclm; elsewhere ssh hclm ssh %sB\n' "$1" "$1" "$1" "$1"
-  printf '         /home shared with %s per account · big data in /gpfs/data/fs72144/samuelb · billing these projects is fine\n         %s' "$2" "$login"
-}
-exec 3< <(query "$(vsc VSC5 VSC4)" VSC5B VSC5) 4< <(query "$(vsc VSC4 VSC5)" VSC4B VSC4) \
-  5< <(query "MUSICA   ssh MUSICA (Vienna, user sb69466) on hclm; elsewhere ssh hclm ssh MUSICA · billing is fine
-         Slurm is on PATH only in login shells: ssh MUSICA bash -lc '…'
-         $login" MUSICA) \
-  6< <(query "MUSICA-LNZ  Linz: its own Slurm cluster; reach and use it like MUSICA" MUSICA-LNZ) \
-  7< <(query "MUSICA-INN  Innsbruck: its own Slurm cluster; reach and use it like MUSICA" MUSICA-INN)
+exec 3< <(query VSC5 VSC5B VSC5) 4< <(query VSC4 VSC4B VSC4) 5< <(query MUSICA MUSICA) \
+  6< <(query MUSICA-LNZ MUSICA-LNZ) 7< <(query MUSICA-INN MUSICA-INN)
 cat <&3; cat <&4; cat <&5; cat <&6; cat <&7
 EOF
+
+# On an ASC login node nothing else is reachable (only hclm holds connections
+# to the clusters), so show this cluster alone.
+c=
+if [ "$(uname -s)" = Linux ]; then case $(uname -n) in kauch01 | ftuw | master.cluster) ;; *)
+  case $(bash -lc 'scontrol show config' 2>/dev/null | awk '/^ClusterName/ { print $3 }') in
+    vsc5) c=VSC5 ;; vsc4) c=VSC4 ;; vie-musica) c=MUSICA ;; lnz-musica) c=MUSICA-LNZ ;; inn-musica) c=MUSICA-INN ;;
+  esac ;;
+esac; fi
+if [ -n "$c" ]; then
+  printf 'fleet, %s, on %s.\n\n' "$(date '+%a %H:%M')" "$c"
+  asc_header "$c" | sed '1s/$/   <- you are here/'
+  out=$(bash -l -s -- 1 <<<"$remote" 2>/dev/null)
+  sed '$d' <<<"$out"; printf '  %-9s %s (user %s)\n\n' "your jobs" "${out##*$'\n'}" "$USER"
+  echo "From here you can use only $c: kauch, frank, hclm and the other clusters are reachable only from hclm (ask the user, or an agent there)."
+  exit
+fi
 
 printf 'fleet, %s. Caps and usage count everything of user samuel on a host: all agents, jobs and CI runners.\n' "$(date '+%a %H:%M')"
 printf 'usable = what you may still start there now: free cores and RAM, less 10%% of RAM kept for others, within your cap.\n\n'
 [ "$(uname -s)" = Darwin ] && printf '%-8s this laptop · it sleeps: never leave long-running work on it   <- you are here\n\n' mac
 # Query all hosts at once (SSH round trips add up from far away), print in order.
-exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$desktop$cluster") 6< <(on hclm master.cluster "$asc")
+exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$desktop$cluster") \
+  6< <(on hclm master.cluster "$(declare -p remote; declare -f asc_header)"$'\n'"$asc")
 cat <&3; cat <&4; cat <&5; cat <&6
