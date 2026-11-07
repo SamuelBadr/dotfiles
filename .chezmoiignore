@@ -5,9 +5,11 @@
 # source copy so `brew bundle add/remove` edit it in place; never deploy to ~.
 Brewfile
 
-# Offline regression checks stay in the source repo.
+# Offline regression checks and repo docs stay in the source repo.
 tests
 tests/**
+docs
+docs/**
 
 # Julia: global env Project.toml/Manifest.toml are machine-local churn
 # (startup.jl config is still tracked).
