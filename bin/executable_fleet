@@ -6,7 +6,7 @@
 # fleet hold <host> <hours> <reason...> / fleet release <host>: reserve a
 # desktop or the hclm login node for quiet work such as benchmarks.
 set -u
-export LC_ALL=C
+export LC_ALL=C USER="${USER:-$(id -un)}"  # cron sets no USER
 tilde='~'  # a literal ~ in the replacement is expanded again by bash 5
 me="$(uname -n):${PWD/#$HOME/$tilde}"  # who holds a host: host:cwd of the agent
 
