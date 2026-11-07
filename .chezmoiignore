@@ -73,6 +73,12 @@ bin/pi
 .config/systemd/user/pi.slice
 {{- end }}
 
+# Self-hosted GitHub Actions runners as user services (`fleet hold` pauses
+# them) only where [data] actionsRunners = true.
+{{- if not .actionsRunners }}
+.config/systemd/user/actions-runner@.service
+{{- end }}
+
 # systemd user units (the daily skills-sync timer) only on Linux.
 {{- if ne .chezmoi.os "linux" }}
 .config/systemd

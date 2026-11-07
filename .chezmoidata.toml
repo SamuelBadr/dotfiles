@@ -11,6 +11,7 @@
 # Optional per-machine guards. Override these in ~/.config/chezmoi/chezmoi.toml
 # with [data] / [data.git] entries when needed.
 hpcLoginNode = false
+actionsRunners = false  # GitHub Actions runner user unit (kauch, frank)
 
 [git]
   signing = false

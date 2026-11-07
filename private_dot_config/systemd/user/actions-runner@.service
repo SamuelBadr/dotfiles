@@ -1,0 +1,16 @@
+[Unit]
+Description=GitHub Actions runner %i (tuwien-cms/ParquetIR.jl)
+After=network-online.target
+
+[Service]
+Environment=GIT_CONFIG_GLOBAL=%h/.gitconfig.runner
+WorkingDirectory=%h/actions-runners/%i
+ExecStart=%h/actions-runners/%i/run.sh
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=5min
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

@@ -138,6 +138,20 @@ pi guard (`~/bin/pi` wrapper, shared `pi.slice` memory cap):
 hpcLoginNode = true
 ```
 
+### GitHub Actions Runner Host
+
+Machines that run the self-hosted runners of `tuwien-cms/ParquetIR.jl` as user
+services (kauch, frank) opt into the `actions-runner@.service` unit, one
+instance per `~/actions-runners/<n>`. Registering a runner (`config.sh`) and
+`systemctl --user enable --now actions-runner@<n>` stay manual; `fleet hold`
+pauses the idle ones.
+
+```toml
+# ~/.config/chezmoi/chezmoi.toml
+[data]
+actionsRunners = true
+```
+
 ### Workstation (Full)
 
 ```toml

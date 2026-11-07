@@ -1,32 +1,57 @@
 #!/usr/bin/env bash
-# Free compute across the fleet: free cores and RAM on the
-# desktops and the hclm login node plus your running jobs there, what is left
-# of your cap where one applies, idle cores per partition on the hclm Slurm
-# cluster. Physical cores only: hyperthreads are not counted.
+# fleet: the machines you can use, how to reach them, their limits, and what is
+# usable on them right now. Physical cores only: hyperthreads are not counted.
+# Caps count everything of user samuel on a host: all agents, jobs and CI
+# runners combined.
 # fleet hold <host> <hours> <reason...> / fleet release <host>: reserve a
 # desktop or the hclm login node for quiet work such as benchmarks.
 set -u
+export LC_ALL=C
+tilde='~'  # a literal ~ in the replacement is expanded again by bash 5
+me="$(uname -n):${PWD/#$HOME/$tilde}"  # who holds a host: host:cwd of the agent
 
-# Run <script> on <ssh-alias>, locally if this machine is <nodename>.
+# Run <script> on <ssh-alias>, locally if this machine is <nodename>, with
+# arguments <ssh-alias> <1 if it runs here, else 0> <me>.
 on() { # <ssh-alias> <nodename> <script>
-  if [ "$(uname -n)" = "$2" ]; then bash -s -- "$1" <<<"$3"
-  else ssh -o BatchMode=yes -o ConnectTimeout=5 "$1" bash -s -- "$1" <<<"$3"; fi ||
-    echo "$1: unreachable"
+  if [ "$(uname -n)" = "$2" ]; then bash -s -- "$1" 1 "$me" <<<"$3"
+  else ssh -o BatchMode=yes -o ConnectTimeout=5 "$1" "bash -s -- $(printf '%q ' "$1" 0 "$me")" <<<"$3"; fi ||
+    printf '%-8s UNREACHABLE: ssh %s failed\n\n' "$1" "$1"
 }
 
 # Holds: an agent that needs a quiet machine (benchmarks) holds it, and fleet
 # shows the hold to every other agent until it is released or expires. The
 # hold lives on that machine in ~/.cache/fleet/hold; its owner is host:cwd.
+# A hold also pauses the idle GitHub Actions runners there (user services
+# actions-runner@<n>, one per ~/actions-runners/<n>); a transient timer starts
+# them again when it expires, so a forgotten release blocks CI only that long.
 IFS= read -r -d '' hold <<'EOF'
+export LC_ALL=C
 f=~/.cache/fleet/hold; mkdir -p ~/.cache/fleet
 now=$(date +%s); IFS='|' read -r exp owner reason 2>/dev/null < "$f" || exp=0
 if [ "$exp" -gt "$now" ] && [ "$owner" != "$2" ]; then
   echo "fleet: $(uname -n) is held by $owner until $(date -d @"$exp" '+%a %H:%M'): $reason" >&2; exit 1; fi
-if [ "$1" = release ]; then rm -f "$f"; echo "$(uname -n) released"; exit; fi
+runners=
+for d in ~/actions-runners/*/; do
+  i=$(basename "$d"); [ -d "$d" ] && systemctl --user -q is-enabled "actions-runner@$i" 2>/dev/null && runners="$runners $i"
+done
+unhold() { systemctl --user stop fleet-unhold.timer 2>/dev/null; systemctl --user reset-failed fleet-unhold.service 2>/dev/null; }
+if [ "$1" = release ]; then
+  rm -f "$f"; unhold; for i in $runners; do systemctl --user start "actions-runner@$i"; done
+  echo "$(uname -n) released${runners:+; CI runners started}"; exit
+fi
 exp=$(awk -v n="$now" -v h="$3" 'BEGIN { if (!(h + 0 > 0)) exit 1; printf "%d", n + h * 3600 }') ||
   { echo "fleet: hours must be a positive number" >&2; exit 2; }
 printf '%s|%s|%s\n' "$exp" "$2" "${*:4}" > "$f"
 echo "$(uname -n) held until $(date -d @"$exp" '+%a %H:%M')"
+[ -n "$runners" ] || exit 0
+unhold
+for i in $runners; do
+  w=$(pgrep -u "$USER" -f "actions-runners/$i/bin/Runner.Worker" | head -1)
+  # Stopping a busy runner would cancel its CI job.
+  if [ -n "$w" ]; then echo "CI runner $i is running a job ($(( $(ps -o etimes= -p "$w") / 60 )) min so far): rerun this hold when it is done to pause it"
+  else systemctl --user stop "actions-runner@$i" && echo "CI runner $i paused until the hold ends"; fi
+done
+systemd-run --user -q --unit=fleet-unhold --on-active=$(( exp - now )) systemctl --user start $(printf 'actions-runner@%s ' $runners)
 EOF
 
 if [ "${1:-}" = hold ] || [ "${1:-}" = release ]; then
@@ -34,23 +59,48 @@ if [ "${1:-}" = hold ] || [ "${1:-}" = release ]; then
     { echo "usage: fleet hold <host> <hours> <reason...>   |   fleet release <host>" >&2; exit 2; }
   case $2 in kauch) node=kauch01 ;; frank) node=ftuw ;; hclm) node=master.cluster ;;
     *) echo "fleet: hold works on kauch, frank and hclm (its login node)" >&2; exit 2 ;; esac
-  tilde='~'  # a literal ~ in the replacement is expanded again by bash 5
-  args=("$1" "$(uname -n):${PWD/#$HOME/$tilde}" "${@:3}")
+  args=("$1" "$me" "${@:3}")
   if [ "$(uname -n)" = "$node" ]; then bash -s -- "${args[@]}" <<<"$hold"
   else ssh -o BatchMode=yes -o ConnectTimeout=5 "$2" "bash -s -- $(printf '%q ' "${args[@]}")" <<<"$hold"; fi
   exit
 fi
 
 IFS= read -r -d '' desktop <<'EOF'
-read -r load _ < /proc/loadavg
-# Agreed caps on everything of yours on the host combined (cores, GB; 0 = none).
-case $1 in frank) cap=8 capmem=0 ;; hclm) cap=8 capmem=64 label="hclm login node" ;; *) cap=0 ;; esac
+export LC_ALL=C
+# What cannot be measured, and the agreed caps on everything of user samuel on
+# the host combined (cores, GB; 0 = none).
+cap=0 capmem=0 note=
+case $1 in
+  kauch) about="shared with other people; runs your GitHub Actions runners"
+    [ "$2" = 1 ] && note="herdr --machine hclm|frank reaches the agents there" ;;
+  frank) about="desktop with a local user; runs your GitHub Actions runners" cap=8 ;;
+  hclm) about="login node, shared by all cluster users" cap=8 capmem=64 ;;
+esac
 cores=$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l)
-awk -v h="${label:-$1}" -v n="$cores" -v l="$load" '/^MemAvailable:/ {
-  f = n - l; if (f < 0) f = 0
-  printf "%-6s %2d cores, load %4.1f: ~%d free; %d GB RAM available\n", h, n, l, f, $2 / 1048576 }' /proc/meminfo
-IFS='|' read -r exp owner reason 2>/dev/null < ~/.cache/fleet/hold && [ "$exp" -gt "$(date +%s)" ] &&
-  echo "       HELD by $owner until $(date -d @"$exp" '+%a %H:%M'): $reason. Start nothing here unless you are its holder."
+read -r load _ < /proc/loadavg
+read -r total avail < <(awk '/^MemTotal:/ { t = $2 } /^MemAvailable:/ { a = $2 } END { printf "%.0f %.0f\n", t / 1048576, a / 1048576 }' /proc/meminfo)
+gpu=$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits 2>/dev/null |
+  awk -F', ' '{ sub(/^NVIDIA (GeForce )?/, "", $1); printf ", %s (%.0f GB)", $1, $2 / 1024 }')
+here=; [ "$2" = 1 ] && here="   <- you are here"
+printf '%-8s ssh %s · %d cores, %d GB RAM%s · %s%s\n' "$1" "$1" "$cores" "$total" "$gpu" "$about" "$here"
+free=$(awk -v n="$cores" -v l="$load" 'BEGIN { f = n - l; printf "%d", f < 0 ? 0 : f }')
+printf '  %-9s ~%d cores (load %.1f), %d GB RAM\n' free "$free" "$load" "$avail"
+held=
+if IFS='|' read -r exp owner reason 2>/dev/null < ~/.cache/fleet/hold && [ "$exp" -gt "$(date +%s)" ]; then
+  until=$(date -d @"$exp" '+%a %H:%M')
+  if [ "$owner" = "$3" ]; then printf '  %-9s by you (%s) until %s: %s\n' held "$owner" "$until" "$reason"
+  else held=1; printf '  %-9s by %s until %s: %s. Start nothing here unless you are its holder.\n' HELD "$owner" "$until" "$reason"; fi
+fi
+r=
+for d in ~/actions-runners/*/; do
+  [ -d "$d" ] || continue; i=$(basename "$d")
+  w=$(pgrep -u "$USER" -f "actions-runners/$i/bin/Runner.Worker" | head -1)
+  if [ -n "$w" ]; then s="running a job ($(( $(ps -o etimes= -p "$w") / 60 )) min)"
+  elif systemctl --user -q is-active "actions-runner@$i"; then s=idle
+  else s=stopped; fi
+  r="${r:+$r · }$i: $s"
+done
+[ -z "$r" ] || printf '  %-9s %s\n' runners "$r"
 # CPU use of your processes over one second (ps %CPU is a lifetime average, so
 # a long-idle process that just got busy would read near zero).
 ticks() { # <pid> <utime+stime> per process; fields after the ")" ending comm
@@ -67,34 +117,51 @@ procs=$(ps -u "$USER" -o pid=,rss=,etimes=,args= | T0=$T0 T1=$T1 awk -v hz="$(ge
 # its memory (less inactive page cache) if that exceeds the RSS sum.
 slice=/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/pi.slice
 slicemem=$(awk '$1 == "inactive_file" { print c - $2 }' c="$(cat "$slice/memory.current" 2>/dev/null)" "$slice/memory.stat" 2>/dev/null)
-[ "$cap" -gt 0 ] && awk -v c="$cap" -v m="$capmem" -v sm="${slicemem:-0}" '
-  { cpu += $2; rss += $3 }
-  END { rss /= 1048576; sm /= 1073741824; if (sm > rss) rss = sm; left = c - cpu; if (left < 0) left = 0
-    printf "       your cap %d cores%s; you use %.1f cores, %d GB: ~%.0f cores", c, (m ? sprintf(", %d GB", m) : ""), cpu, rss, left
-    if (m) printf ", %d GB", (m > rss ? m - rss : 0)
-    print " left for you" }' <<<"$procs"
+read -r cpu rss < <(awk -v sm="${slicemem:-0}" '{ cpu += $2; rss += $3 }
+  END { rss /= 1048576; sm /= 1073741824; printf "%.1f %.0f\n", cpu, (sm > rss ? sm : rss) }' <<<"$procs")
+[ "$capmem" -gt 0 ] && capmem_=", $capmem GB" rss_=", $rss GB" kill="; agents past $capmem GB get killed, possibly you"
+[ "$cap" -gt 0 ] && printf '  %-9s %d cores%s in total; in use %s cores%s%s\n' cap "$cap" "${capmem_:-}" "$cpu" "${rss_:-}" "${kill:-}"
 # Your jobs: processes using >= half a core for >= 10 s, grouped by working directory.
 awk '$2 >= 0.5 && $4 >= 10 { $3 = ""; print }' <<<"$procs" |
-  while read -r pid cpu secs args; do
-    printf '%s\t%s\t%s\t%s\n' "$(readlink "/proc/$pid/cwd" || echo '?')" "$cpu" "$secs" "$args"
+  while read -r pid pcpu secs args; do
+    printf '%s\t%s\t%s\t%s\n' "$(readlink "/proc/$pid/cwd" || echo '?')" "$pcpu" "$secs" "$args"
   done | awk -F'\t' -v home="$HOME" '
   function dur(s) { return s >= 86400 ? int(s / 86400) "d" : s >= 3600 ? int(s / 3600) "h" sprintf("%02d", int(s % 3600 / 60)) : int(s / 60) "m" }
   { d = $1; if (index(d, home) == 1) d = "~" substr(d, length(home) + 1)
     c[d] += $2; n[d]++; if ($3 > t[d]) t[d] = $3
     if ($2 > top[d]) { top[d] = $2; cmd[d] = $4; sub(/^[^ ]*\//, "", cmd[d]) } }
-  END { for (d in c) printf "%9.1f cores %5s  %.60s%s  (%s)\n", c[d], dur(t[d]), cmd[d], (n[d] > 1 ? " +" (n[d] - 1) " more" : ""), d }' |
-  sort -rn
+  END { for (d in c) printf "%4.1f cores  %5s  %.60s%s  (%s)\n", c[d], dur(t[d]), cmd[d], (n[d] > 1 ? " +" (n[d] - 1) " more" : ""), d }' |
+  sort -rn | awk '{ printf "  %-9s %s\n", NR == 1 ? "running" : "", $0 }'
+awk -v n="$free" -v a="$avail" -v t="$total" -v c="$cap" -v m="$capmem" -v cpu="$cpu" -v rss="$rss" -v held="$held" 'BEGIN {
+  if (held) { print "  usable    nothing: held by someone else"; exit }
+  uc = n; if (c && c - cpu < uc) uc = c - cpu
+  um = a - 0.1 * t; if (m && m - rss < um) um = m - rss
+  printf "  %-9s ~%d cores, %d GB RAM\n", "usable", uc < 0 ? 0 : uc, um < 0 ? 0 : um }'
+[ -z "$note" ] || printf '  %-9s %s\n' note "$note"
+echo
 EOF
 
 IFS= read -r -d '' cluster <<'EOF'
-sinfo -h -N -p short,medium,long -O 'Partition:12,CPUsState:20,AllocMem:12,Memory:12,Threads:6' | awk '
-  { p = $1; sub(/\*$/, "", p); split($2, c, "/"); i = c[2] / $5
-    if (!(p in idle)) order[++k] = p
+echo "hclm Slurm  sbatch on hclm · big data in /mnt/storage/$USER; /home and /mnt/storage are visible on the nodes · never use partition cqs"
+echo "            at most 2 nodes at a time for user samuel; bigger work goes to VSC or MUSICA"
+sinfo -h -N -p short,medium,long -O 'Partition:12,CPUsState:20,AllocMem:12,Memory:12,Threads:6,Time:14' | awk '
+  function lim(t,  a, d, h) { if (t == "infinite") return "none"
+    d = 0; if (split(t, a, "-") == 2) { d = a[1]; t = a[2] }; split(t, a, ":"); h = a[1] + 0
+    return d ? d (d > 1 ? " days" : " day") (h ? " " h " h" : "") : h ? h " h" : a[2] + 0 " min" }
+  { p = $1; if (sub(/\*$/, "", p)) def[p] = 1; split($2, c, "/"); i = c[2] / $5
+    if (!(p in idle)) { order[++k] = p; tl[p] = lim($6) }
     idle[p] += i; if (i > big[p]) { big[p] = i; mem[p] = ($4 - $3) / 1024 } }
-  END { for (i = 1; i <= k; i++) { p = order[i]
-    printf "hclm   %-6s %4d idle cores; best node: %d cores, %d GB unallocated\n", p, idle[p], big[p], mem[p] } }'
-squeue -u "$USER" -h -o %T | sort | uniq -c |
-  awk '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { print "hclm   your jobs: " (s ? s : "none") }'
+  END { printf "  %-9s %-7s %10s  %s\n", "partition", "limit", "idle cores", "largest free node"
+    note["long"] = "--test-only start times unreliable: many jobs never end"
+    for (i = 1; i <= k; i++) { p = order[i]
+      s = sprintf("  %-9s %-7s %10d  %-18s %s", p, tl[p], idle[p], big[p] ? sprintf("%d cores, %d GB", big[p], mem[p]) : "-", def[p] ? "default" : note[p])
+      sub(/ +$/, "", s); print s } }'
+jobs=$(squeue -u "$USER" -h -o %T | sort | uniq -c | awk '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { print s ? s : "none" }')
+nodes=$(squeue -u "$USER" -h -t R -o %N | xargs -r scontrol show hostnames | sort -u | wc -l)
+printf '  %-9s %s; %d of your 2 nodes in use\n' "your jobs" "$jobs" "$nodes"
+df -h --output=target,avail,pcent /home /mnt/storage /mnt/scratch |
+  awk 'NR > 1 { s = s (s ? " · " : "") $1 " " $2 " free (" $3 " used)" } END { printf "  %-9s %s\n", "disk", s }'
+echo
 EOF
 
 # Runs on hclm (also every 10 min from cron there, to heal dropped connections).
@@ -103,23 +170,33 @@ EOF
 # step certificate, VSC with the OTP VSC caches for ~12 h after the user's last
 # 2FA, and stop after one refusal (failed logins could get hclm blocked).
 IFS= read -r -d '' asc <<'EOF'
+export LC_ALL=C
 IFS= read -r -d '' remote <<'R'
-[ "$1" = 1 ] && sinfo -h -o '%R|%F|%c|%Z|%m|%G' | grep -vE '_jupyter|musica_login' | awk -F'|' '
+export LC_ALL=C
+# Partitions (from the first connected host of a cluster only), with the job
+# time limit of the QOS named like the partition; then your jobs.
+[ "$1" = 1 ] && { sacctmgr -n -P show qos format=name,maxwall | sed 's/^/Q|/'; sinfo -h -o '%R|%F|%c|%Z|%m|%G'; } | awk -F'|' '
+  function lim(t,  a, d, h) { if (t == "") return "-"
+    d = 0; if (split(t, a, "-") == 2) { d = a[1]; t = a[2] }; split(t, a, ":"); h = a[1] + 0
+    return d ? d (d > 1 ? " days" : " day") (h ? " " h " h" : "") : h ? h " h" : a[2] + 0 " min" }
+  $1 == "Q" { q[$2] = $3; next }
+  $1 ~ /_jupyter|_devel|_training|musica_login/ { next }
   { split($2, n, "/"); p = $1; if (!(p in tot)) order[++k] = p
     idle[p] += n[2]; tot[p] += n[4]; cores[p] = $3 / $4; mem[p] = int($5 / 1000)
-    if (match($6, /gpu:[^:]+:[0-9]+/)) gpu[p] = ", " substr($6, RSTART + 4, RLENGTH - 4) }
-  END { for (i = 1; i <= k; i++) { p = order[i]
-    printf "%-6s %-18s %4d/%-4d nodes idle (%d cores, %d GB%s)\n", c, p, idle[p], tot[p], cores[p], mem[p], gpu[p] } }' c="$2"
-squeue -u "$USER" -h -o %T | sort | uniq -c |
-  awk -v h="$3" '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { printf "%-6s your jobs: %s\n", h, (s ? s : "none") }'
+    if (match($6, /gpu:[^:]+:[0-9]+/)) { split(substr($6, RSTART, RLENGTH), g, ":"); gpu[p] = ", " g[3] "x " toupper(g[2]) } }
+  END { printf "  %-18s %-7s %-11s %s\n", "partition", "limit", "idle nodes", "per node"
+    for (i = 1; i <= k; i++) { p = order[i]
+      printf "  %-18s %-7s %4d / %-4d %d cores, %d GB%s\n", p, lim(q[p]), idle[p], tot[p], cores[p], mem[p], gpu[p] } }'
+squeue -u "$USER" -h -o %T | sort | uniq -c | awk '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { print s ? s : "none" }'
 R
 step_login='step ssh certificate sb69466 ~/.ssh/asc --context asc --console --no-password --insecure --no-agent --force'
 cert_valid() { # the user's daily MUSICA step certificate, ~/.ssh/asc-cert.pub, has not expired
   ssh-keygen -L -f ~/.ssh/asc-cert.pub 2>/dev/null | awk -v now="$(date +%FT%T)" '/Valid: from/ { ok = now < $5 } END { exit !ok }'
 }
 mkdir -p ~/.cache/fleet
-query() { # <cluster label> <host>...: partitions from the first connected host, jobs from each
-  local first=1 h out d e why
+query() { # <header> <host>...: partitions from the first connected host, jobs from each
+  local first=1 h out d e why jobs='' errs=''
+  printf '%s\n' "$1"
   for h in "${@:2}"; do
     d=~/.cache/fleet/$h.denied e=~/.cache/fleet/$h.err
     # One login attempt at a time per host (cron and agents run fleet at once),
@@ -141,22 +218,38 @@ query() { # <cluster label> <host>...: partitions from the first connected host,
     ) 9>~/.cache/fleet/"$h".lock
     if ssh -O check "$h" </dev/null 2>/dev/null; then rm -f "$d"
     else
-      [ -e "$d" ] && why="login refused, see $e; " || why=
-      if [[ $h = MUSICA* ]]; then echo "$1: $h not connected (${why}user, on hclm: $step_login)"
-      else echo "$1: $h not connected (${why}user: ssh -fN $h on hclm)"; fi
+      [ -e "$d" ] && why=" (login refused, see $e)" || why=
+      if [[ $h = MUSICA* ]]; then errs+="  NOT CONNECTED  $h$why: ask the user to run on hclm: $step_login"$'\n'
+      else errs+="  NOT CONNECTED  $h$why: ask the user to run on hclm: ssh -fN $h"$'\n'; fi
       continue
     fi
     # ProxyCommand=false: if the master refuses, fail instead of falling back to a login.
-    if out=$(timeout 30 ssh -o BatchMode=yes -o ProxyCommand=false "$h" bash -l -s -- "$first" "$1" "$h" <<<"$remote" 2>/dev/null); then
-      printf '%s\n' "$out"; first=0
-    elif [ $? = 124 ]; then echo "$1: $h timed out after 30 s (Slurm slow? the master is up)"
-    else echo "$1: $h connection broken (user: ssh -O exit $h; ssh -fN $h on hclm)"; fi
+    if out=$(timeout 30 ssh -o BatchMode=yes -o ProxyCommand=false "$h" bash -l -s -- "$first" <<<"$remote" 2>/dev/null); then
+      [ "$first" = 1 ] && sed '$d' <<<"$out"; first=0
+      jobs+="${jobs:+ · }$h ${out##*$'\n'}"
+    elif [ $? = 124 ]; then errs+="  TIMED OUT  $h: no answer in 30 s (Slurm slow? the connection is up)"$'\n'
+    else errs+="  BROKEN  $h: connection broken; ask the user to run on hclm: ssh -O exit $h; ssh -fN $h"$'\n'; fi
   done
+  [ -z "$jobs" ] || printf '  %-9s %s\n' "your jobs" "$jobs"
+  printf '%s\n' "$errs"
 }
-exec 3< <(query VSC5 VSC5B VSC5) 4< <(query VSC4 VSC4B VSC4) 5< <(query MUS-V MUSICA) 6< <(query MUS-L MUSICA-LNZ) 7< <(query MUS-I MUSICA-INN)
+login="login nodes are shared: compile and copy there, run real work as Slurm jobs"
+vsc() { # <cluster> <the other VSC>
+  printf '%-8s ssh %sB (user samuelb, project p72144) or ssh %s (user samuel, project p71998) on hclm; elsewhere ssh hclm ssh %sB\n' "$1" "$1" "$1" "$1"
+  printf '         /home shared with %s per account · big data in /gpfs/data/fs72144/samuelb · billing these projects is fine\n         %s' "$2" "$login"
+}
+exec 3< <(query "$(vsc VSC5 VSC4)" VSC5B VSC5) 4< <(query "$(vsc VSC4 VSC5)" VSC4B VSC4) \
+  5< <(query "MUSICA   ssh MUSICA (Vienna, user sb69466) on hclm; elsewhere ssh hclm ssh MUSICA · billing is fine
+         Slurm is on PATH only in login shells: ssh MUSICA bash -lc '…'
+         $login" MUSICA) \
+  6< <(query "MUSICA-LNZ  Linz: its own Slurm cluster; reach and use it like MUSICA" MUSICA-LNZ) \
+  7< <(query "MUSICA-INN  Innsbruck: its own Slurm cluster; reach and use it like MUSICA" MUSICA-INN)
 cat <&3; cat <&4; cat <&5; cat <&6; cat <&7
 EOF
 
+printf 'fleet, %s. Caps and usage count everything of user samuel on a host: all agents, jobs and CI runners.\n' "$(date '+%a %H:%M')"
+printf 'usable = what you may still start there now: free cores and RAM, less 10%% of RAM kept for others, within your cap.\n\n'
+[ "$(uname -s)" = Darwin ] && printf '%-8s this laptop · it sleeps: never leave long-running work on it   <- you are here\n\n' mac
 # Query all hosts at once (SSH round trips add up from far away), print in order.
 exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$desktop$cluster") 6< <(on hclm master.cluster "$asc")
 cat <&3; cat <&4; cat <&5; cat <&6
