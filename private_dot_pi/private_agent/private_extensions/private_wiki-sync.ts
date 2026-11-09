@@ -1,6 +1,7 @@
 // Keeps the research wiki (~/.llm-wiki, maintained by pi-llm-wiki) in sync across
 // machines: runs ~/bin/wiki-sync when a session starts, after every settled turn
-// and at shutdown. pi-llm-wiki searches a generated registry that only local
+// and at shutdown (wiki-sync only goes to GitHub when there is something to push
+// or the last pull is a few minutes old, so these calls are cheap). pi-llm-wiki searches a generated registry that only local
 // writes refresh, so after a pull brings pages from another machine this
 // rebuilds it, otherwise recall would miss them.
 import { execFile } from "node:child_process";

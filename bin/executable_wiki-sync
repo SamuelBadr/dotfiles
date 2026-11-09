@@ -2,12 +2,24 @@
 # Sync the research wiki (~/.llm-wiki) with GitHub: commit local changes, pull
 # with rebase, push (all done by ~/bin/git-sync). Runs from pi's wiki-sync
 # extension on every machine, and every 2 minutes from launchd on the Mac.
-# Concurrent runs on one machine wait for each other instead of colliding on
-# git's index lock. Silent on success; prints git-sync's output on failure.
+# It only goes to GitHub when there is something to push or the last pull is
+# older than WIKI_SYNC_PULL_MINUTES (default 5); otherwise it exits after a
+# local check. Concurrent runs on one machine wait for each other instead of
+# colliding on git's index lock. Silent on success; prints git-sync's output
+# on failure.
 set -uo pipefail
 
 repo="$HOME/.llm-wiki"
 [ -d "$repo/.git" ] || exit 0  # wiki not cloned on this machine
+cd "$repo" || exit 1
+
+# every fetch rewrites FETCH_HEAD, so its age is the time since the last pull
+pull_minutes="${WIKI_SYNC_PULL_MINUTES:-5}"
+if [ -z "$(git status --porcelain)" ] &&
+  [ "$(git rev-list --count '@{upstream}..HEAD' 2>/dev/null)" = 0 ] &&
+  [ -n "$(find .git/FETCH_HEAD -mmin "-$pull_minutes" 2>/dev/null)" ]; then
+  exit 0
+fi
 
 lock="$repo/.git/wiki-sync.lock"
 acquired=false
@@ -23,7 +35,6 @@ if ! $acquired; then
 fi
 trap 'rmdir "$lock"' EXIT
 
-cd "$repo" || exit 1
 if ! output=$("$HOME/bin/git-sync" -n -s 2>&1); then
   echo "$output" >&2
   exit 1
