@@ -14,12 +14,21 @@
 - Spawn subagents only when the user explicitly asks for them. Never on your own judgment, however large or risky the task: do the work yourself. This includes workflows, chains and scheduled runs.
 - Omit `model` when launching unless there's a specific reason; per-role models are configured in settings.
 
+## Readable tool calls
+
+I read your tool calls as they run, so write them for a human reader:
+
+- Prefer the dedicated tools (read, edit, write) over `cat`, `sed -i`, heredocs and the like.
+- One step per line, not long `;`/`&&` chains. Clear variable names, long option names when the short ones are obscure, and a short `#` comment for any step whose purpose isn't obvious.
+- No nested quoting or escaping puzzles. Anything longer than a few lines, or code in another language (`python -c`, `julia -e`), goes into a script file with a one-line header comment, which you then run.
+- Label multi-part output (`echo "== tests =="`) so each part is easy to find.
+
 ## Expensive commands
 
 - Prefer the smallest focused check; run full test suites, builds, benchmarks, etc. only when necessary.
 - Don't pipe expensive commands through `head`, `tail`, `grep`, etc. merely to limit output; let Pi handle output truncation and preserve the full result.
 - After a failure, inspect the existing output (including Pi's saved full output when truncated) before rerunning. Rerun only when new execution is actually needed.
-- To wait for running work (background jobs, CI, Slurm, remote runs, but not subagent runs, which wake you when they finish), poll in a loop: check every 15–30 s (Slurm queues: every few minutes), exit as soon as it finishes or fails, and cap the loop at the expected remaining time.
+- To wait for running work (background jobs, CI, Slurm, remote runs, but not subagent runs, which wake you when they finish), use one bash call whose shell loop checks every 15–30 s (Slurm queues: every few minutes) and exits as soon as the work finishes or fails, e.g. `timeout 1800 sh -c "while kill -0 $PID 2>/dev/null; do sleep 20; done"; tail log`. Set the `timeout` to the expected remaining time and the bash tool timeout a bit above it. A loop costs one turn however long it waits, so never use `sleep N; check` with N over 30 to save turns.
 
 ## Compute
 
