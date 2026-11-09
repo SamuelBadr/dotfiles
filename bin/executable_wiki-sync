@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Sync the research wiki (~/.llm-wiki) with GitHub: commit local changes, pull
+# with rebase, push (all done by ~/bin/git-sync). Runs from pi's wiki-sync
+# extension on every machine, and every 2 minutes from launchd on the Mac.
+# Concurrent runs on one machine wait for each other instead of colliding on
+# git's index lock. Silent on success; prints git-sync's output on failure.
+set -uo pipefail
+
+repo="$HOME/.llm-wiki"
+[ -d "$repo/.git" ] || exit 0  # wiki not cloned on this machine
+
+lock="$repo/.git/wiki-sync.lock"
+acquired=false
+for _ in $(seq 60); do
+  if mkdir "$lock" 2>/dev/null; then acquired=true; break; fi
+  # a lock older than 5 minutes is left over from a killed run
+  find "$lock" -maxdepth 0 -mmin +5 -exec rmdir {} + 2>/dev/null
+  sleep 1
+done
+if ! $acquired; then
+  echo "wiki-sync: another sync has held $lock for 60 s" >&2
+  exit 1
+fi
+trap 'rmdir "$lock"' EXIT
+
+cd "$repo" || exit 1
+if ! output=$("$HOME/bin/git-sync" -n -s 2>&1); then
+  echo "$output" >&2
+  exit 1
+fi

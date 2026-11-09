@@ -51,8 +51,17 @@
       ]
     },
     "npm:pi-tool-duration",
-    "npm:pi-better-render"
+    "npm:pi-better-render",
+    "npm:@zosmaai/pi-llm-wiki@0.12.5"
   ],
+  "llm-wiki": {
+    "customTypes": {
+      "derivation": "derivations",
+      "convention": "conventions",
+      "experiment": "experiments",
+      "note": "notes"
+    }
+  },
   "subagents": {
     "disableBuiltins": true,
     "agentOverrides": {
