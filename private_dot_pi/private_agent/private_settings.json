@@ -52,7 +52,8 @@
     },
     "npm:pi-tool-duration",
     "npm:pi-better-render",
-    "npm:@zosmaai/pi-llm-wiki@0.12.5"
+    "npm:@zosmaai/pi-llm-wiki@0.12.5",
+    "npm:pi-cached-compaction"
   ],
   "llm-wiki": {
     "customTypes": {
@@ -98,6 +99,7 @@
   "extensionChangelogVersions": {
     "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
     "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.87.0",
-    "{\"source\":\"npm:pi-tool-duration\",\"scope\":\"user\"}": "0.6.9"
+    "{\"source\":\"npm:pi-tool-duration\",\"scope\":\"user\"}": "0.6.9",
+    "{\"source\":\"npm:@zosmaai/pi-llm-wiki@0.12.5\",\"scope\":\"user\"}": "0.12.5"
   }
 }
