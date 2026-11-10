@@ -14,7 +14,8 @@ const run = promisify(execFile);
 const home = homedir();
 const repo = join(home, ".llm-wiki");
 const syncScript = join(home, "bin", "wiki-sync");
-// shortcut: calls pi-llm-wiki internals (version pinned in settings.json); recheck after upgrading it
+// shortcut: calls pi-llm-wiki internals (version pinned in settings.json); recheck after upgrading it,
+// and drop this once https://github.com/zosmaai/pi-llm-wiki/issues/339 offers a public rebuild
 const llmWikiLib = join(home, ".pi/agent/npm/node_modules/@zosmaai/pi-llm-wiki/extensions/llm-wiki/lib");
 
 // Syncs outlive turns and sessions, so they use node's execFile rather than pi.exec
