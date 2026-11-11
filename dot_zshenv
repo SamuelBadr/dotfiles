@@ -4,6 +4,10 @@ if [[ $OSTYPE == darwin* ]]; then
   path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
 fi
 
+# pi-better-render: Rex (libghostty) draws Kitty Unicode-placeholder images; its
+# default "direct" placements stay on screen after redraws and ghost on scroll.
+[[ $TERM_PROGRAM == rex ]] && export PI_BETTER_RENDER_IMAGES=placeholder
+
 # Login bash hands off to zsh with exec(2) (~/.bash_profile), which cannot carry
 # shell functions across, so the module system /etc/profile.d defined for bash is
 # gone by the time zsh runs. Re-create it from the same file; MODULEPATH itself
