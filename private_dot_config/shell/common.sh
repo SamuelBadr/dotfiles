@@ -74,6 +74,12 @@ alias pluto='julia -e "using Pluto; Pluto.run()"'
 # `chezmoi update`. Other edits to the file behave like any dotfile: re-add to
 # keep them. `pi update --all` never changes the packages list, so no sync.
 # ---------------------------------------------------------------------------
+# herdr-core and Rex terminals live in a systemd-user server whose DISPLAY/WAYLAND_DISPLAY
+# go stale once the desktop session ends (and may lack wl-copy), and clients attach
+# remotely without passing SSH_* through. Make pi copy via OSC 52 too, so selections
+# reach the attached client's clipboard.
+[ -n "${HC_TERMINAL_ID:-}${REX_SESSION:-}" ] && export PI_CLIPBOARD_OSC52=1
+
 pi() {
   command pi "$@"; local _s=$?
   case "${1:-}" in
