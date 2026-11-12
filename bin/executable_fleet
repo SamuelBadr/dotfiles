@@ -10,12 +10,23 @@ export LC_ALL=C USER="${USER:-$(id -un)}"  # cron sets no USER
 tilde='~'  # a literal ~ in the replacement is expanded again by bash 5
 me="$(uname -n):${PWD/#$HOME/$tilde}"  # who holds a host: host:cwd of the agent
 
+# kauch is the hub: from anywhere but kauch, frank and hclm (the laptop), every
+# other host is reached through it.
+case $(uname -n) in kauch01 | ftuw | master.cluster) hub= ;; *) hub=kauch ;; esac
+
+# Run <command> on <ssh-alias>, through the hub from the laptop; stdin passes through.
+sshto() { # <ssh-alias> <command> [ssh option...]
+  local cmd=(ssh -o BatchMode=yes -o ConnectTimeout=5 "${@:3}" "$1" "$2")
+  if [ -n "$hub" ] && [ "$1" != "$hub" ]; then ssh -o BatchMode=yes -o ConnectTimeout=5 "$hub" "$(printf '%q ' "${cmd[@]}")"
+  else "${cmd[@]}"; fi
+}
+
 # Run <script> on <ssh-alias>, locally if this machine is <nodename>, with
 # arguments <ssh-alias> <1 if it runs here, else 0> <me>.
-on() { # <ssh-alias> <nodename> <script>
+on() { # <ssh-alias> <nodename> <script> [ssh option...]
   if [ "$(uname -n)" = "$2" ]; then bash -s -- "$1" 1 "$me" <<<"$3"
-  else ssh -o BatchMode=yes -o ConnectTimeout=5 "$1" "bash -s -- $(printf '%q ' "$1" 0 "$me")" <<<"$3"; fi ||
-    printf '%-8s UNREACHABLE: ssh %s failed\n\n' "$1" "$1"
+  else sshto "$1" "bash -s -- $(printf '%q ' "$1" 0 "$me")" "${@:4}" <<<"$3"; fi ||
+    printf '%-8s UNREACHABLE: ssh %s failed%s\n\n' "$1" "$1" "${hub:+ (from here through ssh $hub)}"
 }
 
 # Holds: an agent that needs a quiet machine (benchmarks) holds it, and fleet
@@ -61,7 +72,7 @@ if [ "${1:-}" = hold ] || [ "${1:-}" = release ]; then
     *) echo "fleet: hold works on kauch, frank and hclm (its login node)" >&2; exit 2 ;; esac
   args=("$1" "$me" "${@:3}")
   if [ "$(uname -n)" = "$node" ]; then bash -s -- "${args[@]}" <<<"$hold"
-  else ssh -o BatchMode=yes -o ConnectTimeout=5 "$2" "bash -s -- $(printf '%q ' "${args[@]}")" <<<"$hold"; fi
+  else sshto "$2" "bash -s -- $(printf '%q ' "${args[@]}")" <<<"$hold"; fi
   exit
 fi
 
@@ -157,7 +168,7 @@ sinfo -h -N -p short,medium,long -O 'Partition:12,CPUsState:20,AllocMem:12,Memor
       s = sprintf("  %-9s %-7s %10d  %-18s %s", p, tl[p], idle[p], big[p] ? sprintf("%d cores, %d GB", big[p], mem[p]) : "-", def[p] ? "default" : note[p])
       sub(/ +$/, "", s); print s } }'
 jobs=$(squeue -u "$USER" -h -o %T | sort | uniq -c | awk '{ s = s (s ? ", " : "") $1 " " tolower($2) } END { print s ? s : "none" }')
-nodes=$(squeue -u "$USER" -h -t R -o %N | xargs -r scontrol show hostnames | sort -u | wc -l)
+nodes=$(squeue -u "$USER" -h -t R -o %N | paste -sd, | xargs -r scontrol show hostnames | sort -u | wc -l)
 printf '  %-9s %s; %d of your 2 nodes in use\n' "your jobs" "$jobs" "$nodes"
 df -h --output=target,avail,pcent /home /mnt/storage /mnt/scratch |
   awk 'NR > 1 { s = s (s ? " · " : "") $1 " " $2 " free (" $3 " used)" } END { printf "  %-9s %s\n", "disk", s }'
@@ -273,8 +284,13 @@ fi
 
 printf 'fleet, %s. Caps and usage count everything of user samuel on a host: all agents, jobs and CI runners.\n' "$(date '+%a %H:%M')"
 printf 'usable = what you may still start there now: free cores and RAM, less 10%% of RAM kept for others, within your cap.\n\n'
-[ "$(uname -s)" = Darwin ] && printf '%-8s this laptop · it sleeps: never leave long-running work on it   <- you are here\n\n' mac
+[ "$(uname -s)" = Darwin ] && printf '%-8s this laptop · it sleeps: never leave long-running work on it   <- you are here\n' mac
+[ -z "$hub" ] || printf '         reach every other host through %s, never directly: ssh %s ssh hclm, ssh %s ssh hclm ssh VSC5B\n' "$hub" "$hub" "$hub"
+echo
+# Open the hub's SSH master first: the parallel sessions below would race to create it.
+[ -z "$hub" ] || ssh -o BatchMode=yes -o ConnectTimeout=5 "$hub" true 2>/dev/null
 # Query all hosts at once (SSH round trips add up from far away), print in order.
+# The second hclm session must not also try to create the SSH master: they race and warn.
 exec 3< <(on kauch kauch01 "$desktop") 4< <(on frank ftuw "$desktop") 5< <(on hclm master.cluster "$desktop$cluster") \
-  6< <(on hclm master.cluster "$(declare -p remote; declare -f asc_header)"$'\n'"$asc")
+  6< <(on hclm master.cluster "$(declare -p remote; declare -f asc_header)"$'\n'"$asc" -o ControlMaster=no)
 cat <&3; cat <&4; cat <&5; cat <&6
