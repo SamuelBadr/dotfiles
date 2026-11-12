@@ -47,3 +47,8 @@ I read your tool calls as they run, so write them for a human reader:
 - Start remote runs detached (`nohup … > log 2>&1 &`) and report host, path, and PID or job ID.
 - Benchmarks: on a desktop or login node, `fleet hold <host> <hours> <reason>` first (rerun to extend), wait until `fleet` shows it quiet, and `fleet release <host>` when done. On Slurm, use `--exclusive`.
 - Never attempt a login that may need my password or 2FA: failed logins can get machines blocked. Use only connections `fleet` shows as connected; for missing ones, give me the command it prints.
+
+## Rex
+
+- Name the Rex session and your tab after the task, without being asked, as part of the first request that identifies the work. Rename both when the task changes; keep labels that still fit, including ones I set. Labels: two to four lowercase words joined by hyphens, naming the task or project (`fix-login-redirect`). Outside Rex the command does nothing:
+  `[ -n "$REX_SESSION" ] && rex session rename "$REX_SESSION" LABEL && rex window rename -s "$REX_SESSION" "$(rex block inspect -s "$REX_SESSION" "$REX_BLOCK" --json | jq -r .block.window_id)" LABEL`
