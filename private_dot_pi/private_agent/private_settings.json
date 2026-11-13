@@ -53,7 +53,8 @@
     "npm:pi-tool-duration",
     "npm:pi-better-render",
     "npm:@zosmaai/pi-llm-wiki@0.12.5",
-    "npm:pi-cached-compaction"
+    "npm:pi-cached-compaction",
+    "npm:pi-better"
   ],
   "llm-wiki": {
     "notices": false,
@@ -99,7 +100,7 @@
   "hideThinkingBlock": true,
   "extensionChangelogVersions": {
     "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
-    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.88.0",
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.88.1",
     "{\"source\":\"npm:pi-tool-duration\",\"scope\":\"user\"}": "0.6.10",
     "{\"source\":\"npm:@zosmaai/pi-llm-wiki@0.12.5\",\"scope\":\"user\"}": "0.12.5",
     "{\"source\":\"npm:pi-cached-compaction\",\"scope\":\"user\"}": "0.2.0"
