@@ -37,10 +37,13 @@ notes() { { grep -h '^versions:' "$@"; grep -h '^up: skipped' "$@"; } | sed 's/^
 # last apply. pi does that routinely: it records package versions in its
 # settings.json. So first overwrite each file changed on both sides whose apply
 # removes no line, i.e. loses nothing local; the rest still fail the apply.
+# A removed line that comes back with a trailing comma (appending to a JSON
+# list) does not count as removed.
 apply_dotfiles() {
   local f
   while IFS= read -r f; do
-    chezmoi diff "$f" | grep -v '^--- a/' | grep -q '^-' || chezmoi apply --force "$f"
+    chezmoi diff "$f" | awk '/^--- a\//{next} /^\+/{add[substr($0,2)]} /^-/{del[substr($0,2)]}
+      END{for (l in del) if (!((l ",") in add)) exit 1}' && chezmoi apply --force "$f"
   done < <(chezmoi status -i files -p absolute | sed -n 's/^MM //p')
   chezmoi apply --no-tty --keep-going
 }
