@@ -75,6 +75,10 @@ Host kauch
 Host hclm
 	User samuel
 	Hostname hclm.ifp.tuwien.ac.at
+{{- if eq .chezmoi.os "darwin" }}
+	# Off campus the laptop can't resolve or reach hclm, so it always goes via kauch.
+	ProxyJump kauch
+{{- end }}
 {{- if .modules.backupMac }}
 
 Host hclm-backup
