@@ -38,12 +38,22 @@ notes() { { grep -h '^versions:' "$@"; grep -h '^up: skipped' "$@"; } | sed 's/^
 # settings.json. So first overwrite each file changed on both sides whose apply
 # removes no line, i.e. loses nothing local; the rest still fail the apply.
 # A removed line that comes back with a trailing comma (appending to a JSON
-# list) does not count as removed.
+# list) does not count as removed. Neither do pi's changelog markers
+# (lastChangelogVersion, extensionChangelogVersions), which pi bumps on every
+# machine after updates: reverting one only shows that changelog again. Where
+# chezmoi autoPushes (the workstation), a file differing only in markers is
+# re-added instead, so the newer markers reach every machine and stop bouncing.
 apply_dotfiles() {
-  local f
+  local f diff push= marker='lastChangelogVersion"|scope.":'
+  grep -qE '^\s*autoPush\s*=\s*true' ~/.config/chezmoi/chezmoi.toml 2>/dev/null && push=1
   while IFS= read -r f; do
-    chezmoi diff "$f" | awk '/^--- a\//{next} /^\+/{add[substr($0,2)]} /^-/{del[substr($0,2)]}
-      END{for (l in del) if (!((l ",") in add)) exit 1}' && chezmoi apply --force "$f"
+    diff=$(chezmoi diff "$f")
+    if [ -n "$push" ] && printf '%s\n' "$diff" | awk -v m="$marker" '/^(--- a|\+\+\+ b)\//{next} /^[-+]/ && $0 !~ m {exit 1}'; then
+      chezmoi re-add "$f"
+    elif printf '%s\n' "$diff" | awk -v m="$marker" '/^--- a\//{next} /^\+/{add[substr($0,2)]} /^-/ && $0 !~ m {del[substr($0,2)]}
+      END{for (l in del) if (!((l ",") in add)) exit 1}'; then
+      chezmoi apply --force "$f"
+    fi
   done < <(chezmoi status -i files -p absolute | sed -n 's/^MM //p')
   chezmoi apply --no-tty --keep-going
 }
@@ -62,17 +72,20 @@ apply_dotfiles || { printf "\nup: skipped chezmoi apply, see chezmoi diff\n"; ap
 ~/bin/up; rc=$?
 [ "$apply_rc" = 1 ] && [ "$rc" = 0 ] && rc=1
 exit "$rc"'
-  for pair in hclm:master.cluster frank:ftuw kauch:kauch01; do
-    h=${pair%%:*}; [ "$(uname -n)" = "${pair#*:}" ] && continue
-    ssh -o BatchMode=yes -o ConnectTimeout=10 "$h" "bash -lc $(printf '%q' "$remote_cmd")" \
-      >"$logs/$h" 2>&1 </dev/null &
-    pids+=($!); hosts+=("$h")
-  done
+  # Local dotfiles first, so what they push (re-added pi markers) reaches the remotes' pull.
   apply_rc=0
   { chezmoi update --apply=false && apply_dotfiles; } || {
     printf '\nup: skipped chezmoi apply, see chezmoi diff\n' | tee "$logs/local.notes"
     apply_rc=1
   }
+  for pair in hclm:master.cluster frank:ftuw kauch:kauch01; do
+    h=${pair%%:*}; [ "$(uname -n)" = "${pair#*:}" ] && continue
+    # Like fleet: the laptop reaches hclm only through kauch (off campus it may not resolve or answer).
+    jump=; case $h:$(uname -n) in hclm:ftuw | hclm:kauch01) ;; hclm:*) jump=kauch ;; esac
+    ssh -o BatchMode=yes -o ConnectTimeout=10 ${jump:+-J $jump} "$h" "bash -lc $(printf '%q' "$remote_cmd")" \
+      >"$logs/$h" 2>&1 </dev/null &
+    pids+=($!); hosts+=("$h")
+  done
   UP_NOTES=$logs/local.notes "$0"; rc=$?
   [ "$apply_rc" = 1 ] && [ "$rc" = 0 ] && rc=1
   summary=("$(printf '%-6s %-7s' local "$([ $rc = 0 ] && echo ok || echo FAILED)") $(notes "$logs/local.notes")")

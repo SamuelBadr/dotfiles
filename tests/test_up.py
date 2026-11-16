@@ -96,6 +96,43 @@ class UpTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(events.count("start skills update"), 1)
 
+    def apply_dotfiles(self, diff, push):
+        """Run apply_dotfiles on one file changed on both sides; return chezmoi's writes."""
+        source = UP.read_text()
+        function = source[source.index("apply_dotfiles() {"):source.index("\n}\n", source.index("apply_dotfiles() {")) + 3]
+        stub = r'''
+import os, sys
+args = sys.argv[1:]
+if args[0] == "status": print("MM /f")
+elif args[0] == "diff": sys.stdout.write(os.environ["DIFF"])
+else: open(os.environ["EVENTS"], "a").write(" ".join(args) + "\n")
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            (home / "bin").mkdir()
+            chezmoi = home / "bin/chezmoi"
+            chezmoi.write_text(f"#!{sys.executable}\n" + stub)
+            chezmoi.chmod(0o755)
+            if push:
+                (home / ".config/chezmoi").mkdir(parents=True)
+                (home / ".config/chezmoi/chezmoi.toml").write_text("[git]\n    autoPush = true\n")
+            events = home / "events"
+            events.touch()
+            subprocess.run([shutil.which("bash"), "-c", function + "\napply_dotfiles"], check=True,
+                           env=os.environ | {"HOME": tmp, "PATH": f"{home / 'bin'}:{os.environ['PATH']}",
+                                             "EVENTS": str(events), "DIFF": diff}, timeout=10)
+            return [e for e in events.read_text().splitlines() if not e.startswith("apply --no-tty")]
+
+    def test_apply_dotfiles_resolves_pi_changelog_markers(self):
+        head = "--- a/settings.json\n+++ b/settings.json\n@@ -1 +1 @@\n"
+        marker = ('-    "{\\"source\\":\\"npm:x\\",\\"scope\\":\\"user\\"}": "0.48.0",\n'
+                  '+    "{\\"source\\":\\"npm:x\\",\\"scope\\":\\"user\\"}": "0.47.0",\n')
+        real = '-    "theme": "dark",\n'
+        self.assertEqual(self.apply_dotfiles(head + marker, push=True), ["re-add /f"])
+        self.assertEqual(self.apply_dotfiles(head + marker, push=False), ["apply --force /f"])
+        self.assertEqual(self.apply_dotfiles(head + marker + real, push=True), [])
+        self.assertEqual(self.apply_dotfiles(head + real, push=False), [])
+
     @unittest.skipUnless(shutil.which("julia"), "Julia not installed")
     def test_shared_environment_selection(self):
         source = UP.read_text()
