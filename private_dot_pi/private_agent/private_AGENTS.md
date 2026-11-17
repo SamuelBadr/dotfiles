@@ -8,6 +8,7 @@
 ## Math
 
 - Write all math (no exceptions) as LaTeX (`$…$` inline, `$$…$$` display).
+- No `\frac` inline: write a fraction as `$a/b$` inline, or move the formula to a display block, whichever reads better.
 
 ## Research wiki
 
