@@ -52,10 +52,10 @@
     },
     "npm:pi-tool-duration",
     "npm:pi-better-render",
+    "git:github.com/johnlindquist/pi-emphasis",
     "npm:@zosmaai/pi-llm-wiki@0.12.5",
     "npm:pi-cached-compaction",
-    "npm:pi-better",
-    "git:github.com/johnlindquist/pi-emphasis"
+    "npm:pi-better"
   ],
   "llm-wiki": {
     "notices": false,
