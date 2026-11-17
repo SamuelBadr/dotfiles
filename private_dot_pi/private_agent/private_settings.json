@@ -54,7 +54,8 @@
     "npm:pi-better-render",
     "npm:@zosmaai/pi-llm-wiki@0.12.5",
     "npm:pi-cached-compaction",
-    "npm:pi-better"
+    "npm:pi-better",
+    "git:github.com/johnlindquist/pi-emphasis"
   ],
   "llm-wiki": {
     "notices": false,
