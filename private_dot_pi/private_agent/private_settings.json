@@ -23,6 +23,9 @@
   "defaultTools": [
     "+codemode"
   ],
+  "codemode": {
+    "inlineBudget": 0
+  },
   "cacheWarming": "idle",
   "branchSummary": {
     "skipPrompt": true
