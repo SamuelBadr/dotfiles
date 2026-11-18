@@ -10,13 +10,6 @@
 - Write all math (no exceptions) as LaTeX (`$…$` inline, `$$…$$` display).
 - No `\frac` inline: write a fraction as `$a/b$` inline, or move the formula to a display block, whichever reads better.
 
-## Research wiki
-
-- `~/.llm-wiki` is my research wiki (pi-llm-wiki; the same git repo on every machine, synced automatically). Before you create or edit wiki pages, read `~/.llm-wiki/WIKI_SCHEMA.md` and follow it: page types and format, math, links, and which pages you may change.
-- As you work, record what is worth keeping (results and dead ends, derivations, settled conventions), as the schema describes.
-- Never call `wiki_bootstrap`.
-- The rarer wiki tools (`wiki_capture_source`, `wiki_ingest`, `wiki_lint`, `wiki_rebuild_meta`, `wiki_status`, `wiki_log_event`, `wiki_watch`, `wiki_reindex`, `wiki_reindex_embeddings`) aren't declared to save tokens; call them from codemode, e.g. `await tools.wiki_lint({})`, after `describeTool(name)` for the arguments.
-
 ## Subagents
 
 - Spawn subagents only when the user explicitly asks for them. Never on your own judgment, however large or risky the task: do the work yourself. This includes workflows, chains and scheduled runs.
