@@ -53,6 +53,8 @@ async function sync(ctx: ExtensionContext, when: "start" | "turn" | "shutdown") 
     await run("qmd", ["update"], { timeout: 60_000 });
     await run("qmd", ["embed"], { timeout: 600_000 });
   } catch (error) {
+    // qmd not installed on this machine: search falls back to rg, nothing to reindex
+    if ((error as { code?: string }).code === "ENOENT") return;
     warn(ctx, `wiki-sync: qmd reindex failed: ${lastLine(error)}`);
   }
 }
