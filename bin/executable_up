@@ -7,8 +7,8 @@
 # missing here are skipped.
 # Package/project environments are left alone: update those by hand.
 #   up        this machine
-#   up --all  this machine, hclm, frank and kauch in parallel (each pulls
-#             the dotfiles first, so they run the same version of this script)
+#   up --all  this machine and kauch in parallel (kauch pulls the dotfiles
+#             first, so it runs the same version of this script)
 set -u
 . "$HOME/.config/shell/common.sh"  # PATH; ssh and systemd shells lack it
 jobs=2  # Julia + Cargo can compile together; leave room for the other lanes
@@ -78,11 +78,9 @@ exit "$rc"'
     printf '\nup: skipped chezmoi apply, see chezmoi diff\n' | tee "$logs/local.notes"
     apply_rc=1
   }
-  for pair in hclm:master.cluster frank:ftuw kauch:kauch01; do
+  for pair in kauch:kauch01; do
     h=${pair%%:*}; [ "$(uname -n)" = "${pair#*:}" ] && continue
-    # Like fleet: the laptop reaches hclm only through kauch (off campus it may not resolve or answer).
-    jump=; case $h:$(uname -n) in hclm:ftuw | hclm:kauch01) ;; hclm:*) jump=kauch ;; esac
-    ssh -o BatchMode=yes -o ConnectTimeout=10 ${jump:+-J $jump} "$h" "bash -lc $(printf '%q' "$remote_cmd")" \
+    ssh -o BatchMode=yes -o ConnectTimeout=10 "$h" "bash -lc $(printf '%q' "$remote_cmd")" \
       >"$logs/$h" 2>&1 </dev/null &
     pids+=($!); hosts+=("$h")
   done
