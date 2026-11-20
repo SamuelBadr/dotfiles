@@ -3,6 +3,9 @@ typeset -U path
 if [[ $OSTYPE == darwin* ]]; then
   path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
 fi
+# ~/.local/bin (e.g. peek's remote CLI) for non-interactive SSH commands; .zshrc's
+# common.sh reorders the full PATH for interactive shells.
+path=($HOME/.local/bin $path)
 
 # pi-better-render: Rex (libghostty) draws Kitty Unicode-placeholder images; its
 # default "direct" placements stay on screen after redraws and ghost on scroll.
