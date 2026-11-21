@@ -43,6 +43,15 @@ I read your tool calls as they run, so write them for a human reader:
 - Benchmarks: on a desktop or login node, `fleet hold <host> <hours> <reason>` first (rerun to extend), wait until `fleet` shows it quiet, and `fleet release <host>` when done. On Slurm, use `--exclusive`.
 - Never attempt a login that may need my password or 2FA: failed logins can get machines blocked. Use only connections `fleet` shows as connected; for missing ones, give me the command it prints.
 
+## Visual delivery (`peek`)
+
+When you make screenshots, plots, PDFs, or Markdown/HTML reports for me to look at, push them to a floating card with `peek`:
+
+- Run `peek -t "Short Title" <file…>` (on remote SSH hosts where `~/.local/bin` is not in `PATH`: `~/.local/bin/peek -t "Short Title" <file…>`).
+- Pass related images (before/after, variants) in one `peek` call so they show together; `⌘D` compares side by side.
+- Keep CSS, JS, and images referenced by Markdown or HTML as relative paths in the same folder; `peek` snapshots them, so later overwrites don't change earlier cards.
+- Never run `open` or `qlmanage -p` on preview files (they steal focus), and never leave a bare file path without pushing it via `peek`.
+
 ## Rex
 
 - Name the Rex session and your tab after the task, without being asked, as part of the first request that identifies the work. Rename both when the task changes; keep labels that still fit, including ones I set. Labels: two to four lowercase words joined by hyphens, naming the task or project (`fix-login-redirect`). Outside Rex the command does nothing:
