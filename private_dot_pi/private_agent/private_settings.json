@@ -4,12 +4,12 @@
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "claude-bridge/claude-opus-5-5",
-    "claude-bridge/claude-sonnet-5-5",
-    "claude-bridge/claude-haiku-5-5",
-    "openai/gpt-6.1-sol",
     "openai/gpt-6-luna",
     "aqueduct/glm-5.3-744b-experimental",
-    "aqueduct/deepseek-v4-vision-exp-284b"
+    "aqueduct/deepseek-v4-vision-exp-284b",
+    "openai/gpt-6.2-sol",
+    "openai/gpt-6.2-astra",
+    "claude-bridge/claude-fable-5-2"
   ],
   "modelThinkingLevels": {
     "openai/gpt-6-luna": "max",
