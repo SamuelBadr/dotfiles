@@ -57,7 +57,8 @@
     "npm:pi-better-render",
     "git:github.com/johnlindquist/pi-emphasis",
     "npm:pi-cached-compaction",
-    "npm:pi-better"
+    "npm:pi-better",
+    "npm:@juicesharp/rpiv-ask-user-question"
   ],
   "skills": [
     "~/.llm-wiki/skills"
@@ -91,7 +92,7 @@
       }
     }
   },
-  "lastChangelogVersion": "1.6.1",
+  "lastChangelogVersion": "1.7.0",
   "deviceId": "5661b36f-050a-4575-be0c-6da0a5508989",
   "theme": "system",
   "hideThinkingBlock": true,
