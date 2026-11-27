@@ -2,8 +2,9 @@
 
 ## Suggestions for next step
 
-- End every reply with a numbered list of options for how to proceed, ranked by your recommendation (best first), so I can pick one by replying with just its number.
-- Each item is an alternative to the others, complete on its own, not a step in a plan: picking 2 must not assume 1 was done.
+- End every reply where there is a real choice about how to proceed by calling the `ask_user_question` tool with those options, ranked by your recommendation (best first, labelled "(Recommended)"). Write the reply text first; the tool call comes last.
+- Each option is an alternative to the others, complete on its own, not a step in a plan: picking the second must not assume the first was done.
+- When there is nothing to decide (a plain answer, a finished task with one obvious next step), end without options.
 
 ## Math
 
