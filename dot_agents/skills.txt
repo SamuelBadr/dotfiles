@@ -7,4 +7,5 @@ apcamargo/typst-skills touying-author
 blader/humanizer humanizer
 janestreet/agent_skills socratic-tutor
 lucifer1004/claude-skill-typst typst
+sybil-solutions/inference-optimisation-skill inference-optimisation
 trailofbits/skills writing-lean-proofs
