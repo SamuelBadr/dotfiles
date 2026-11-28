@@ -11,6 +11,12 @@ path=($HOME/.local/bin $path)
 # default "direct" placements stay on screen after redraws and ghost on scroll.
 [[ $TERM_PROGRAM == rex ]] && export PI_BETTER_RENDER_IMAGES=placeholder
 
+# The Linux Rex server (seen on kauch, snapshot.2699) sets REX_BLOCK but not REX_SERVER
+# in its panes; rexume's agent hooks need REX_SERVER and fail silently without it.
+if [[ -n $REX_BLOCK && -z $REX_SERVER && -S $XDG_RUNTIME_DIR/rex/server.sock ]]; then
+  export REX_SERVER=unix://$XDG_RUNTIME_DIR/rex/server.sock
+fi
+
 # Login bash hands off to zsh with exec(2) (~/.bash_profile), which cannot carry
 # shell functions across, so the module system /etc/profile.d defined for bash is
 # gone by the time zsh runs. Re-create it from the same file; MODULEPATH itself
